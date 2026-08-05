@@ -1,0 +1,140 @@
+/* Logo image sizing */
+.logo-site .logo-img{
+    max-height:40px;
+    width:auto;
+    display:block;
+}
+
+/* Disable cursor trail canvas */
+.cursor-trail{display:none !important}
+
+/* Education Timeline Styles */
+.section-education {
+    position: relative;
+}
+
+.education-timeline {
+    position: relative;
+    padding-left: 40px;
+}
+
+/* Vertical line */
+.education-timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 20px;
+    bottom: 20px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--primary) 0%, rgba(255,255,255,0.2) 100%);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 60px;
+    padding-left: 20px;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+/* Dot indicator */
+.timeline-dot {
+    position: absolute;
+    left: -25px;
+    top: 8px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid var(--bg-1);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+    z-index: 2;
+    transition: all 0.3s ease;
+}
+
+.timeline-item:hover .timeline-dot {
+    transform: scale(1.3);
+    box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.2);
+}
+
+.timeline-content {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: all 0.3s ease;
+}
+
+.timeline-content:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: translateY(-4px);
+}
+
+.timeline-year {
+    display: inline-block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.timeline-content h3 {
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.timeline-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.timeline-content ul li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 8px;
+    line-height: 1.6;
+}
+
+.timeline-content ul li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--primary);
+    font-weight: bold;
+}
+
+.timeline-image {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.timeline-image:hover {
+    transform: scale(1.05);
+}
+
+.timeline-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .education-timeline {
+        padding-left: 30px;
+    }
+    
+    .timeline-content {
+        padding: 20px;
+    }
+    
+    .timeline-image {
+        margin-top: 20px;
+    }
+}
