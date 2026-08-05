@@ -34,7 +34,7 @@
 :root {
   --white: #ffffff;
   --black: #000000;
-  --primary: #07C42C;
+  --primary: #0079c4;
   --primary-rgb: 7, 196, 44;
   --white-50: #FFFFFF80;
   --white-64: #FFFFFFA3;
@@ -51,7 +51,7 @@
 }
 
 [data-color-primary=color-primary-1] {
-  --primary: #07C42C;
+  --primary: #0079c4;
 }
 
 [data-color-primary=color-primary-2] {
@@ -7587,8 +7587,8 @@ button.animate-btn::after,
 
 /* Enhanced Availability Status */
 .availability-status {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(0, 54, 14, 0) 0%, rgba(255, 255, 255, 0.02) 100%);
+  /* border: 1px solid rgba(255, 255, 255, 0.1); */
   border-radius: 16px;
   padding: 24px;
   margin-bottom: 40px;
@@ -7629,7 +7629,7 @@ button.animate-btn::after,
 .availability-status .pulse-dot {
   width: 8px;
   height: 8px;
-  background-color: #22c55e;
+  background-color: #2297c5;
   border-radius: 50%;
   position: relative;
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -7640,7 +7640,7 @@ button.animate-btn::after,
   position: absolute;
   inset: -4px;
   border-radius: 50%;
-  background-color: #22c55e;
+  background-color: #ffffff;
   opacity: 0.4;
   animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
@@ -7665,14 +7665,14 @@ button.animate-btn::after,
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.1em;
-  color: #22c55e;
+  color: #ffffff;
   text-transform: uppercase;
 }
 
 .availability-status .year-badge {
   font-size: 12px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgb(255, 255, 255);
   letter-spacing: 0.05em;
 }
 

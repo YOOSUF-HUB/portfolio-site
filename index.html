@@ -55,6 +55,36 @@
     height: auto;
     display: block;
 }
+
+.hero-image {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.hero-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Dark fade overlay */
+.hero-image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    background:
+        radial-gradient(circle, rgba(0,0,0,0) 45%, rgba(0,0,0,0.45) 100%),
+        linear-gradient(to bottom,
+            rgba(0,0,0,.8) 1%,
+            rgba(0,0,0,0) 25%,
+            rgba(0,0,0,0) 30%,
+            rgba(0,0,0,.8) 100%);
+}
     </style>
 </head>
 
@@ -131,7 +161,7 @@
                         </div>
                         <div class="col-3 col-md-2 d-none d-sm-block">
                             <div class="header-contact">
-                                <a href="mailto:davies@gmail.com" class="link h8">YAHAMED95@GMAIL.COM</a>
+                                <a href="mailto:yahamed95@gmail.com" class="link h8">YAHAMED95@GMAIL.COM</a>
                                 <p class="h8">
                                     SL <span class="clock"></span>
                                 </p>
@@ -155,6 +185,13 @@
                 <video class="" muted="" autoplay="" loop="" playsinline="">
                     <source src="assets/images/video/corridor.webm" type="video/mp4">
                 </video>
+                <!-- <div class="hero-image">
+                    <img
+                        src="assets/images/hero/82875_Shrink.webp"
+                        alt="Yoosuf A.A."
+                        class="img-fluid"
+                        loading="lazy">
+                </div> -->
                 <div class="video-overlay"></div>
                 <div class="video-overlay-2"></div>
                 <div class="video-overlay-2"></div>
@@ -190,22 +227,23 @@
                                             <span class="label-text">Current Availability</span>
                                             <span class="percentage-text">100%</span>
                                         </div>
-                                        <div class="progress-bar">
+                                        <!-- <div class="progress-bar">
                                             <div class="progress-fill" data-progress="100"></div>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </div>
-                                <div class="bot">
-                                    <p class="desc text-white-64 effectFade fadeRight view-visible">
-                                    Building intelligent AI systems with machine learning, LLMs, and modern software engineering.
-                                    Transforming data into production-ready solutions through scalable architectures and automation.
-                                    Focused on AI engineering, backend development, and real-world problem solving.
-                                    </p>
-                                    <div class="effectFade fadeRight view-visible">
-                                        <a href="#contactScroll" class="tf-btn ">
-                                            START A PROJECT
-                                        </a>
-                                    </div>
+                                <div class="bot"> 
+                                    <p class="desc text-white-64 effectFade fadeRight view-visible"> 
+                                        I turn ideas into intelligent products by combining AI, 
+                                        machine learning, and modern software engineering. 
+                                        From LLM-powered applications to scalable backend systems, 
+                                        I enjoy building solutions that solve real problems and make an impact, one commit at a time.
+                                    </p> 
+                                <div class="effectFade fadeRight view-visible"> 
+                                    <a href="#contactScroll" class="tf-btn"> 
+                                        LET'S BUILD SOMETHING 
+                                    </a> 
+                                </div>
                                 </div>
                             </div>
                         </div>
@@ -235,19 +273,21 @@
                             <!-- item 1 -->
                             <div class="swiper-slide">
                                 <div class="wg-feature-v01 hover-img main-mouse-hover">
-                                    <a href="#" class="feature-image img-style">
-                                        <img loading="lazy" width="628" height="471" src="assets/images/section/feature-1.jpg" alt="Image">
+                                    <a href="https://github.com/YOOSUF-HUB/AVJNS" class="feature-image img-style" target="_blank">
+                                        <img loading="lazy" width="628" height="471" src="assets/images/git-images/AVJNS_Thumbnail.png" alt="AVJNS Project">
                                     </a>
                                     <div class="feature-content">
                                         <div class="info">
-                                            <p class="tag text-white-64 letter-space--1">DEEP LEARNING</p>
+                                            <p class="tag text-white-64 letter-space--1">AGENTIC AI • RAG • LEGAL TECH</p>
                                             <h5 class="name letter-space--2">
-                                                <a href="https://github.com/YOOSUF-HUB/Plant-Disease-Detection-CNN" class="link" target="_blank">Plant Disease Detection CNN Project</a>
+                                                <a href="https://github.com/YOOSUF-HUB/AVJNS" class="link" target="_blank">
+                                                    AVJNS - Anonymous Victim-Centered Justice Navigation System
+                                                </a>
                                             </h5>
                                         </div>
                                     </div>
                                     <div class="tf-mouse">
-                                        <a href="#" class="action tf-btn-2">
+                                        <a href="https://github.com/YOOSUF-HUB/AVJNS" class="action tf-btn-2" target="_blank">
                                             <i class="icon icon-arrow-long-right"></i>
                                         </a>
                                     </div>
@@ -256,19 +296,21 @@
                             <!-- item 2 -->
                             <div class="swiper-slide">
                                 <div class="wg-feature-v01 hover-img main-mouse-hover">
-                                    <a href="#" class="feature-image img-style">
-                                        <img loading="lazy" width="628" height="471" src="assets/images/section/feature-1.jpg" alt="Image">
+                                    <a href="https://github.com/YOOSUF-HUB/API-Sentinel-AI" class="feature-image img-style" target="_blank">
+                                        <img loading="lazy" width="628" height="471" src="assets/images/git-images/API_Sentinel_Thumbnail.png" alt="API Sentinel AI">
                                     </a>
                                     <div class="feature-content">
                                         <div class="info">
-                                            <p class="tag text-white-64 letter-space--1">WEB DEV</p>
+                                            <p class="tag text-white-64 letter-space--1">AI • API SECURITY • LLM</p>
                                             <h5 class="name letter-space--2">
-                                                <a href="https://github.com/YOOSUF-HUB/Smart-Pharmacy-System" class="link" target="_blank">MediSync - Smart Pharmacy System</a>
+                                                <a href="https://github.com/YOOSUF-HUB/API-Sentinel-AI" class="link" target="_blank">
+                                                    API Sentinel AI
+                                                </a>
                                             </h5>
                                         </div>
                                     </div>
                                     <div class="tf-mouse">
-                                        <a href="#" class="action tf-btn-2">
+                                        <a href="https://github.com/YOOSUF-HUB/API-Sentinel-AI" class="action tf-btn-2" target="_blank">
                                             <i class="icon icon-arrow-long-right"></i>
                                         </a>
                                     </div>
