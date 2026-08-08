@@ -1,0 +1,634 @@
+/* =========================================================
+   PROJECTS
+   Category groups of compact flip cards. No carousel — every
+   project is on screen at once.
+   ========================================================= */
+
+.project-groups {
+    display: flex;
+    flex-direction: column;
+
+    gap: 48px;
+}
+
+
+/* =========================================================
+   CATEGORY HEADER
+   ========================================================= */
+
+.project-group-header {
+    display: flex;
+    align-items: center;
+
+    gap: 20px;
+
+    margin-bottom: 28px;
+}
+
+
+.project-group-title {
+    margin: 0;
+
+    flex-shrink: 0;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    letter-spacing: 2px;
+    text-transform: uppercase;
+
+    color: var(--white);
+}
+
+
+/* Rule that fills the space between the category name and its count */
+.project-group-header::after {
+    content: "";
+
+    flex-grow: 1;
+
+    height: 1px;
+
+    background: var(--white-16);
+}
+
+
+.project-group-count {
+    flex-shrink: 0;
+
+    font-size: 11px;
+    font-weight: 500;
+
+    letter-spacing: 1.5px;
+
+    color: var(--white-32);
+}
+
+
+/* =========================================================
+   GRID
+   ========================================================= */
+
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 24px;
+}
+
+
+/* =========================================================
+   FLASHCARD
+
+   The two faces share a single grid cell, so a card is always as
+   tall as its taller face and neither one can clip its content.
+   Cards in a row stretch to a common height via the parent grid.
+   ========================================================= */
+
+.project-flashcard {
+    --card-padding: 24px;
+    --card-radius: 18px;
+    --card-line: rgba(255, 255, 255, 0.12);
+    --card-flip-duration: 0.6s;
+
+    /* Flip state, set by the triggers below */
+    --card-flip: 0deg;
+    --card-front-visibility: visible;
+    --card-back-visibility: hidden;
+
+    width: 100%;
+    min-height: 300px;
+
+    perspective: 1200px;
+}
+
+
+/* =========================================================
+   FLIP TRIGGERS
+   ========================================================= */
+
+/* Pointers that can hover: flip on hover */
+@media (hover: hover) and (pointer: fine) {
+
+    .project-flashcard:hover {
+        --card-flip: 180deg;
+        --card-front-visibility: hidden;
+        --card-back-visibility: visible;
+    }
+
+}
+
+/* Keyboard: flip while something inside the card holds keyboard focus */
+.project-flashcard:has(:focus-visible) {
+    --card-flip: 180deg;
+    --card-front-visibility: hidden;
+    --card-back-visibility: visible;
+}
+
+/* Touch / Enter / Space: toggled by assets/js/project-flashcards.js */
+.project-flashcard.is-flipped {
+    --card-flip: 180deg;
+    --card-front-visibility: hidden;
+    --card-back-visibility: visible;
+}
+
+.project-flashcard:focus {
+    outline: none;
+}
+
+.project-flashcard:focus-visible {
+    outline: 1px solid var(--white-32);
+    outline-offset: 5px;
+    border-radius: var(--card-radius);
+}
+
+
+/* =========================================================
+   CARD INNER
+   ========================================================= */
+
+.project-flashcard-inner {
+    display: grid;
+
+    width: 100%;
+    height: 100%;
+
+    transform-style: preserve-3d;
+    transform: rotateY(var(--card-flip));
+
+    transition: transform var(--card-flip-duration) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+/* =========================================================
+   FRONT & BACK
+   ========================================================= */
+
+.project-flashcard-front,
+.project-flashcard-back {
+    grid-area: 1 / 1;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: var(--card-padding);
+
+    border: 1px solid var(--card-line);
+    border-radius: var(--card-radius);
+
+    /* No backdrop-filter here: it pulls the face out of its parent's 3D
+       context in WebKit, which breaks backface-visibility mid-flip. */
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.07),
+            rgba(255, 255, 255, 0.025)
+        ),
+        var(--black);
+
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+
+    overflow: hidden;
+
+    /* Keep the face that is turned away out of the tab order and away from
+       screen readers. The swap lands halfway through the flip. */
+    transition: visibility 0s linear calc(var(--card-flip-duration) / 2);
+}
+
+.project-flashcard-front {
+    visibility: var(--card-front-visibility);
+}
+
+.project-flashcard-back {
+    transform: rotateY(180deg);
+
+    visibility: var(--card-back-visibility);
+}
+
+
+/* =========================================================
+   FRONT — HEAD (icon + index)
+   ========================================================= */
+
+.project-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 12px;
+}
+
+
+.project-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 44px;
+    height: 44px;
+
+    flex-shrink: 0;
+
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.06);
+
+    color: var(--white);
+}
+
+
+.project-card-icon svg {
+    width: 20px;
+    height: 20px;
+
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+
+.project-card-number {
+    font-size: 11px;
+    font-weight: 500;
+
+    letter-spacing: 1px;
+
+    color: var(--white-32);
+}
+
+
+/* =========================================================
+   FRONT — CONTENT
+   ========================================================= */
+
+.project-card-content {
+    margin-top: 20px;
+}
+
+
+.project-card-title {
+    margin: 0;
+
+    font-size: 22px;
+    line-height: 1.15;
+
+    font-weight: 600;
+
+    letter-spacing: -0.8px;
+
+    color: var(--white);
+}
+
+
+.project-card-subtitle {
+    margin-top: 8px;
+    margin-bottom: 0;
+
+    font-size: 12.5px;
+    line-height: 1.5;
+
+    color: var(--white-64);
+}
+
+
+.project-card-description {
+    margin-top: 12px;
+    margin-bottom: 0;
+
+    font-size: 12px;
+    line-height: 1.6;
+
+    color: var(--white-50);
+}
+
+
+/* =========================================================
+   FRONT — TECHNOLOGY TAGS
+   ========================================================= */
+
+.project-card-tech {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 6px;
+
+    /* Pins the tags and hint to the bottom of the taller face */
+    margin-top: auto;
+    padding-top: 20px;
+}
+
+
+.project-card-tech span {
+    padding: 5px 9px;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+
+    background: rgba(255, 255, 255, 0.055);
+
+    font-size: 9px;
+    font-weight: 500;
+
+    letter-spacing: 0.6px;
+
+    color: var(--white-64);
+}
+
+
+/* =========================================================
+   FRONT — FLIP HINT
+   ========================================================= */
+
+.project-card-hint {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-top: 16px;
+
+    font-size: 9.5px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+
+    color: var(--white-32);
+}
+
+
+.project-card-hint i {
+    font-size: 15px;
+
+    transition: transform 0.3s ease;
+}
+
+
+/* Only one of the two labels applies to any given device */
+.project-card-hint .hint-tap {
+    display: none;
+}
+
+@media (hover: none), (pointer: coarse) {
+
+    .project-card-hint .hint-hover {
+        display: none;
+    }
+
+    .project-card-hint .hint-tap {
+        display: inline;
+    }
+
+}
+
+
+@media (hover: hover) and (pointer: fine) {
+
+    .project-flashcard:hover .project-card-hint i {
+        transform: translateX(5px);
+    }
+
+}
+
+
+/* =========================================================
+   BACK
+   ========================================================= */
+
+.project-card-label {
+    font-size: 9px;
+    font-weight: 600;
+
+    letter-spacing: 1.5px;
+
+    color: var(--white-32);
+}
+
+
+.project-card-back-content {
+    margin-top: 14px;
+
+    /* Minimum gap before the button when the copy runs long */
+    margin-bottom: 20px;
+}
+
+
+.project-card-back-title {
+    margin: 0;
+
+    font-size: 18px;
+    line-height: 1.2;
+
+    font-weight: 600;
+
+    color: var(--white);
+}
+
+
+.project-card-back-content > p {
+    margin-top: 8px;
+    margin-bottom: 0;
+
+    font-size: 12px;
+    line-height: 1.6;
+
+    color: var(--white-64);
+}
+
+
+/* =========================================================
+   BACK — FEATURE LIST
+   ========================================================= */
+
+.project-card-features {
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+
+    margin-top: 16px;
+}
+
+
+.project-feature {
+    display: flex;
+    align-items: baseline;
+
+    gap: 9px;
+
+    font-size: 11.5px;
+    line-height: 1.4;
+
+    color: var(--white-64);
+}
+
+
+/* Small dot instead of the numbered box the larger card used */
+.project-feature::before {
+    content: "";
+
+    width: 4px;
+    height: 4px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: var(--white-32);
+}
+
+
+/* =========================================================
+   BACK — GITHUB BUTTON
+   ========================================================= */
+
+.project-card-github {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    /* Sits on the bottom edge however tall the copy above it runs */
+    margin-top: auto;
+    padding: 11px 14px;
+
+    border: 1px solid var(--card-line);
+    border-radius: 10px;
+
+    background: rgba(255, 255, 255, 0.05);
+
+    font-size: 9px;
+    font-weight: 600;
+
+    letter-spacing: 1.1px;
+
+    color: var(--white-64);
+
+    transition:
+        background 0.3s ease,
+        border-color 0.3s ease,
+        color 0.3s ease;
+}
+
+
+.project-card-github:hover,
+.project-card-github:focus-visible {
+    background: rgba(255, 255, 255, 0.1);
+
+    border-color: var(--white-32);
+
+    color: var(--white);
+}
+
+
+.project-card-github i {
+    font-size: 15px;
+
+    transition: transform 0.3s ease;
+}
+
+
+.project-card-github:hover i,
+.project-card-github:focus-visible i {
+    transform: translateX(4px);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1199px) {
+
+    .project-groups {
+        gap: 48px;
+    }
+
+    .project-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+}
+
+
+@media (max-width: 767px) {
+
+    .project-groups {
+        gap: 40px;
+    }
+
+    .project-group-header {
+        gap: 14px;
+
+        margin-bottom: 20px;
+    }
+
+    .project-group-title {
+        font-size: 13px;
+        letter-spacing: 1.5px;
+    }
+
+    .project-grid {
+        grid-template-columns: 1fr;
+
+        gap: 16px;
+    }
+
+    .project-flashcard {
+        min-height: 280px;
+    }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   Cross-fade the faces instead of spinning the card.
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .project-flashcard {
+        perspective: none;
+    }
+
+    .project-flashcard-inner {
+        transform: none;
+        transition: none;
+    }
+
+    .project-flashcard-front,
+    .project-flashcard-back {
+        backface-visibility: visible;
+        -webkit-backface-visibility: visible;
+
+        transition: opacity 0.2s ease;
+    }
+
+    .project-flashcard-back {
+        transform: none;
+
+        opacity: 0;
+    }
+
+    .project-flashcard-front {
+        opacity: 1;
+    }
+
+    .project-flashcard:hover .project-flashcard-front,
+    .project-flashcard:has(:focus-visible) .project-flashcard-front,
+    .project-flashcard.is-flipped .project-flashcard-front {
+        opacity: 0;
+    }
+
+    .project-flashcard:hover .project-flashcard-back,
+    .project-flashcard:has(:focus-visible) .project-flashcard-back,
+    .project-flashcard.is-flipped .project-flashcard-back {
+        opacity: 1;
+    }
+
+}
