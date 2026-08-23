@@ -482,8 +482,22 @@
 
 
 /* =========================================================
-   BACK — GITHUB BUTTON
+   BACK — LINK BUTTONS
+
+   One button on most cards, two where the project is deployed.
+   The row is what gets pinned to the bottom edge, so both cases
+   line up at the same height.
    ========================================================= */
+
+.project-card-links {
+    display: flex;
+
+    gap: 8px;
+
+    /* Sits on the bottom edge however tall the copy above it runs */
+    margin-top: auto;
+}
+
 
 .project-card-github {
     display: flex;
@@ -492,8 +506,10 @@
 
     gap: 10px;
 
-    /* Sits on the bottom edge however tall the copy above it runs */
-    margin-top: auto;
+    /* Equal split when a card carries both a repo and a demo link */
+    flex: 1 1 0;
+    min-width: 0;
+
     padding: 11px 14px;
 
     border: 1px solid var(--card-line);
@@ -535,6 +551,32 @@
 .project-card-github:hover i,
 .project-card-github:focus-visible i {
     transform: translateX(4px);
+}
+
+
+/* The deployed-project link reads as the primary action of the pair */
+.project-card-demo {
+    border-color: var(--white-32);
+
+    background: rgba(255, 255, 255, 0.1);
+
+    color: var(--white);
+}
+
+
+.project-card-demo:hover,
+.project-card-demo:focus-visible {
+    background: rgba(255, 255, 255, 0.16);
+
+    border-color: var(--white-50);
+}
+
+
+.project-card-github span {
+    overflow: hidden;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 
