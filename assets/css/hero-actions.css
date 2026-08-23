@@ -1,0 +1,97 @@
+/* =========================================================
+   HERO ACTIONS
+
+   The contact CTA and the CV download sit side by side and
+   wrap to a stack once the hero column gets narrow.
+   ========================================================= */
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+
+    gap: 12px;
+}
+
+
+/* =========================================================
+   DOWNLOAD CV BUTTON
+
+   Built on the theme's .tf-btn, so it inherits the fill-up
+   hover and the black-on-hover text colour. Everything below
+   only adds the icon and its motion.
+   ========================================================= */
+
+.btn-download-cv {
+    gap: 10px;
+}
+
+
+.btn-download-icon {
+    width: 15px;
+    height: 15px;
+
+    flex-shrink: 0;
+
+    /* currentColor keeps the icon in step with .tf-btn:hover */
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+
+    transition: transform 0.3s ease;
+}
+
+
+/* A short nudge downward, echoing the direction of the action */
+.btn-download-cv:hover .btn-download-icon,
+.btn-download-cv:focus-visible .btn-download-icon {
+    transform: translateY(2px);
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+    .btn-download-icon {
+        transition: none;
+    }
+
+    .btn-download-cv:hover .btn-download-icon,
+    .btn-download-cv:focus-visible .btn-download-icon {
+        transform: none;
+    }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+
+   Between 768px and 1199px the hero sits in Bootstrap's
+   col-md-4, which is too narrow to hold both buttons on one
+   line. Left alone they wrap into two rows of different
+   widths; stacking them full width keeps both edges aligned.
+   Below 576px the single-column layout needs the same.
+   ========================================================= */
+
+@media (min-width: 768px) and (max-width: 1199px) {
+
+    .hero-actions .tf-btn {
+        flex: 1 1 100%;
+    }
+
+}
+
+
+@media (max-width: 575px) {
+
+    .hero-actions {
+        gap: 10px;
+    }
+
+    .hero-actions .tf-btn {
+        flex: 1 1 100%;
+    }
+
+}
