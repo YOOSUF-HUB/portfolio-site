@@ -1,0 +1,284 @@
+/* =========================================================
+   TOOLS & TECHNOLOGIES — logo grid
+   Logos sit muted in grey and light up white with a soft
+   glow + shine sweep on hover.
+   ========================================================= */
+
+.section-tech-logos .mini-title {
+    margin-bottom: 48px;
+}
+
+/* =========================================================
+   GRID — collapsed 1px borders
+   ========================================================= */
+
+.tech-grid {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+
+    border-top: 1px solid var(--white-16);
+    border-left: 1px solid var(--white-16);
+}
+
+
+/* =========================================================
+   CELL
+   ========================================================= */
+
+.tech-logo {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 14px;
+
+    padding: 34px 10px;
+
+    overflow: hidden;
+
+    border-right: 1px solid var(--white-16);
+    border-bottom: 1px solid var(--white-16);
+
+    color: var(--white-32);
+
+    transition:
+        color 0.4s ease,
+        background-color 0.4s ease;
+}
+
+.tech-logo svg {
+    width: 40px;
+    height: 40px;
+
+    transition:
+        transform 0.4s ease,
+        filter 0.4s ease;
+}
+
+.tech-logo-name {
+    font-size: 11px;
+    font-weight: 500;
+
+    letter-spacing: 1.5px;
+    text-align: center;
+    text-transform: uppercase;
+
+    color: var(--white-32);
+
+    transition: color 0.4s ease;
+}
+
+/* Shine — a diagonal light band that sweeps across on hover */
+.tech-logo::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(
+        115deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.12) 50%,
+        transparent 70%
+    );
+
+    transform: translateX(-100%);
+
+    pointer-events: none;
+}
+
+
+/* ---------- Hover ---------- */
+
+.tech-logo:hover {
+    color: var(--white);
+
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.tech-logo:hover svg {
+    transform: scale(1.1);
+
+    filter:
+        drop-shadow(0 0 6px rgba(255, 255, 255, 0.55))
+        drop-shadow(0 0 18px rgba(255, 255, 255, 0.25));
+}
+
+.tech-logo:hover .tech-logo-name {
+    color: var(--white);
+}
+
+.tech-logo:hover::after {
+    transform: translateX(100%);
+
+    transition: transform 0.8s ease;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 767px) {
+    .tech-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 575px) {
+    .tech-logo {
+        gap: 10px;
+
+        padding: 22px 6px;
+    }
+
+    .tech-logo svg {
+        width: 32px;
+        height: 32px;
+    }
+
+    .tech-logo-name {
+        font-size: 9px;
+        letter-spacing: 0.8px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tech-logo:hover svg {
+        transform: none;
+    }
+
+    .tech-logo::after {
+        display: none;
+    }
+}
+
+
+/* =========================================================
+   TECH STACK — Python row
+   The scrolling Python marquee, with the Python logo in the
+   glass pills. Logos glow white + shine when hovered.
+   ========================================================= */
+
+.tech-stack-python .python-icon {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    width: 136px;
+    height: 68px;
+
+    overflow: hidden;
+
+    color: var(--white-50);
+
+    transition: color 0.4s ease;
+}
+
+.tech-stack-python .python-icon svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    width: 34px;
+    height: 34px;
+
+    margin: -17px 0 0 -17px;
+
+    transition:
+        transform 0.4s ease,
+        filter 0.4s ease;
+}
+
+/* Shine band inside the pill */
+.tech-stack-python .python-icon::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background: linear-gradient(
+        115deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.22) 50%,
+        transparent 70%
+    );
+
+    transform: translateX(-110%);
+
+    pointer-events: none;
+}
+
+/* Hovering the row lights up every Python logo */
+.tech-stack-python .wg-tech:hover .python-icon {
+    color: var(--white);
+}
+
+.tech-stack-python .wg-tech:hover .python-icon svg {
+    transform: scale(1.12);
+
+    filter:
+        drop-shadow(0 0 6px rgba(255, 255, 255, 0.6))
+        drop-shadow(0 0 20px rgba(255, 255, 255, 0.3));
+}
+
+.tech-stack-python .wg-tech:hover .python-icon::after {
+    transform: translateX(110%);
+
+    transition: transform 0.9s ease;
+}
+
+@media (max-width: 575px) {
+    .tech-stack-python .python-icon {
+        width: 96px;
+        height: 48px;
+    }
+
+    .tech-stack-python .python-icon svg {
+        width: 26px;
+        height: 26px;
+
+        margin: -13px 0 0 -13px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tech-stack-python .wg-tech:hover .python-icon svg {
+        transform: none;
+    }
+
+    .tech-stack-python .python-icon::after {
+        display: none;
+    }
+}
+
+/* "SINCE 2020" label — smaller and tracked like the section captions */
+.tech-stack-python .tech_text h6 {
+    margin-top: 10px;
+
+    font-size: 13px;
+    font-weight: 500;
+
+    letter-spacing: 2.5px;
+}
+
+@media (max-width: 575px) {
+    .tech-stack-python .tech_text h6 {
+        margin-top: 4px;
+
+        font-size: 10px;
+        letter-spacing: 1.5px;
+    }
+}
