@@ -1,0 +1,242 @@
+/* =========================================================
+   MONOCHROME · DARKROOM THEME
+   ---------------------------------------------------------
+   The single source of truth for colour on the site. Loaded
+   after every other stylesheet so it wins over template
+   leftovers without having to edit them one by one.
+
+   Rule of the system: every colour has r = g = b. No hues.
+   Hierarchy comes from value (black → white), opacity,
+   weight and spacing — never from tint.
+   ========================================================= */
+
+/* ---------- 1. Tokens ---------- */
+/* [data-color-primary] is included so the template's colour
+   switcher (main.js + localStorage) can never re-introduce a hue. */
+:root,
+[data-color-primary] {
+    /* Value scale */
+    --mono-black: #000000;
+    --mono-ink: #050505;          /* deepest surface, just off black      */
+    --mono-charcoal: #0c0c0c;     /* cards, panels                         */
+    --mono-charcoal-2: #141414;   /* raised / hovered surfaces             */
+    --mono-graphite: #262626;     /* scrollbars, inactive tracks           */
+    --mono-grey-600: #5c5c5c;     /* tertiary text, disabled               */
+    --mono-grey-400: #8c8c8c;     /* secondary text                        */
+    --mono-grey-200: #c8c8c8;     /* soft highlights                       */
+    --mono-silver: #e2e2e2;
+    --mono-white: #ffffff;
+    --mono-white-rgb: 255, 255, 255;
+
+    /* Semantic roles */
+    --mono-text: var(--mono-white);
+    --mono-text-secondary: var(--mono-grey-400);
+    --mono-text-tertiary: var(--mono-grey-600);
+    --mono-surface: var(--mono-charcoal);
+    --mono-surface-raised: var(--mono-charcoal-2);
+    --mono-border: rgba(255, 255, 255, 0.08);
+    --mono-border-strong: rgba(255, 255, 255, 0.18);
+    --mono-interactive: var(--mono-white);
+    --mono-on-interactive: var(--mono-black);
+
+    /* Restrained light — glows stay soft and small */
+    --mono-glow-soft: 0 0 18px rgba(255, 255, 255, 0.10);
+    --mono-glow: 0 0 12px rgba(255, 255, 255, 0.35);
+
+    /* Film grain strength (0 disables it) */
+    --mono-grain-opacity: 0.055;
+
+    /* Motion */
+    --mono-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+    /* Template variables, re-pointed at the scale */
+    --primary: var(--mono-white);
+    --primary-rgb: var(--mono-white-rgb);
+    --primary-2: var(--mono-grey-400);   /* was undefined: broke .tf-btn-line hover */
+    --verified: var(--mono-white);
+    --success: var(--mono-white);
+}
+
+/* Brand colours from the template's social icon set → monochrome.
+   Hover fills white, so the glyph flips to black. */
+.tf-social-icon {
+    --facebook-cl: var(--mono-white);
+    --x-cl: var(--mono-white);
+    --instagram-cl: var(--mono-white);
+    --threads-cl: var(--mono-white);
+    --youtube-cl: var(--mono-white);
+    --tiktok-cl: var(--mono-white);
+    --tiktok-cl2: var(--mono-white);
+    --pinterest-cl: var(--mono-white);
+    --tumblr-cl: var(--mono-white);
+    --vimeo-cl: var(--mono-white);
+    --snapchat-cl: var(--mono-white);
+    --whatsapp-cl: var(--mono-white);
+    --linked_in-cl: var(--mono-white);
+    --wechat-cl: var(--mono-white);
+    --reddit-cl: var(--mono-white);
+    --line-cl: var(--mono-white);
+    --spotify-cl: var(--mono-white);
+}
+
+.tf-social-icon a:hover {
+    color: var(--mono-on-interactive) !important;
+}
+
+
+/* ---------- 2. Base ---------- */
+::selection {
+    background: var(--mono-white);
+    color: var(--mono-black);
+}
+
+:focus-visible {
+    outline: 1px solid var(--mono-white);
+    outline-offset: 3px;
+}
+
+body::-webkit-scrollbar-thumb,
+.offcanvas-menu .canvas_center::-webkit-scrollbar-thumb,
+.canvas-body::-webkit-scrollbar-thumb {
+    background: var(--mono-graphite);
+}
+
+
+/* ---------- 3. Interactive: white outlines that fill ---------- */
+/* .tf-btn already has a white outline and a white fill that rises
+   from below on hover; this refines its timing and adds a soft,
+   small glow once filled. */
+.tf-btn {
+    transition: color 0.45s var(--mono-ease), background-color 0.45s var(--mono-ease), box-shadow 0.45s var(--mono-ease), border-color 0.45s var(--mono-ease);
+}
+
+.tf-btn::before {
+    transition: top 0.45s var(--mono-ease);
+}
+
+.tf-btn:hover,
+.tf-btn:focus-visible {
+    color: var(--mono-on-interactive);
+    box-shadow: var(--mono-glow-soft);
+}
+
+.tf-btn:focus-visible::before {
+    top: 0;
+}
+
+/* Thin "link line" buttons: grey wipe over white */
+.tf-btn-line::before {
+    background-color: var(--mono-grey-400);
+}
+
+
+/* ---------- 4. Components with hard-coded hues ---------- */
+
+/* Hero availability card */
+.availability-status {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.02) 100%);
+}
+
+.availability-status .pulse-dot {
+    background-color: var(--mono-white);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.45);
+}
+
+.availability-status .progress-fill {
+    background: linear-gradient(90deg, var(--mono-grey-400) 0%, var(--mono-white) 100%);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.22);
+}
+
+/* Template card / plan tints that were green or navy */
+.section-certifications .certification-card {
+    background: rgba(12, 12, 12, 0.5);
+}
+
+.section-certifications .certification-card:hover {
+    background: rgba(20, 20, 20, 0.6);
+}
+
+.wg-plan.style-2.type-2 {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.pricing-tab_btn .tf-btn-tab.active .dot-active {
+    box-shadow: 0 0 2px 1px rgba(255, 255, 255, 0.25), 0 0 6px 4px rgba(255, 255, 255, 0.1);
+}
+
+.hover-cursor-img .hover-image img {
+    box-shadow: 0 10px 25px 0 rgba(0, 0, 0, 0.5);
+}
+
+.settings-color .choose-item:nth-child(1) {
+    background: var(--mono-white);
+}
+
+/* Tech marquee: the old accent tint was green (wrong --primary-rgb) */
+.wg-tech .infiniteSlide_tech_main {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.wg-tech:hover,
+.wg-tech.active {
+    border-color: var(--mono-border-strong);
+}
+
+/* Process cards: subtle grey outline brightening on hover,
+   rather than jumping straight to full white */
+.wg-process:hover {
+    border-color: rgba(255, 255, 255, 0.32);
+}
+
+
+/* ---------- 5. Atmosphere: film grain ---------- */
+/* A fixed, non-interactive layer of fine monochrome noise. The noise
+   tile is an inline SVG (feTurbulence, desaturated) — no image file
+   or library. It shifts in a few discrete steps like projected film;
+   reduced-motion users get a still grain. */
+body::after {
+    content: "";
+
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    z-index: 9998;
+
+    width: 200%;
+    height: 200%;
+
+    pointer-events: none;
+
+    opacity: var(--mono-grain-opacity);
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    background-size: 220px 220px;
+
+    animation: mono-grain 1.2s steps(6) infinite;
+    will-change: transform;
+}
+
+@keyframes mono-grain {
+    0%   { transform: translate(0, 0); }
+    17%  { transform: translate(-3%, 2%); }
+    33%  { transform: translate(2%, -4%); }
+    50%  { transform: translate(-4%, -1%); }
+    67%  { transform: translate(3%, 3%); }
+    83%  { transform: translate(-1%, 4%); }
+    100% { transform: translate(0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body::after {
+        animation: none;
+    }
+}
+
+/* Touch screens are small and often battery-bound: keep the grain,
+   but don't animate it. */
+@media (hover: none) {
+    body::after {
+        animation: none;
+        will-change: auto;
+    }
+}

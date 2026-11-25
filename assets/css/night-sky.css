@@ -1,0 +1,74 @@
+/* =========================================================
+   NIGHT SKY BACKGROUND
+   Fixed canvas behind every section. The body stays black
+   underneath, so the page still looks right if JS is off.
+   ========================================================= */
+
+.night-sky {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+
+    width: 100%;
+    height: 100%;
+
+    pointer-events: none;
+}
+
+/* A faint deep-space glow at the edges of the sky */
+.night-sky-glow {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+
+    pointer-events: none;
+
+    background:
+        radial-gradient(ellipse 70% 50% at 85% 10%, rgba(255, 255, 255, 0.035), transparent 70%),
+        radial-gradient(ellipse 60% 45% at 10% 90%, rgba(255, 255, 255, 0.025), transparent 70%);
+}
+
+
+/* =========================================================
+   HERO — neural constellation canvas
+   Replaces the template video. Transparent, so the night sky
+   shows through and continues seamlessly below the hero.
+   ========================================================= */
+
+.section-hero-v1 .hero-network-wrap {
+    pointer-events: none;
+}
+
+.section-hero-v1 .hero-network {
+    position: absolute;
+    inset: 0;
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+}
+
+/* Soft dark scrims so the neurons never fight with the text:
+   behind the header, the intro paragraph and the buttons. */
+.section-hero-v1 .hero-network-wrap::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0) 14%),
+        radial-gradient(ellipse 32% 30% at 80% 82%, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0) 100%),
+        radial-gradient(ellipse 30% 24% at 20% 55%, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 100%);
+}
+
+@media (max-width: 767px) {
+    .section-hero-v1 .hero-network-wrap::after {
+        background:
+            linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 10%),
+            radial-gradient(ellipse 80% 22% at 50% 76%, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+    }
+}
