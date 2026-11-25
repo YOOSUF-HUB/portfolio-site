@@ -24,8 +24,8 @@
     pointer-events: none;
 
     background:
-        radial-gradient(ellipse 70% 50% at 85% 10%, rgba(120, 140, 200, 0.05), transparent 70%),
-        radial-gradient(ellipse 60% 45% at 10% 90%, rgba(150, 150, 180, 0.04), transparent 70%);
+        radial-gradient(ellipse 70% 50% at 85% 10%, rgba(255, 255, 255, 0.035), transparent 70%),
+        radial-gradient(ellipse 60% 45% at 10% 90%, rgba(255, 255, 255, 0.025), transparent 70%);
 }
 
 

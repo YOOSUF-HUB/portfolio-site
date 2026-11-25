@@ -67,12 +67,19 @@
     // Particle kinds
     var STAR = 0, CORE = 1, SOMA = 2, DEND = 3, AXON = 4, BOUTON = 5, SPINE = 6, HAZE = 7, DUST = 8, LINK = 9;
 
-    // Palette (restrained cool blues; violet as a rare accent)
-    var BLUE = [0.30, 0.54, 1.0];
-    var CYAN = [0.40, 0.84, 1.0];
-    var ICE = [0.82, 0.91, 1.0];
-    var VIOLET = [0.60, 0.50, 1.0];
-    var PULSE = [0.80, 0.95, 1.0];
+    /* Palette — strictly neutral (darkroom monochrome). Every entry has
+       r = g = b, so nothing in the hero can drift into a hue. The names
+       describe a role, not a colour:
+         BLUE   → STEEL  : mid grey for dust and dimmer cell tissue
+         CYAN   → SILVER : light grey for dendrites and axon fibre
+         ICE    → WHITE  : near-white for nuclei, nodes, boutons, stars
+         VIOLET → GRAPHITE: darker grey used as the rare "accent" cell
+         PULSE  → pure white impulses */
+    var BLUE = [0.60, 0.60, 0.60];
+    var CYAN = [0.80, 0.80, 0.80];
+    var ICE = [0.94, 0.94, 0.94];
+    var VIOLET = [0.46, 0.46, 0.46];
+    var PULSE = [1.0, 1.0, 1.0];
 
     /* ---------- Composition: where neurons sit on screen ----------
        [screen x, screen y, depth z, size, type]. Kept clear of the
