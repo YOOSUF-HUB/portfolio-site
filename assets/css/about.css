@@ -1,30 +1,179 @@
 /* =========================================================
-   ABOUT — portrait
-   Replaces the template video with a still portrait, keeping
-   the same monochrome treatment and black edge vignette.
+   ABOUT — portrait card
+   An "observatory" frame for the portrait: an offset outline
+   frame for depth, viewfinder corners, meta labels and an
+   inset caption. Tilts gently toward the cursor (about-portrait.js).
    ========================================================= */
 
-.section-about-me .about-portrait .video {
+.section-about-me .portrait-card {
+    --tilt-x: 0deg;
+    --tilt-y: 0deg;
+
+    position: relative;
+
+    width: 100%;
+    max-width: 440px;
+
+    margin: 0 0 0 0;
+
+    perspective: 1200px;
+}
+
+/* Offset outline frame sitting behind the photo */
+.section-about-me .portrait-frame {
+    position: absolute;
+    inset: 0;
+
+    border: 1px solid var(--white-16);
+    border-radius: 22px;
+
+    transform: translate(22px, 22px);
+
+    transition:
+        transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1),
+        border-color 0.6s ease;
+}
+
+.section-about-me .portrait-card:hover .portrait-frame {
+    border-color: var(--white-32);
+
+    transform: translate(30px, 30px);
+}
+
+/* The photo itself */
+.section-about-me .portrait-media {
+    position: relative;
+
+    overflow: hidden;
+
+    aspect-ratio: 4 / 5;
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+
+    background: #0a0a0a;
+
+    box-shadow:
+        0 30px 60px -20px rgba(0, 0, 0, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+    transform-style: preserve-3d;
+
+    transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.section-about-me .portrait-img {
     display: block;
 
     width: 100%;
-    height: auto;
+    height: 100%;
 
     object-fit: cover;
-    object-position: center top;
+    object-position: center 18%;
 
-    /* Same B&W look as the old video, with a little extra punch */
-    filter: grayscale(100%) contrast(1.08) brightness(0.95);
+    filter: grayscale(100%) contrast(1.08) brightness(0.92);
 
-    transition: filter 0.6s ease;
+    transform: scale(1.02);
+
+    transition:
+        transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1),
+        filter 0.6s ease;
 }
 
-.section-about-me .about-portrait:hover .video {
+.section-about-me .portrait-card:hover .portrait-img {
     filter: grayscale(100%) contrast(1.12) brightness(1);
+
+    transform: scale(1.06);
 }
 
-/* Name in place of the template's logo signature */
-.about-signature {
+/* Bottom shade so the caption reads, plus a soft top shade for the meta row */
+.section-about-me .portrait-media::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0) 22%),
+        linear-gradient(0deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0) 38%);
+}
+
+/* Viewfinder corners */
+.section-about-me .portrait-corners i {
+    position: absolute;
+    z-index: 2;
+
+    width: 18px;
+    height: 18px;
+
+    border-color: rgba(255, 255, 255, 0.55);
+    border-style: solid;
+    border-width: 0;
+
+    transition: all 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.section-about-me .portrait-corners i:nth-child(1) { top: 16px;    left: 16px;  border-top-width: 1px;    border-left-width: 1px; }
+.section-about-me .portrait-corners i:nth-child(2) { top: 16px;    right: 16px; border-top-width: 1px;    border-right-width: 1px; }
+.section-about-me .portrait-corners i:nth-child(3) { bottom: 16px; left: 16px;  border-bottom-width: 1px; border-left-width: 1px; }
+.section-about-me .portrait-corners i:nth-child(4) { bottom: 16px; right: 16px; border-bottom-width: 1px; border-right-width: 1px; }
+
+/* Corners "focus" inward on hover */
+.section-about-me .portrait-card:hover .portrait-corners i {
+    width: 24px;
+    height: 24px;
+
+    border-color: var(--white);
+}
+
+.section-about-me .portrait-card:hover .portrait-corners i:nth-child(1) { top: 24px;    left: 24px; }
+.section-about-me .portrait-card:hover .portrait-corners i:nth-child(2) { top: 24px;    right: 24px; }
+.section-about-me .portrait-card:hover .portrait-corners i:nth-child(3) { bottom: 24px; left: 24px; }
+.section-about-me .portrait-card:hover .portrait-corners i:nth-child(4) { bottom: 24px; right: 24px; }
+
+/* Meta labels along the top */
+.section-about-me .portrait-meta {
+    position: absolute;
+    top: 24px;
+    left: 46px;
+    right: 46px;
+    z-index: 2;
+
+    display: flex;
+    justify-content: space-between;
+
+    font-size: 9px;
+    font-weight: 500;
+
+    letter-spacing: 2px;
+    text-transform: uppercase;
+
+    color: var(--white-50);
+}
+
+/* Inset caption */
+.section-about-me .portrait-caption {
+    position: absolute;
+    left: 32px;
+    right: 32px;
+    bottom: 34px;
+    z-index: 2;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 8px;
+
+    margin: 0;
+
+    text-align: center;
+}
+
+.section-about-me .portrait-name {
     font-size: 13px;
     font-weight: 500;
 
@@ -32,20 +181,91 @@
     text-transform: uppercase;
 
     color: var(--white);
+}
 
-    opacity: 0.85;
+.section-about-me .portrait-role {
+    font-size: 10px;
+    font-weight: 500;
+
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+
+    color: var(--white-50);
+}
+
+/* Badge pinned over the top-right corner of the card */
+.section-about-me .portrait-card .badget {
+    top: 14%;
+    right: 0;
+    z-index: 3;
+
+    transform: translate(50%, 0);
+}
+
+@media (max-width: 1199px) {
+    .section-about-me .portrait-card .badget {
+        transform: translate(35%, 0);
+    }
+}
+
+@media (max-width: 991px) {
+    .section-about-me .portrait-card {
+        margin-inline: auto;
+    }
 }
 
 @media (max-width: 575px) {
-    .about-signature {
+    .section-about-me .portrait-card {
+        width: calc(100% - 16px);
+        margin-inline: 0;
+    }
+
+    .section-about-me .portrait-frame {
+        transform: translate(12px, 12px);
+    }
+
+    .section-about-me .portrait-card .badget {
+        max-width: 84px;
+        top: -24px;
+        right: 12px;
+
+        transform: none;
+    }
+
+    .section-about-me .portrait-meta {
+        left: 40px;
+        right: 40px;
+
+        font-size: 8px;
+        letter-spacing: 1.5px;
+    }
+
+    /* The badge sits over the top-right corner on phones */
+    .section-about-me .portrait-meta span:last-child {
+        display: none;
+    }
+
+    .section-about-me .portrait-name {
         font-size: 11px;
         letter-spacing: 4px;
+    }
+
+    .section-about-me .portrait-role {
+        font-size: 9px;
+        letter-spacing: 2px;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .section-about-me .about-portrait .video {
+    .section-about-me .portrait-frame,
+    .section-about-me .portrait-media,
+    .section-about-me .portrait-img,
+    .section-about-me .portrait-corners i {
         transition: none;
+    }
+
+    .section-about-me .portrait-media {
+        transform: none;
     }
 }
 
@@ -97,4 +317,87 @@
     .badge-ring {
         animation: none;
     }
+}
+
+
+/* =========================================================
+   FOOTER WORDMARK — "YOOSUF"
+   Outline-only SVG wordmark set in Figtree. Strokes don't
+   scale, so the line stays 1px crisp at every screen size.
+   ========================================================= */
+
+.footer-wordmark {
+    display: block;
+
+    width: 100%;
+    height: auto;
+
+    overflow: visible;
+}
+
+.footer-wordmark .wm-text {
+    font-family: "Figtree", sans-serif;
+    font-size: 400px;
+    font-weight: 500;
+
+    letter-spacing: -12px;
+
+    fill: none;
+
+    stroke: rgba(255, 255, 255, 0.3);
+    stroke-width: 1px;
+
+    vector-effect: non-scaling-stroke;
+}
+
+.footer-wordmark .wm-guide {
+    stroke: rgba(255, 255, 255, 0.08);
+    stroke-width: 1px;
+
+    vector-effect: non-scaling-stroke;
+}
+
+
+/* =========================================================
+   CONTACT (CTA) GLOW
+   The template's green glow above the contact section,
+   turned into a soft, translucent grey-white so it matches
+   the monochrome night-sky theme.
+   ========================================================= */
+
+.section-cta .bg-img img {
+    filter: grayscale(100%) brightness(1.1) contrast(1.35);
+    opacity: 0.55;
+
+    /* Fade the image edges so no hard seam shows against the sky */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 35%, #000 70%, transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0%, #000 35%, #000 70%, transparent 100%);
+}
+
+
+/* =========================================================
+   ABOUT ME BACKGROUND GLOW
+   Same treatment as the contact glow: the green light streak
+   becomes a translucent grey-white, edges faded into the sky.
+   ========================================================= */
+
+.section-about-me .s-img-bg img {
+    filter: grayscale(100%) brightness(1.1) contrast(1.35);
+    opacity: 0.55;
+
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 25%, #000 75%, transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0%, #000 25%, #000 75%, transparent 100%);
+}
+
+/* Screen blending only adds light, so the image's dark areas
+   disappear and the stars behind stay visible. The contrast in
+   the filter above crushes the near-black JPEG noise. */
+.section-about-me .s-img-bg,
+.section-cta .bg-img {
+    mix-blend-mode: screen;
+}
+
+/* The template's dark overlay is no longer needed now the image is translucent */
+.section-about-me .s-img-bg::before {
+    display: none;
 }

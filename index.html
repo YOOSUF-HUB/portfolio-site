@@ -29,6 +29,8 @@
     <link rel="stylesheet" href="assets/css/certifications.css">
     <link rel="stylesheet" href="assets/css/about.css">
     <link rel="stylesheet" href="assets/css/tech-logos.css">
+    <link rel="stylesheet" href="assets/css/process.css">
+    <link rel="stylesheet" href="assets/css/night-sky.css">
     <link rel="stylesheet" href="assets/css/hero-actions.css">
 
     <!-- Favicon and Touch Icons  -->
@@ -81,6 +83,10 @@
 </head>
 
 <body class="counter-scroll">
+    <!-- Night sky background -->
+    <div class="night-sky-glow" aria-hidden="true"></div>
+    <canvas class="night-sky" id="night-sky" aria-hidden="true"></canvas>
+
     <canvas class="cursor-trail d-none d-xl-block" id="trail"></canvas>
 
     <!-- Scroll Top -->
@@ -172,23 +178,9 @@
         <!-- /Header -->
         <!-- Hero Banner -->
         <div class="section-hero-v1">
-            <div class="overlay"></div>
-            <div class="bg-video">
-                <video muted autoplay loop playsinline preload="metadata"
-                    poster="assets/images/hero/82875_Shrink.webp">
-                    <source src="assets/images/video/corridor-1600.webm" type="video/webm">
-                    <source src="assets/images/video/corridor-1600.mp4"  type="video/mp4">
-                </video>
-                <!-- <div class="hero-image">
-                    <img
-                        src="assets/images/hero/82875_Shrink.webp"
-                        alt="Yoosuf A.A."
-                        class="img-fluid"
-                        loading="lazy">
-                </div> -->
-                <div class="video-overlay"></div>
-                <div class="video-overlay-2"></div>
-                <div class="video-overlay-2"></div>
+            <!-- Neural constellation: stars gather into a neural network (assets/js/hero-network.js) -->
+            <div class="bg-video hero-network-wrap" aria-hidden="true">
+                <canvas class="hero-network" id="hero-network"></canvas>
             </div>
             <div class="content-wrap">
                 <div class="container">
@@ -2343,8 +2335,9 @@
                                         <img loading="lazy" width="509" height="509" src="assets/images/item/bg-1.jpg" alt="Image">
                                     </div>
                                     <div class="content position-relative z-5">
-                                        <div class="img-icon">
-                                            <img loading="lazy" width="120" height="120" src="assets/images/item/process-1.png" alt="Image">
+                                        <div class="img-icon process-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25"
+                                                stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Understand and define"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
                                         </div>
 
                                         <div>
@@ -2377,8 +2370,9 @@
                                         <img loading="lazy" width="509" height="509" src="assets/images/item/bg-1.jpg" alt="Image">
                                     </div>
                                     <div class="content position-relative z-5">
-                                        <div class="img-icon">
-                                            <img loading="lazy" width="120" height="120" src="assets/images/item/process-2.png" alt="Image">
+                                        <div class="img-icon process-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25"
+                                                stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Build AI solutions"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/></svg>
                                         </div>
 
                                         <div>
@@ -2409,15 +2403,16 @@
                                         <img loading="lazy" width="509" height="509" src="assets/images/item/bg-1.jpg" alt="Image">
                                     </div>
                                     <div class="content position-relative z-5">
-                                        <div class="img-icon">
-                                            <img loading="lazy" width="120" height="120" src="assets/images/item/process-3.png" alt="Image">
+                                        <div class="img-icon process-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25"
+                                                stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Test, deploy and improve"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>
                                         </div>
 
                                         <div>
                                             <h5 class="title letter-space--2">
                                                 <a href="#" class="link">
                                                     Test, Deploy <br class="d-none d-sm-block">
-                                                    & Continously Improve
+                                                    & Continuously Improve
                                                 </a>
                                             </h5>
                                             <div class="br-line"></div>
@@ -2453,29 +2448,35 @@
                 <div class="row">
                     <div class="col-lg-5">
                         <div class="col-left mb-lg-0">
-                            <div class="davies-video about-portrait">
-                                <img class="video" loading="lazy" width="900" height="1125"
-                                    src="assets/images/photo-yoosuf/yoosuf-portrait.jpg"
-                                    alt="Portrait of Yoosuf Ahamed">
-                                <div class="overlay v1"></div>
-                                <div class="overlay mark-1"></div>
-                                <div class="overlay mark-2"></div>
-                            </div>
-                            <div class="signature">
-                                <span class="about-signature">Yoosuf Ahamed</span>
-                            </div>
-                            <div class="badget">
-                                <svg class="badge-ring" width="156" height="156" viewBox="0 0 156 156" role="img"
-                                    aria-label="AI Engineer, Data Science, 2026">
-                                    <defs>
-                                        <path id="badgeCircle" d="M78,78 m-56,0 a56,56 0 1,1 112,0 a56,56 0 1,1 -112,0"></path>
-                                    </defs>
-                                    <text>
-                                        <textPath href="#badgeCircle" textLength="351" lengthAdjust="spacing">AI ENGINEER · DATA SCIENCE · 2026 ·&#160;</textPath>
-                                    </text>
-                                </svg>
-                                <span class="badge-dot" aria-hidden="true"></span>
-                            </div>
+                            <figure class="portrait-card effectFade fadeUp">
+                                <span class="portrait-frame" aria-hidden="true"></span>
+                                <div class="portrait-media">
+                                    <img class="portrait-img" loading="lazy" width="900" height="1124"
+                                        src="assets/images/photo-yoosuf/yoosuf-portrait.jpg"
+                                        alt="Portrait of Yoosuf Ahamed">
+                                    <span class="portrait-corners" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                                    <div class="portrait-meta" aria-hidden="true">
+                                        <span>Portrait · 001</span>
+                                        <span>Sri Lanka · 2026</span>
+                                    </div>
+                                    <figcaption class="portrait-caption">
+                                        <span class="portrait-name">Yoosuf Ahamed</span>
+                                        <span class="portrait-role">AI Engineer · Data Science</span>
+                                    </figcaption>
+                                </div>
+                                <div class="badget">
+                                    <svg class="badge-ring" width="156" height="156" viewBox="0 0 156 156" role="img"
+                                        aria-label="AI Engineer, Data Science, 2026">
+                                        <defs>
+                                            <path id="badgeCircle" d="M78,78 m-56,0 a56,56 0 1,1 112,0 a56,56 0 1,1 -112,0"></path>
+                                        </defs>
+                                        <text>
+                                            <textPath href="#badgeCircle" textLength="351" lengthAdjust="spacing">AI ENGINEER · DATA SCIENCE · 2026 ·&#160;</textPath>
+                                        </text>
+                                    </svg>
+                                    <span class="badge-dot" aria-hidden="true"></span>
+                                </div>
+                            </figure>
                         </div>
                     </div>
                     <div class="offset-lg-1 col-lg-6 offset-xl-2 col-xl-5">
@@ -3191,36 +3192,32 @@
                     <div class="col-lg-8 mx-auto">
                         <div class="accordion-faq_list" id="accordion-faq_list">
                             <div class="accordion-faq_item" role="presentation">
-                                <div class="accordion-action text-body-1 letter-space--1 fw-medium collapsed" data-bs-target="#faq-1" role="button"
+                                <div class="accordion-action text-body-1 letter-space--1 fw-medium" data-bs-target="#faq-1" role="button"
                                     data-bs-toggle="collapse" aria-controls="faq-1" aria-expanded="true">
                                     <span class="accordion-order">01</span>
-                                    <p class="accordion-text">How long does a project usually take?</p>
+                                    <p class="accordion-text">What do you specialise in?</p>
                                     <div class="ic-wrap d-flex">
                                         <i class="icon icon-arrow-caret-down fs-10"></i>
                                     </div>
                                 </div>
-                                <div id="faq-1" class="collapse" data-bs-parent="#accordion-faq_list">
+                                <div id="faq-1" class="collapse show" data-bs-parent="#accordion-faq_list">
                                     <p class="accordion-content">
-                                        Most projects are completed within 4–8 weeks, depending on complexity, revisions, and scope. I’ll
-                                        always
-                                        provide a clear timeline before starting.
+                                        AI engineering and data science. I build LLM-powered applications, agentic AI systems and RAG pipelines, train machine learning models, and ship them as full-stack products with clean APIs and modern web interfaces.
                                     </p>
                                 </div>
                             </div>
                             <div class="accordion-faq_item" role="presentation">
-                                <div class="accordion-action text-body-1 letter-space--1 fw-medium " data-bs-target="#faq-2" role="button"
+                                <div class="accordion-action text-body-1 letter-space--1 fw-medium collapsed" data-bs-target="#faq-2" role="button"
                                     data-bs-toggle="collapse" aria-controls="faq-2" aria-expanded="false">
                                     <span class="accordion-order">02</span>
-                                    <p class="accordion-text">Do you work with international clients?</p>
+                                    <p class="accordion-text">Are you open to new opportunities?</p>
                                     <div class="ic-wrap d-flex">
                                         <i class="icon icon-arrow-caret-down fs-10"></i>
                                     </div>
                                 </div>
-                                <div id="faq-2" class="collapse show" data-bs-parent="#accordion-faq_list">
+                                <div id="faq-2" class="collapse" data-bs-parent="#accordion-faq_list">
                                     <p class="accordion-content">
-                                        Yes, I collaborate with clients worldwide using online meetings, project management tools, and shared
-                                        design
-                                        platforms to ensure smooth communication.
+                                        Yes. I’m currently an AI Engineer Intern at Guardians Solutions and completing my BSc (Hons) in Information Technology, specialising in Data Science, at SLIIT (graduating 2027). I’m open to AI and ML engineering roles, research collaborations and freelance projects.
                                     </p>
                                 </div>
                             </div>
@@ -3228,16 +3225,14 @@
                                 <div class="accordion-action text-body-1 letter-space--1 fw-medium collapsed" data-bs-target="#faq-3" role="button"
                                     data-bs-toggle="collapse" aria-controls="faq-3" aria-expanded="false">
                                     <span class="accordion-order">03</span>
-                                    <p class="accordion-text">Can you help with both design and development?</p>
+                                    <p class="accordion-text">What kind of AI projects have you built?</p>
                                     <div class="ic-wrap d-flex">
                                         <i class="icon icon-arrow-caret-down fs-10"></i>
                                     </div>
                                 </div>
                                 <div id="faq-3" class="collapse" data-bs-parent="#accordion-faq_list">
                                     <p class="accordion-content">
-                                        Absolutely. I handle branding, UI/UX design, and no-code or coded development to deliver a complete
-                                        end-to-end
-                                        solution.
+                                        Multi-agent and retrieval-augmented systems such as AVJNS, a legal navigation assistant for Sri Lanka; MCP servers that let Claude Desktop run real tools; and a NASA Space Apps Challenge 2026 project that turns open Earth data into district-level disaster warnings.
                                     </p>
                                 </div>
                             </div>
@@ -3245,16 +3240,14 @@
                                 <div class="accordion-action text-body-1 letter-space--1 fw-medium collapsed" data-bs-target="#faq-4" role="button"
                                     data-bs-toggle="collapse" aria-controls="faq-4" aria-expanded="false">
                                     <span class="accordion-order">04</span>
-                                    <p class="accordion-text">What’s your payment process?</p>
+                                    <p class="accordion-text">Which tools and languages do you use most?</p>
                                     <div class="ic-wrap d-flex">
                                         <i class="icon icon-arrow-caret-down fs-10"></i>
                                     </div>
                                 </div>
                                 <div id="faq-4" class="collapse" data-bs-parent="#accordion-faq_list">
                                     <p class="accordion-content">
-                                        I typically require a 50% deposit to begin work, with the remaining balance due upon project
-                                        completion and
-                                        approval.
+                                        Python is my core language and I’ve been using it since 2020. Around it I work with PyTorch, TensorFlow, scikit-learn, LangChain and Hugging Face for AI, FastAPI and PostgreSQL for the backend, Docker and Git for delivery, and React or Next.js on the front end.
                                     </p>
                                 </div>
                             </div>
@@ -3262,16 +3255,14 @@
                                 <div class="accordion-action text-body-1 letter-space--1 fw-medium collapsed" data-bs-target="#faq-5" role="button"
                                     data-bs-toggle="collapse" aria-controls="faq-5" aria-expanded="false">
                                     <span class="accordion-order">05</span>
-                                    <p class="accordion-text">Do you provide ongoing support after launch?</p>
+                                    <p class="accordion-text">Do you work remotely, and how can I reach you?</p>
                                     <div class="ic-wrap d-flex">
                                         <i class="icon icon-arrow-caret-down fs-10"></i>
                                     </div>
                                 </div>
                                 <div id="faq-5" class="collapse" data-bs-parent="#accordion-faq_list">
                                     <p class="accordion-content">
-                                        Yes. I offer maintenance, updates, and performance monitoring packages to keep your website or product
-                                        running
-                                        smoothly long-term.
+                                        I’m based in Sri Lanka and work comfortably with remote teams across time zones. The quickest way to reach me is the contact form below or by email. Tell me a little about the idea or role and I’ll get back to you.
                                     </p>
                                 </div>
                             </div>
@@ -3436,7 +3427,12 @@
             <div class="footer-bottom">
                 <div class="container">
                     <div class="img-agency">
-                        <img class="effectFade fadeZoom" loading="lazy" width="1293" height="269" src="assets/images/logo/agency.png" alt="Image">
+                        <svg class="footer-wordmark effectFade fadeZoom" viewBox="3 -286 1541 293" role="img" aria-label="Yoosuf">
+                            <!-- construction guides: cap line + baseline -->
+                            <line class="wm-guide" x1="3" y1="-280" x2="1544" y2="-280"></line>
+                            <line class="wm-guide" x1="3" y1="0" x2="1544" y2="0"></line>
+                            <text class="wm-text" x="0" y="0">YOOSUF</text>
+                        </svg>
                     </div>
                     <div class="bottom">
                         <p class="text-nocopy text-caption fw-medium letter-space--1">
@@ -3597,6 +3593,9 @@
 
     <script src="assets/js/main.js"></script>
     <script src="assets/js/project-flashcards.js"></script>
+    <script src="assets/js/night-sky.js"></script>
+    <script src="assets/js/hero-network.js"></script>
+    <script src="assets/js/about-portrait.js"></script>
 </body>
 
 </html>
