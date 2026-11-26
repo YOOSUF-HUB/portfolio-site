@@ -29,7 +29,7 @@
     <link rel="stylesheet" href="assets/css/education.css">
     <link rel="stylesheet" href="assets/css/registry.css">
     <link rel="stylesheet" href="assets/css/about.css">
-    <link rel="stylesheet" href="assets/css/about-neural.css">
+    <link rel="stylesheet" href="assets/css/about-motion.css">
     <link rel="stylesheet" href="assets/css/contact-form.css">
     <link rel="stylesheet" href="assets/css/tech-logos.css">
     <link rel="stylesheet" href="assets/css/tech-explorer.css">
@@ -771,122 +771,113 @@
         <!-- /Process -->
 
 
-        <!-- About — Neural Identity -->
-        <section class="ni" id="aboutScroll" aria-labelledby="ni-title" data-ni>
+        <!-- About — "The Engineer in Motion"
+             Styles: assets/css/about-motion.css · Signal + interaction: assets/js/about-motion.js -->
+        <section class="em" id="aboutScroll" aria-labelledby="em-title" data-em>
             <div class="container">
 
-                <header class="ni-head">
-                    <div class="ni-head__row">
-                        <p class="pj-label">Profile / 001</p>
-                        <p class="ni-note" aria-hidden="true">Human input <span>→</span> computational output</p>
+                <header class="em-head">
+                    <div class="em-head__meta">
+                        <p class="em-eyebrow"><span>Profile</span><span class="em-eyebrow__sep" aria-hidden="true">/</span><span>001</span></p>
+                        <p class="em-note" aria-hidden="true">Laptop <span>→</span> intelligence</p>
                     </div>
-                    <h2 class="ni-title" id="ni-title">
-                        <span class="ni-title__line"><span class="ni-title__text">Human curiosity.</span></span>
-                        <span class="ni-title__line ni-title__line--b"><span class="ni-title__text">Machine intelligence.</span></span>
+                    <h2 class="em-title" id="em-title">
+                        <span class="em-title__line"><span class="em-title__text">Built in motion.</span></span>
+                        <span class="em-title__line em-title__line--b"><span class="em-title__text">Driven by curiosity.</span></span>
                     </h2>
                 </header>
 
-                <div class="ni-stage" data-ni-stage>
-                    <canvas class="ni-canvas" aria-hidden="true" data-ni-canvas></canvas>
+                <div class="em-stage" data-em-stage>
+                    <canvas class="em-canvas" aria-hidden="true" data-em-canvas></canvas>
 
-                    <div class="ni-bio ni-quiet ni-reveal" style="--d:1">
-                        <h3 class="ni-bio__title">The mind behind the models.</h3>
-                        <div class="ni-bio__text">
+                    <figure class="em-photo em-reveal" data-em-photo>
+                        <div class="em-photo__frame" data-em-frame>
+                            <picture>
+                                <source type="image/webp"
+                                    srcset="assets/images/photo-yoosuf/yoosuf-working-900.webp 900w, assets/images/photo-yoosuf/yoosuf-working-1600.webp 1600w"
+                                    sizes="(max-width: 991px) 92vw, 46vw">
+                                <img class="em-photo__img" data-em-img loading="lazy" decoding="async" width="1599" height="2133"
+                                    src="assets/images/photo-yoosuf/yoosuf-working-900.jpg"
+                                    srcset="assets/images/photo-yoosuf/yoosuf-working-900.jpg 900w, assets/images/photo-yoosuf/yoosuf-working-1600.jpg 1600w"
+                                    sizes="(max-width: 991px) 92vw, 46vw"
+                                    alt="Yoosuf Ahamed working on a laptop outdoors">
+                            </picture>
+                            <span class="em-photo__shade" aria-hidden="true"></span>
+                            <span class="em-photo__grain" aria-hidden="true"></span>
+                            <span class="em-photo__ticks" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                            <span class="em-photo__fig" aria-hidden="true">Fig. 001</span>
+                        </div>
+                        <figcaption class="em-photo__cap">
+                            <span>Yoosuf Ahamed</span>
+                            <span>At work · Mono</span>
+                        </figcaption>
+                        <span class="em-src" aria-hidden="true" data-em-src><span class="em-src__label">Signal source<b>Laptop / 001</b></span></span>
+                    </figure>
+
+                    <div class="em-bio em-reveal em-quiet" style="--d:1">
+                        <p class="em-label">Introduction <span>— 01</span></p>
+                        <h3 class="em-bio__title">The person behind the systems.</h3>
+                        <div class="em-bio__text">
                             <p>I'm an AI Engineer and Data Science undergraduate passionate about turning complex ideas into intelligent, practical applications.</p>
                             <p>My work revolves around machine learning, LLM-powered systems, agentic AI, and the engineering behind them.</p>
                             <p>I enjoy exploring how models learn, how intelligent systems reason, and how these technologies can solve real-world problems.</p>
-                            <p class="ni-bio__close">For me, the most interesting part of AI isn't just what a model can do. It's what we can build with it.</p>
+                            <p class="em-bio__close">For me, the most interesting part of AI isn't just what a model can do. It's what we can build with it.</p>
                         </div>
                     </div>
 
-                    <figure class="ni-portrait" data-ni-portrait>
-                        <div class="ni-portrait__frame">
-                            <img class="ni-portrait__img" loading="lazy" decoding="async" width="900" height="1124"
-                                src="assets/images/photo-yoosuf/yoosuf-portrait.jpg"
-                                alt="Portrait of Yoosuf Ahamed">
-                            <span class="ni-portrait__ticks" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-                        </div>
-                        <figcaption class="ni-portrait__cap ni-quiet">
-                            <span>Yoosuf Ahamed</span>
-                            <span>AI Engineer · Data Science</span>
-                        </figcaption>
-                        <span class="ni-soma" aria-hidden="true" data-ni-soma></span>
-                    </figure>
-
-                    <div class="ni-exp ni-reveal" style="--d:2">
-                        <p class="ni-block-label">Work experience</p>
-                        <ol class="ni-exp__list ni-quiet">
-                            <li class="ni-exp__item">
-                                <span class="ni-exp__num" aria-hidden="true">01</span>
-                                <span class="ni-exp__role">AI Engineer Intern</span>
-                                <span class="ni-exp__org">Guardians Solutions</span>
-                                <span class="ni-exp__period">2026 — Present</span>
+                    <div class="em-exp em-reveal em-quiet" style="--d:2">
+                        <p class="em-label">Work experience <span>— 02</span></p>
+                        <ol class="em-exp__list">
+                            <li class="em-exp__row">
+                                <span class="em-exp__role">AI Engineer Intern</span>
+                                <span class="em-exp__org">Guardians Solutions</span>
+                                <span class="em-exp__period">2026 — Present</span>
                             </li>
-                            <li class="ni-exp__item">
-                                <span class="ni-exp__num" aria-hidden="true">02</span>
-                                <span class="ni-exp__role">Administrator</span>
-                                <span class="ni-exp__org">Catenaa</span>
-                                <span class="ni-exp__period">2024 — Present</span>
+                            <li class="em-exp__row">
+                                <span class="em-exp__role">Administrator</span>
+                                <span class="em-exp__org">Catenaa</span>
+                                <span class="em-exp__period">2024 — Present</span>
                             </li>
                         </ol>
                     </div>
 
-                    <div class="ni-focus ni-reveal" style="--d:3">
-                        <p class="ni-focus__label pj-label pj-label--plain ni-quiet" id="ni-focus-label">Intelligence systems <span>/ 03 pathways</span></p>
-                        <ul class="ni-pillars" aria-labelledby="ni-focus-label">
-                            <li class="ni-pillar ni-pillar--major">
-                                <button type="button" class="ni-pillar__btn" data-ni-pillar="0" aria-pressed="false" aria-controls="ni-readout">
-                                    <span class="ni-pillar__node" aria-hidden="true" data-ni-anchor></span>
-                                    <span class="ni-pillar__num">01</span>
-                                    <span class="ni-pillar__title ni-quiet">Artificial intelligence</span>
-                                    <span class="ni-pillar__tags ni-quiet">LLM apps · Agentic AI · RAG</span>
+                    <div class="em-focus em-reveal" style="--d:1">
+                        <p class="em-label em-quiet" id="em-focus-label">Disciplines <span>— 03 pathways</span></p>
+                        <ul class="em-paths" aria-labelledby="em-focus-label">
+                            <li class="em-path em-path--major">
+                                <button type="button" class="em-path__btn" data-em-path="0" aria-pressed="false" aria-describedby="em-desc-0">
+                                    <span class="em-path__node" aria-hidden="true" data-em-node></span>
+                                    <span class="em-path__num em-quiet">01</span>
+                                    <span class="em-path__title em-quiet">Artificial intelligence</span>
+                                    <span class="em-path__tags em-quiet">LLM applications, Agentic AI, RAG, tool calling, and multi-agent systems.</span>
+                                    <span class="em-path__desc em-quiet" id="em-desc-0"><span>Building LLM-powered applications and agentic systems that retrieve, reason and act.</span></span>
                                 </button>
                             </li>
-                            <li class="ni-pillar ni-pillar--major">
-                                <button type="button" class="ni-pillar__btn" data-ni-pillar="1" aria-pressed="false" aria-controls="ni-readout">
-                                    <span class="ni-pillar__node" aria-hidden="true" data-ni-anchor></span>
-                                    <span class="ni-pillar__num">02</span>
-                                    <span class="ni-pillar__title ni-quiet">Machine learning &amp; data science</span>
-                                    <span class="ni-pillar__tags ni-quiet">Modelling · Features · Evaluation</span>
+                            <li class="em-path em-path--major">
+                                <button type="button" class="em-path__btn" data-em-path="1" aria-pressed="false" aria-describedby="em-desc-1">
+                                    <span class="em-path__node" aria-hidden="true" data-em-node></span>
+                                    <span class="em-path__num em-quiet">02</span>
+                                    <span class="em-path__title em-quiet">Machine learning &amp; data science</span>
+                                    <span class="em-path__tags em-quiet">Model development, feature engineering, data analysis, model evaluation, and predictive modelling.</span>
+                                    <span class="em-path__desc em-quiet" id="em-desc-1"><span>Taking data from raw to predictive, and checking honestly how well a model really performs.</span></span>
                                 </button>
                             </li>
-                            <li class="ni-pillar ni-pillar--minor">
-                                <button type="button" class="ni-pillar__btn" data-ni-pillar="2" aria-pressed="false" aria-controls="ni-readout">
-                                    <span class="ni-pillar__node" aria-hidden="true" data-ni-anchor></span>
-                                    <span class="ni-pillar__num">03</span>
-                                    <span class="ni-pillar__title ni-quiet">Software engineering</span>
-                                    <span class="ni-pillar__tags ni-quiet">APIs · Databases · Deployment</span>
+                            <li class="em-path em-path--minor">
+                                <button type="button" class="em-path__btn" data-em-path="2" aria-pressed="false" aria-describedby="em-desc-2">
+                                    <span class="em-path__node" aria-hidden="true" data-em-node></span>
+                                    <span class="em-path__num em-quiet">03</span>
+                                    <span class="em-path__title em-quiet">Software engineering</span>
+                                    <span class="em-path__tags em-quiet">Python, FastAPI, APIs, databases, Docker, and deployment.</span>
+                                    <span class="em-path__desc em-quiet" id="em-desc-2"><span>The engineering that turns a model into a complete, working application.</span></span>
                                 </button>
                             </li>
                         </ul>
-
-                        <div class="ni-readout ni-quiet" id="ni-readout" aria-live="polite" data-ni-readout>
-                            <div class="ni-readout__panel is-current" data-ni-panel="-1">
-                                <p class="ni-readout__meta">Signal propagation</p>
-                                <p class="ni-readout__desc">Three pathways, one system. Hover or tap a focus area to send a signal through it.</p>
-                            </div>
-                            <div class="ni-readout__panel" data-ni-panel="0">
-                                <p class="ni-readout__meta">Neural pathway / 001</p>
-                                <p class="ni-readout__desc">Building LLM-powered applications and agentic systems that retrieve, reason and act.</p>
-                                <ul class="ni-readout__list"><li>LLM-powered applications</li><li>Agentic AI</li><li>Retrieval-augmented generation</li><li>Tool calling</li><li>Intelligent automation</li><li>Multi-agent systems</li></ul>
-                            </div>
-                            <div class="ni-readout__panel" data-ni-panel="1">
-                                <p class="ni-readout__meta">Neural pathway / 002</p>
-                                <p class="ni-readout__desc">Taking data from raw to predictive, and checking honestly how well a model really performs.</p>
-                                <ul class="ni-readout__list"><li>Model development</li><li>Data preprocessing</li><li>Feature engineering</li><li>Model evaluation</li><li>Data analysis</li><li>Predictive modelling</li></ul>
-                            </div>
-                            <div class="ni-readout__panel" data-ni-panel="2">
-                                <p class="ni-readout__meta">Neural pathway / 003</p>
-                                <p class="ni-readout__desc">The engineering that turns a model into a complete, working application.</p>
-                                <ul class="ni-readout__list"><li>Python</li><li>FastAPI</li><li>API development</li><li>Databases</li><li>Docker</li><li>Application deployment</li></ul>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
             </div>
         </section>
-        <!-- /About — Neural Identity -->
+        <!-- /About — The Engineer in Motion -->
         <!-- Tech Stack -->
         <section class="section-tech-stack flat-spacing" aria-label="Python">
             <ul class="tech-stack-list main-action-active tech-stack-python">
@@ -1866,7 +1857,7 @@
     <script src="assets/js/credentials-ui.js"></script>
     <script src="assets/js/night-sky.js"></script>
     <script src="assets/js/hero-network.js"></script>
-    <script src="assets/js/about-neural.js"></script>
+    <script src="assets/js/about-motion.js"></script>
     <script src="assets/js/tech-stack-data.js"></script>
     <script src="assets/js/tech-explorer.js"></script>
     <script src="assets/js/contact-form.js"></script>
