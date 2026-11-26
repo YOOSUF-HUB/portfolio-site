@@ -27,7 +27,7 @@
     <link rel="stylesheet" href="assets/css/custom-logo.css">
     <link rel="stylesheet" href="assets/css/projects.css">
     <link rel="stylesheet" href="assets/css/education.css">
-    <link rel="stylesheet" href="assets/css/certifications.css">
+    <link rel="stylesheet" href="assets/css/registry.css">
     <link rel="stylesheet" href="assets/css/about.css">
     <link rel="stylesheet" href="assets/css/tech-logos.css">
     <link rel="stylesheet" href="assets/css/process.css">
@@ -429,131 +429,49 @@
 
 
         
-        <!-- CERTIFICATIONS SECTION -->
-        <div class="section-certifications flat-spacing" id="certificationsScroll">
+        <!-- CREDENTIALS — "The Archive Index": compact entrance to the Credential Registry (certifications.html)
+             Count, period and monograms are filled from assets/js/credentials-data.js (static values match).
+             The outline → white fill and staggered reveals run in assets/js/credentials-ui.js;
+             without JS the heading is solid white and everything is visible. Styles: assets/css/registry.css -->
+        <section class="section-certifications crh" id="certificationsScroll" aria-labelledby="crh-title" data-cr-home>
             <div class="container">
-                <div class="row">
-                    <div class="col-12">
-                        <h6 class="mini-title text-caption text-white-64 effectFade fadeUp text-center">
-                            CREDENTIALS
-                        </h6>
-                        <h2 class="text-display-2 fw-semibold letter-space--3 effectFade fadeUp mb-5 text-center">
-                            Certifications
+                <div class="crh-inner">
+                    <div class="crh-head">
+                        <span class="pj-label">Knowledge archive / 002</span>
+                        <p class="crh-lede">A record of continuous learning.</p>
+                    </div>
+
+                    <div class="crh-display" data-crh-display>
+                        <span class="crh-num" aria-hidden="true" data-cr-count>04</span>
+                        <h2 class="crh-word" id="crh-title">
+                            <span class="crh-word__base">Credentials</span>
+                            <span class="crh-word__fill" aria-hidden="true">Credentials</span>
                         </h2>
                     </div>
-                </div>
 
-                <div class="cred-header effectFade fadeUp">
-                    <h3 class="cred-header-title">Certifications &amp; Training</h3>
-                    <span class="cred-header-count">04 CREDENTIALS</span>
-                </div>
+                    <div class="crh-rule" aria-hidden="true">
+                        <span class="crh-rule__bar"></span>
+                        <span class="crh-rule__ref" data-cr-ref>CR—001 → CR—004</span>
+                    </div>
 
-                <div class="cred-list">
-
-                        <!-- AI/ML Engineering — Stage 1 -->
-                        <article class="cred-item effectFade fadeUp">
-                            <div class="cred-mark" aria-hidden="true">SL</div>
-
-                            <div class="cred-body">
-                                <div class="cred-meta">
-                                    <span class="cred-type">Certificate</span>
-                                    <span class="cred-dot" aria-hidden="true"></span>
-                                    <span class="cred-year">2025</span>
-                                </div>
-                                <h3 class="cred-title">AI/ML Engineering — Stage 1</h3>
-                                <p class="cred-issuer">SLIIT · Centre for Open &amp; Distance Education</p>
-                                <div class="cred-skills">
-                                <span>Machine Learning</span>
-                                <span>Applied AI</span>
-                                <span>Python</span>
-                                </div>
-                            </div>
-
-                            <a href="https://code.sliit.org/certificates/dglefu1tib" class="cred-verify" target="_blank" rel="noopener noreferrer"
-                                aria-label="Verify AI/ML Engineering — Stage 1 credential">
-                                <span>VERIFY</span>
-                                <i class="icon icon-arrow-long-right"></i>
-                            </a>
-                        </article>
-
-                        <!-- Machine Learning A-Z: AI, Python &amp; R -->
-                        <article class="cred-item effectFade fadeUp">
-                            <div class="cred-mark" aria-hidden="true">Ud</div>
-
-                            <div class="cred-body">
-                                <div class="cred-meta">
-                                    <span class="cred-type">Course Certificate</span>
-                                    <span class="cred-dot" aria-hidden="true"></span>
-                                    <span class="cred-year">2025</span>
-                                </div>
-                                <h3 class="cred-title">Machine Learning A-Z: AI, Python &amp; R</h3>
-                                <p class="cred-issuer">Udemy</p>
-                                <div class="cred-skills">
-                                <span>ML Algorithms</span>
-                                <span>Deep Learning</span>
-                                <span>Computer Vision</span>
-                                <span>NLP</span>
-                                </div>
-                            </div>
-
-                            <a href="https://www.udemy.com/certificate/UC-b34121cd-6458-4134-894a-6a72a3587a22/" class="cred-verify" target="_blank" rel="noopener noreferrer"
-                                aria-label="Verify Machine Learning A-Z: AI, Python &amp; R credential">
-                                <span>VERIFY</span>
-                                <i class="icon icon-arrow-long-right"></i>
-                            </a>
-                        </article>
-
-                        <!-- GenAI Business Strategy &amp; Solution Design -->
-                        <article class="cred-item effectFade fadeUp">
-                            <div class="cred-mark" aria-hidden="true">AWS</div>
-
-                            <div class="cred-body">
-                                <div class="cred-meta">
-                                    <span class="cred-type">Course Certificate</span>
-                                    <span class="cred-dot" aria-hidden="true"></span>
-                                    <span class="cred-year">2025</span>
-                                </div>
-                                <h3 class="cred-title">GenAI Business Strategy &amp; Solution Design</h3>
-                                <p class="cred-issuer">Amazon Web Services</p>
-                                <div class="cred-skills">
-                                <span>Responsible AI</span>
-                                <span>Foundation Models</span>
-                                <span>AI Strategy</span>
-                                </div>
-                            </div>
-
-                            <span class="cred-verify is-disabled">ON REQUEST</span>
-                        </article>
-
-                        <!-- Introduction to Cloud Infrastructure -->
-                        <article class="cred-item effectFade fadeUp">
-                            <div class="cred-mark" aria-hidden="true">MS</div>
-
-                            <div class="cred-body">
-                                <div class="cred-meta">
-                                    <span class="cred-type">Training Achievement</span>
-                                    <span class="cred-dot" aria-hidden="true"></span>
-                                    <span class="cred-year">2025</span>
-                                </div>
-                                <h3 class="cred-title">Introduction to Cloud Infrastructure</h3>
-                                <p class="cred-issuer">Microsoft Learn</p>
-                                <div class="cred-skills">
-                                <span>IaaS / PaaS / SaaS</span>
-                                <span>Azure Networking</span>
-                                <span>Cloud Security</span>
-                                </div>
-                            </div>
-
-                            <a href="https://learn.microsoft.com/en-us/users/yoosuf-8173/achievements/wvp2cg2n" class="cred-verify" target="_blank" rel="noopener noreferrer"
-                                aria-label="Verify Introduction to Cloud Infrastructure credential">
-                                <span>VERIFY</span>
-                                <i class="icon icon-arrow-long-right"></i>
-                            </a>
-                        </article>
-
+                    <div class="crh-row">
+                        <p class="crh-count crh-step" style="--d:0"><strong data-cr-count>04</strong><span>Learning records</span></p>
+                        <p class="crh-period crh-step" style="--d:1"><span>Archive period</span><b data-cr-period>Dec 2025 — Jan 2026</b></p>
+                        <ul class="crh-monos crh-step" style="--d:2" aria-label="Issuers" data-cr-monograms>
+                            <li title="SLIIT · Centre for Open &amp; Distance Education"><span aria-hidden="true">SL</span><span class="pj-visually-hidden">SLIIT · Centre for Open &amp; Distance Education</span></li>
+                            <li title="Udemy"><span aria-hidden="true">Ud</span><span class="pj-visually-hidden">Udemy</span></li>
+                            <li title="Amazon Web Services"><span aria-hidden="true">AWS</span><span class="pj-visually-hidden">Amazon Web Services</span></li>
+                            <li title="Microsoft Learn"><span aria-hidden="true">MS</span><span class="pj-visually-hidden">Microsoft Learn</span></li>
+                        </ul>
+                        <a href="certifications.html" class="crh-btn crh-step" style="--d:3">
+                            <span>Open credential registry</span>
+                            <span class="crh-btn__icon" aria-hidden="true"><svg class="pj-arrow" viewBox="0 0 12 12" focusable="false"><path d="M2.5 9.5 9.5 2.5M4 2.5h5.5V8"/></svg></span>
+                        </a>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
+        <!-- /Credentials -->
 
 
 
@@ -2028,6 +1946,8 @@
     <script src="assets/js/project-visuals.js"></script>
     <script src="assets/js/projects-ui.js"></script>
     <script src="assets/js/education.js"></script>
+    <script src="assets/js/credentials-data.js"></script>
+    <script src="assets/js/credentials-ui.js"></script>
     <script src="assets/js/night-sky.js"></script>
     <script src="assets/js/hero-network.js"></script>
     <script src="assets/js/about-portrait.js"></script>
