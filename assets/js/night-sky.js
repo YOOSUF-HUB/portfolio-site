@@ -89,6 +89,20 @@
     var scrollTarget = 0, scrollCurrent = 0;
     var running = false;
 
+    /* Sections that draw their own visualisation (the About neuron):
+       constellations fade out while one is on screen. */
+    var quietTarget = 0, quietFade = 0;
+    var quietSection = document.getElementById("aboutScroll");
+    if (quietSection && "IntersectionObserver" in window) {
+        new IntersectionObserver(function (entries) {
+            quietTarget = entries[0].isIntersecting ? 1 : 0;
+            if (!running) {
+                quietFade = quietTarget;
+                draw(performance.now());
+            }
+        }, { rootMargin: "-15% 0px -15% 0px" }).observe(quietSection);
+    }
+
     function resize() {
         DPR = Math.min(window.devicePixelRatio || 1, 2);
         W = window.innerWidth;
@@ -145,7 +159,9 @@
         // The hero has its own neural constellation, so the sky's
         // constellations fade in only once you scroll past it.
         var heroFade = Math.min(1, Math.max(0, (scrollCurrent - H * 0.35) / (H * 0.5)));
-        if (heroFade <= 0) return;
+        // The About section has its own neuron, so they step aside there too.
+        heroFade *= 1 - quietFade;
+        if (heroFade <= 0.01) return;
         ctx.save();
         ctx.globalAlpha = heroFade;
 
@@ -287,6 +303,9 @@
         // Ease toward the real scroll position so the sky glides
         scrollCurrent += (scrollTarget - scrollCurrent) * 0.07;
         if (Math.abs(scrollTarget - scrollCurrent) < 0.05) scrollCurrent = scrollTarget;
+
+        quietFade += (quietTarget - quietFade) * 0.06;
+        if (Math.abs(quietTarget - quietFade) < 0.005) quietFade = quietTarget;
 
         if (!shooting && now >= nextShootAt) {
             spawnShootingStar(now);

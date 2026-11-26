@@ -1,0 +1,865 @@
+/* =========================================================
+   ABOUT — "Neural Identity"
+   Human curiosity × machine intelligence.
+
+   .ni-head     PROFILE / 001 + a two-line editorial heading
+   .ni-stage    bio · portrait · three focus pathways, with a
+                WebGL neuron (about-neural.js) drawn behind the
+                text. Its geometry is measured from the DOM: the
+                soma sits at .ni-soma, the axon's three
+                collaterals end at each [data-ni-anchor], and no
+                branch enters a .ni-quiet box or the face.
+
+   Monochrome only (r = g = b). Without JS everything is
+   static and visible; the canvas simply stays empty.
+   ========================================================= */
+
+.ni {
+    --ni-bg: #050505;
+    --ni-surface: #101010;
+    --ni-line: #252525;
+    --ni-line-strong: #3d3d3d;
+    --ni-muted: #666666;          /* decorative / large only */
+    --ni-secondary: #a3a3a3;
+    --ni-text: #ffffff;
+    --ni-soft: #f5f5f5;
+    --ni-ease: var(--mono-ease, cubic-bezier(0.22, 0.61, 0.36, 1));
+    --ni-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+    position: relative;
+
+    padding: 128px 0 128px;
+
+    overflow-x: clip;
+
+    color: var(--ni-text);
+}
+
+
+/* ---------- 1. Heading ---------- */
+
+.ni-head {
+    container-type: inline-size;
+}
+
+.ni-head__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 32px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid var(--ni-line);
+}
+
+.ni-head__row .pj-label {
+    margin: 0;
+}
+
+.ni-note {
+    margin: 0;
+
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+
+    color: var(--ni-muted);
+}
+
+.ni-note span {
+    margin: 0 4px;
+
+    color: var(--ni-secondary);
+}
+
+.ni-title {
+    margin: clamp(36px, 4.4cqi, 64px) 0 0;
+
+    font-size: 7.6cqi;
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -0.045em;
+    text-transform: uppercase;
+
+    color: var(--ni-text);
+}
+
+.ni-title__line {
+    display: block;
+
+    /* room for the masked entrance without clipping glyphs */
+    padding: 0.04em 0 0.05em;
+    overflow: hidden;
+}
+
+.ni-title__text {
+    display: inline-block;
+
+    white-space: nowrap;
+}
+
+/* Second line: pushed right, neutral grey, led in by a hairline */
+.ni-title__line--b {
+    display: flex;
+    align-items: center;
+    gap: 0.32em;
+
+    color: var(--ni-secondary);
+}
+
+.ni-title__line--b::before {
+    content: "";
+
+    flex: 1 1 auto;
+    min-width: 0.6em;
+    height: 1px;
+    margin-top: 0.06em;
+
+    background: var(--ni-line-strong);
+
+    transform-origin: left center;
+}
+
+
+/* ---------- 2. Stage ---------- */
+
+.ni-stage {
+    position: relative;
+
+    display: grid;
+    grid-template-columns: minmax(0, 0.86fr) clamp(120px, 13vw, 210px) minmax(0, 1fr);
+    grid-template-areas:
+        "portrait . bio"
+        "portrait . focus"
+        "exp      . focus";
+    grid-template-rows: auto auto 1fr;
+    align-items: start;
+    gap: 0;
+
+    margin-top: clamp(72px, 8vw, 120px);
+}
+
+/* The neural field. It bleeds past the stage (into the gutters and
+   the space above/below) so branches can reach into negative space;
+   the section clips it horizontally. */
+.ni-canvas {
+    position: absolute;
+    top: -72px;
+    bottom: -48px;
+    left: -8vw;
+    right: -8vw;
+    z-index: 2;
+
+    display: block;
+    width: calc(100% + 16vw);
+    height: calc(100% + 120px);
+
+    pointer-events: none;
+}
+
+.ni-bio,
+.ni-portrait,
+.ni-focus {
+    position: relative;
+}
+
+.ni-bio,
+.ni-focus {
+    z-index: 3;
+}
+
+
+/* ---------- 2a. Biography ---------- */
+
+.ni-bio {
+    grid-area: bio;
+
+    padding-top: 8px;
+}
+
+.ni-bio__title {
+    max-width: 16ch;
+    margin: 0;
+
+    font-size: clamp(28px, 2.5vw, 38px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.035em;
+    text-transform: uppercase;
+
+    color: var(--ni-text);
+}
+
+.ni-bio__text {
+    max-width: 36em;
+    margin-top: 32px;
+    padding-top: 24px;
+
+    border-top: 1px solid var(--ni-line);
+}
+
+.ni-bio__text p {
+    margin: 0 0 16px;
+
+    font-size: 16px;
+    line-height: 1.65;
+
+    color: var(--ni-secondary);
+}
+
+.ni-bio__text p:first-child {
+    font-size: 18px;
+    line-height: 1.55;
+
+    color: var(--ni-soft);
+}
+
+.ni-bio__text .ni-bio__close {
+    margin: 24px 0 0;
+    padding-left: 16px;
+
+    border-left: 1px solid var(--ni-line-strong);
+
+    color: var(--ni-soft);
+}
+
+
+/* ---------- 2b. Portrait ---------- */
+
+.ni-portrait {
+    grid-area: portrait;
+    z-index: 1;
+
+    margin: 0;
+}
+
+.ni-bio {
+    padding-top: 0;
+}
+
+.ni-portrait__frame {
+    position: relative;
+
+    aspect-ratio: 900 / 1124;
+    overflow: hidden;
+
+    background: #0a0a0a;
+}
+
+.ni-portrait__img {
+    display: block;
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    /* Monochrome, gently lifted contrast; the file is untouched. */
+    filter: grayscale(1) contrast(1.08) brightness(0.94);
+
+    /* the suit dissolves into the page at the bottom */
+    -webkit-mask-image: linear-gradient(to bottom, #000 78%, rgba(0, 0, 0, 0.35) 100%);
+    mask-image: linear-gradient(to bottom, #000 78%, rgba(0, 0, 0, 0.35) 100%);
+}
+
+/* Viewfinder ticks, just outside the photograph's corners */
+.ni-portrait__ticks i {
+    position: absolute;
+
+    width: 14px;
+    height: 14px;
+
+    border-color: var(--ni-line-strong);
+    border-style: solid;
+    border-width: 0;
+}
+
+.ni-portrait__ticks i:nth-child(1) { top: 10px; left: 10px; border-top-width: 1px; border-left-width: 1px; }
+.ni-portrait__ticks i:nth-child(2) { top: 10px; right: 10px; border-top-width: 1px; border-right-width: 1px; }
+.ni-portrait__ticks i:nth-child(3) { bottom: 10px; left: 10px; border-bottom-width: 1px; border-left-width: 1px; }
+.ni-portrait__ticks i:nth-child(4) { bottom: 10px; right: 10px; border-bottom-width: 1px; border-right-width: 1px; }
+
+.ni-portrait__cap {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 16px;
+
+    padding-top: 14px;
+
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+
+    color: var(--ni-muted);
+}
+
+.ni-portrait__cap span:first-child {
+    color: var(--ni-secondary);
+}
+
+/* Where the neural cell body sits. Invisible; measured by JS. */
+.ni-soma {
+    position: absolute;
+    left: calc(100% + clamp(46px, 5vw, 80px));
+    top: 50%;
+
+    width: 1px;
+    height: 1px;
+
+    pointer-events: none;
+}
+
+
+/* ---------- 2c. Focus areas ---------- */
+
+.ni-focus {
+    grid-area: focus;
+
+    margin-top: clamp(64px, 6vw, 88px);
+}
+
+.ni-focus__label {
+    margin: 0 0 20px;
+}
+
+.ni-focus__label span {
+    color: var(--ni-muted);
+}
+
+.ni-pillars {
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+
+    border-top: 1px solid var(--ni-line);
+}
+
+.ni-pillar {
+    border-bottom: 1px solid var(--ni-line);
+}
+
+.ni-pillar__btn {
+    position: relative;
+
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr);
+    grid-template-areas:
+        "num title"
+        ".   tags";
+    align-items: baseline;
+    gap: 8px 0;
+
+    width: 100%;
+    padding: 24px 0 24px 24px;
+
+    font: inherit;
+    text-align: left;
+
+    color: inherit;
+    background: none;
+    border: 0;
+    border-radius: 0;
+
+    cursor: pointer;
+
+    -webkit-tap-highlight-color: transparent;
+}
+
+.ni-pillar__btn:focus-visible {
+    outline: 1px solid var(--ni-text);
+    outline-offset: 4px;
+}
+
+/* the synapse each pathway ends on */
+.ni-pillar__node {
+    position: absolute;
+    left: 0;
+    top: 32px;
+
+    width: 9px;
+    height: 9px;
+
+    border: 1px solid var(--ni-line-strong);
+    border-radius: 50%;
+
+    background: var(--ni-bg);
+
+    transition: border-color 0.4s var(--ni-ease), background-color 0.4s var(--ni-ease), box-shadow 0.6s var(--ni-ease);
+}
+
+.ni-pillar__num {
+    grid-area: num;
+
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    font-variant-numeric: tabular-nums;
+
+    color: var(--ni-muted);
+
+    transition: color 0.4s var(--ni-ease);
+}
+
+.ni-pillar__title {
+    grid-area: title;
+
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.025em;
+    text-transform: uppercase;
+
+    color: var(--ni-soft);
+
+    transition: color 0.4s var(--ni-ease);
+}
+
+.ni-pillar__tags {
+    grid-area: tags;
+
+    font-size: 13px;
+    line-height: 1.5;
+
+    color: var(--ni-secondary);
+
+    transition: color 0.4s var(--ni-ease);
+}
+
+/* The third pillar is deliberately quieter */
+.ni-pillar--minor .ni-pillar__btn {
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+
+.ni-pillar--minor .ni-pillar__node {
+    top: 25px;
+}
+
+.ni-pillar--minor .ni-pillar__title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.ni-pillar--minor .ni-pillar__tags {
+    font-size: 12px;
+}
+
+/* One pathway active: it lights, the others step back */
+.ni.has-active .ni-pillar__title { color: var(--ni-muted); }
+.ni.has-active .ni-pillar__tags { color: var(--ni-muted); }
+
+.ni.has-active .ni-pillar.is-active .ni-pillar__title { color: var(--ni-text); }
+.ni.has-active .ni-pillar.is-active .ni-pillar__tags { color: var(--ni-secondary); }
+.ni .ni-pillar.is-active .ni-pillar__num { color: var(--ni-text); }
+
+.ni .ni-pillar.is-active .ni-pillar__node {
+    border-color: var(--ni-text);
+    background: var(--ni-text);
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .ni-pillar__btn:hover .ni-pillar__node { border-color: var(--ni-secondary); }
+}
+
+/* Readout: one panel per pathway, stacked in one grid cell so the
+   box never changes height when the selection changes. */
+.ni-readout {
+    display: grid;
+
+    margin-top: 24px;
+}
+
+.ni-readout__panel {
+    grid-area: 1 / 1;
+}
+
+.ni.is-js .ni-readout__panel {
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(6px);
+
+    transition: opacity 0.35s var(--ni-ease), transform 0.5s var(--ni-out), visibility 0s linear 0.35s;
+}
+
+.ni.is-js .ni-readout__panel.is-current {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+
+    transition: opacity 0.45s var(--ni-ease) 0.08s, transform 0.6s var(--ni-out) 0.08s, visibility 0s;
+}
+
+/* Without JS: the intro line is dropped and the three descriptions
+   are simply listed. */
+.ni:not(.is-js) .ni-readout { gap: 24px; }
+.ni:not(.is-js) .ni-readout__panel { grid-area: auto; }
+.ni:not(.is-js) .ni-readout__panel[data-ni-panel="-1"] { display: none; }
+
+.ni-readout__meta {
+    margin: 0 0 10px;
+
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+
+    color: var(--ni-muted);
+}
+
+.ni-readout__desc {
+    margin: 0;
+
+    font-size: 15px;
+    line-height: 1.6;
+
+    color: var(--ni-soft);
+}
+
+.ni-readout__panel[data-ni-panel="-1"] .ni-readout__desc {
+    color: var(--ni-secondary);
+}
+
+.ni-readout__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 0;
+
+    margin: 14px 0 0;
+    padding: 0;
+
+    list-style: none;
+
+    font-size: 12px;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+
+    color: var(--ni-secondary);
+}
+
+.ni-readout__list li:not(:last-child)::after {
+    content: "/" / "";
+
+    margin: 0 8px;
+
+    color: var(--ni-line-strong);
+}
+
+
+/* ---------- 3. Work experience ---------- */
+
+.ni-exp {
+    grid-area: exp;
+
+    margin-top: 64px;
+}
+
+.ni-block-label {
+    margin: 0 0 20px;
+
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+
+    color: var(--ni-secondary);
+}
+
+.ni-exp__list {
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+}
+
+.ni-exp__item {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    grid-template-areas:
+        "num role period"
+        ".   org  period";
+    align-items: baseline;
+    gap: 4px 16px;
+
+    padding: 18px 0;
+
+    border-bottom: 1px solid var(--ni-line);
+}
+
+.ni-exp__item:first-child {
+    border-top: 1px solid var(--ni-line);
+}
+
+.ni-exp__num {
+    grid-area: num;
+
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    font-variant-numeric: tabular-nums;
+
+    color: var(--ni-muted);
+}
+
+.ni-exp__role {
+    grid-area: role;
+
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+
+    color: var(--ni-text);
+}
+
+.ni-exp__org {
+    grid-area: org;
+
+    font-size: 14px;
+    line-height: 1.4;
+
+    color: var(--ni-secondary);
+}
+
+.ni-exp__period {
+    grid-area: period;
+
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+
+    color: var(--ni-secondary);
+}
+
+
+/* ---------- 4. Entrance (only with JS) ---------- */
+
+.ni.is-js .ni-head__row {
+    opacity: 0;
+
+    transition: opacity 0.8s var(--ni-ease);
+}
+
+.ni.is-js .ni-title__text {
+    transform: translateY(105%);
+
+    transition: transform 1.1s var(--ni-out);
+}
+
+.ni.is-js .ni-title__line--b .ni-title__text { transition-delay: 0.12s; }
+
+.ni.is-js .ni-title__line--b::before {
+    transform: scaleX(0);
+
+    transition: transform 1.3s var(--ni-out) 0.3s;
+}
+
+.ni.is-js .ni-head.is-in .ni-head__row { opacity: 1; }
+.ni.is-js .ni-head.is-in .ni-title__text { transform: none; }
+.ni.is-js .ni-head.is-in .ni-title__line--b::before { transform: none; }
+
+.ni.is-js .ni-reveal {
+    opacity: 0;
+    transform: translateY(24px);
+
+    transition: opacity 0.9s var(--ni-ease), transform 1.1s var(--ni-out);
+    transition-delay: calc(var(--d, 0) * 0.12s);
+}
+
+.ni.is-js .ni-reveal.is-in {
+    opacity: 1;
+    transform: none;
+}
+
+.ni.is-js .ni-portrait__frame {
+    clip-path: inset(100% 0 0 0);
+
+    transition: clip-path 1.4s var(--ni-out) 0.1s;
+}
+
+.ni.is-js .ni-portrait.is-in .ni-portrait__frame {
+    clip-path: inset(0 0 0 0);
+}
+
+
+/* ---------- 5. Responsive ---------- */
+
+@media (max-width: 991px) {
+    .ni {
+        padding: 96px 0 104px;
+    }
+
+    .ni-stage {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "bio"
+            "portrait"
+            "focus"
+            "exp";
+        grid-template-rows: none;
+        gap: 0;
+    }
+
+    .ni-bio__title {
+        max-width: none;
+    }
+
+    .ni-bio__text {
+        max-width: 620px;
+    }
+
+    /* Portrait set in from the left: the gutter carries the pathways
+       down to the focus areas. */
+    .ni-portrait {
+        width: min(calc(100% - 32px), 520px);
+        margin: 72px 0 0 32px;
+    }
+
+    /* Below the caption, in the left margin: the apical dendrite
+       climbs beside the portrait, the axon runs down the spine. */
+    .ni-soma {
+        left: -22px;
+        top: calc(100% + 44px);
+    }
+
+    .ni-focus {
+        margin-top: 120px;
+        padding-left: 0;
+    }
+
+    .ni-focus__label {
+        padding-left: 40px;
+    }
+
+    /* Dividers start in line with the label and readout text, leaving
+       the left strip to the axon and its three collaterals. */
+    .ni-pillars {
+        display: block;
+
+        border-top: 0;
+        background: linear-gradient(var(--ni-line), var(--ni-line)) 40px 0 / calc(100% - 40px) 1px no-repeat;
+    }
+
+    .ni-pillar {
+        border-top: 0;
+        border-bottom: 0;
+        background: linear-gradient(var(--ni-line), var(--ni-line)) 40px 100% / calc(100% - 40px) 1px no-repeat;
+    }
+
+    .ni-pillar__btn,
+    .ni-pillar--minor .ni-pillar__btn {
+        grid-template-columns: 36px minmax(0, 1fr);
+        grid-template-areas:
+            "num title"
+            ".   tags";
+        gap: 8px 0;
+
+        padding: 22px 0 22px 40px;
+    }
+
+    .ni-pillar__node,
+    .ni-pillar--minor .ni-pillar__node {
+        left: 22px;
+        top: 29px;
+    }
+
+    .ni-pillar--minor .ni-pillar__node { top: 27px; }
+
+    .ni-readout {
+        max-width: none;
+        margin-top: 0;
+        padding: 24px 0 0 40px;
+
+        border-top: 0;
+    }
+
+    .ni-exp {
+        margin-top: 64px;
+    }
+}
+
+@media (max-width: 575px) {
+    .ni-head__row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    /* Phones: four short lines, larger — the rule gets its own row
+       and the second statement is set flush right. */
+    .ni-title {
+        font-size: 14cqi;
+        line-height: 0.9;
+    }
+
+    .ni-title__text {
+        white-space: normal;
+    }
+
+    .ni-title__line--b {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0;
+
+        text-align: right;
+    }
+
+    .ni-title__line--b::before {
+        flex: 0 0 100%;
+        margin: 0.26em 0 0.22em;
+    }
+
+    .ni-bio__text p:first-child {
+        font-size: 17px;
+    }
+
+    .ni-portrait {
+        width: calc(100% - 28px);
+        margin-left: 28px;
+    }
+
+    .ni-soma {
+        left: -18px;
+    }
+
+    .ni-pillar__title {
+        font-size: 20px;
+    }
+
+    .ni-pillar--minor .ni-pillar__title {
+        font-size: 16px;
+    }
+
+    .ni-exp__item {
+        grid-template-columns: 28px minmax(0, 1fr);
+        grid-template-areas:
+            "num role"
+            ".   org"
+            ".   period";
+    }
+
+    .ni-exp__period {
+        margin-top: 4px;
+    }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ni.is-js .ni-head__row,
+    .ni.is-js .ni-title__text,
+    .ni.is-js .ni-title__line--b::before,
+    .ni.is-js .ni-reveal,
+    .ni.is-js .ni-portrait__frame,
+    .ni.is-js .ni-readout__panel {
+        transition: none;
+        transition-delay: 0s;
+    }
+}
