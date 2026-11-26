@@ -338,9 +338,25 @@
                 });
             }
 
-            $(window).on("load", function () {
+            // Start the exit once, however we get here. This runs inside jQuery's
+            // ready handler, which is async: on fast or cached loads (common on
+            // phones) the window "load" event has already fired by now, so a
+            // plain load listener would never run and the preloader would stay
+            // up forever. A safety timer also covers a resource that never
+            // finishes loading.
+            var started = false;
+            var startExit = function () {
+                if (started) return;
+                started = true;
                 animateBars();
-            });
+            };
+
+            if (document.readyState === "complete") {
+                startExit();
+            } else {
+                $(window).on("load", startExit);
+                setTimeout(startExit, 6000);
+            }
         } else {
             runAnimations();
         }
