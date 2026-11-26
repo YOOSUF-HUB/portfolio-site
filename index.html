@@ -25,7 +25,8 @@
     <link rel="stylesheet" href="assets/css/slick.theme.css">
     <link rel="stylesheet" type="text/css" href="assets/css/styles.css">
     <link rel="stylesheet" href="assets/css/custom-logo.css">
-    <link rel="stylesheet" href="assets/css/project-flashcards.css">
+    <link rel="stylesheet" href="assets/css/projects.css">
+    <link rel="stylesheet" href="assets/css/education.css">
     <link rel="stylesheet" href="assets/css/certifications.css">
     <link rel="stylesheet" href="assets/css/about.css">
     <link rel="stylesheet" href="assets/css/tech-logos.css">
@@ -146,14 +147,16 @@
                         <div class="col-7 d-none d-md-block">
                             <div class="box-navigation">
                                 <ul class="nav-menu-main">
-                                    <li class="menu-item"><a href="#educationScroll" class="item-link link text-caption"><span>01
+                                    <li class="menu-item"><a href="projects.html" class="item-link link text-caption"><span>01
+                                                /</span>PROJECTS</a></li>
+                                    <li class="menu-item"><a href="#educationScroll" class="item-link link text-caption"><span>02
                                                 /</span>EDUCATION</a></li>
-                                    <li class="menu-item"><a href="#certificationsScroll" class="item-link link text-caption"><span>02
+                                    <li class="menu-item"><a href="#certificationsScroll" class="item-link link text-caption"><span>03
                                                 /</span>CERTIFICATIONS</a>
                                     </li>
-                                    <li class="menu-item"><a href="#aboutScroll" class="item-link link text-caption"><span>03
+                                    <li class="menu-item"><a href="#aboutScroll" class="item-link link text-caption"><span>04
                                                 /</span>ABOUT</a></li>
-                                    <li class="menu-item"><a href="#contactScroll" class="item-link link text-caption"><span>04
+                                    <li class="menu-item"><a href="#contactScroll" class="item-link link text-caption"><span>05
                                                 /</span>CONTACT</a>
                                     </li>
                                 </ul>
@@ -254,1769 +257,175 @@
 
 
 
-        <!-- Feature -->
-        <section class="section-feature flat-spacing">
+        <!-- Selected Work
+             Rendered from assets/js/projects-data.js by projects-ui.js.
+             Edit FEATURED in projects-data.js to change which projects appear.
+             The full archive lives on projects.html. -->
+        <section class="section-feature section-selected-work flat-spacing" id="projectsScroll" aria-labelledby="selected-work-title">
             <div class="container">
                 <div class="s-header">
-                    <h2 class="text-display-2 fw-semibold letter-space--3 effectFade fadeUp">
-                        PROJECTS
+                    <h2 class="text-display-2 fw-semibold letter-space--3 effectFade fadeUp" id="selected-work-title">
+                        SELECTED WORK
                     </h2>
-                    <a href="https://github.com/YOOSUF-HUB/" class="tf-btn" target="_blank">
-                        GITHUB
-                    </a>
+                    <div class="sw-head-right">
+                        <span class="sw-count">03 / <span data-pj-total>20</span> projects</span>
+                        <a href="https://github.com/YOOSUF-HUB/" class="tf-btn" target="_blank" rel="noopener noreferrer">
+                            GITHUB
+                        </a>
+                    </div>
                 </div>
 
-                <div class="project-groups">
-
-                    <!-- ============================================
-                         CATEGORY — AGENTIC AI
-                         ============================================ -->
-                    <div class="project-group">
-                        <div class="project-group-header effectFade fadeUp no-div">
-                            <h3 class="project-group-title">Agentic AI</h3>
-                            <span class="project-group-count">05 PROJECTS</span>
-                        </div>
-
-                        <div class="project-grid">
-
-                            <!-- AVJNS -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- scales of justice -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                    <circle cx="12" cy="4.5" r="1.5" />
-                                                    <path d="M12 6.5v13.5" />
-                                                    <path d="M7 20h10" />
-                                                    <path d="M4.5 7.5h15" />
-                                                    <path d="M4.5 7.5 2 14h5l-2.5-6.5Z" />
-                                                    <path d="M19.5 7.5 17 14h5l-2.5-6.5Z" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">01</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">AVJNS</h5>
-
-                                            <p class="project-card-subtitle">
-                                                Anonymous Victim-Centered Justice Navigation System
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                A multi-agent system that navigates Sri Lankan legal information using retrieval-augmented generation.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>Multi-Agent</span>
-                                            <span>RAG</span>
-                                            <span>LLM</span>
-                                            <span>Legal Tech</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">AVJNS</h5>
-
-                                            <p>
-                                                Combines LLMs, RAG, and document retrieval across specialised agents.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">Multi-Agent Architecture</div>
-                                                <div class="project-feature">Retrieval-Augmented Generation</div>
-                                                <div class="project-feature">Legal Document Retrieval</div>
-                                                <div class="project-feature">LLM-Based Reasoning</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                            <a href="https://github.com/YOOSUF-HUB/AVJNS"
-                                                class="project-card-github"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                <span>VIEW ON GITHUB</span>
-                                                <i class="icon icon-arrow-long-right"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- AI Project Manager -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- clipboard with check -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                    <rect x="9" y="2.75" width="6" height="3" rx="1.25" />
-                                                    <path d="M9 4.25H7.5A2.25 2.25 0 0 0 5.25 6.5v12A2.25 2.25 0 0 0 7.5 20.75h9a2.25 2.25 0 0 0 2.25-2.25v-12A2.25 2.25 0 0 0 16.5 4.25H15" />
-                                                    <path d="m9.5 13 1.75 1.75 3.5-3.5" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">02</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">AI Project Manager</h5>
-
-                                            <p class="project-card-subtitle">
-                                                Model Context Protocol Server for Claude Desktop
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                An MCP server that lets Claude Desktop run project management actions through safe, predefined tools.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>MCP</span>
-                                            <span>Python</span>
-                                            <span>SQLite</span>
-                                            <span>Claude Desktop</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">AI Project Manager</h5>
-
-                                            <p>
-                                                Exposes controlled tools instead of raw database access, with audit logs on every write.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">Sprint Risk Reporting</div>
-                                                <div class="project-feature">Team Workload Analysis</div>
-                                                <div class="project-feature">Client Status Reports</div>
-                                                <div class="project-feature">Audit-Logged Write Actions</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                            <a href="https://github.com/YOOSUF-HUB/AI-Project-Manager-MCP-Server"
-                                                class="project-card-github"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                <span>VIEW ON GITHUB</span>
-                                                <i class="icon icon-arrow-long-right"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- Pharmacy Inventory MCP -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- inventory box -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                    <path d="M3.25 7.5 12 3.25l8.75 4.25v9L12 20.75 3.25 16.5v-9Z" />
-                                                    <path d="M3.25 7.5 12 11.75l8.75-4.25" />
-                                                    <path d="M12 11.75v9" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">03</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">Pharmacy Inventory MCP</h5>
-
-                                            <p class="project-card-subtitle">
-                                                AI-Driven Inventory Assistant
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                An MCP server exposing stock, reorder, and expiry tools over a SQLite pharmacy inventory.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>MCP</span>
-                                            <span>Python</span>
-                                            <span>SQLite</span>
-                                            <span>Inventory</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">Pharmacy Inventory MCP</h5>
-
-                                            <p>
-                                                Lets an AI client query and update stock through a discoverable, approval-gated tool surface.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">Tool-Based Database Access</div>
-                                                <div class="project-feature">Stock &amp; Reorder Analysis</div>
-                                                <div class="project-feature">Batch Expiry Checks</div>
-                                                <div class="project-feature">Natural-Language Queries</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                            <a href="https://github.com/YOOSUF-HUB/pharmacy-inventory-mcp-server"
-                                                class="project-card-github"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                <span>VIEW ON GITHUB</span>
-                                                <i class="icon icon-arrow-long-right"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- Idea Forge -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- lightbulb -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                <path d="M9 18h6" />
-                                                <path d="M10 21h4" />
-                                                <path d="M12 3a6 6 0 0 0-3.6 10.8c.7.55 1.1 1.3 1.1 2.2v.5h5v-.5c0-.9.4-1.65 1.1-2.2A6 6 0 0 0 12 3Z" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">04</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">Idea Forge</h5>
-
-                                            <p class="project-card-subtitle">
-                                                Agentic Product Coach
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                Scores product ideas on clarity, feasibility, novelty, and demand, then drafts a tight MVP plan.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>Next.js</span>
-                                            <span>TypeScript</span>
-                                            <span>Groq</span>
-                                            <span>Agent SDK</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">Idea Forge</h5>
-
-                                            <p>
-                                                A tool-calling coach that saves, compares, and plans ideas while keeping every record in the browser.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">Four-Dimension Scoring Rubric</div>
-                                                <div class="project-feature">Tool-Calling Agent Loop</div>
-                                                <div class="project-feature">Constrained MVP Plans</div>
-                                                <div class="project-feature">Browser-Only Idea Storage</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                        <a href="https://github.com/YOOSUF-HUB/idea-forge"
-                                            class="project-card-github"
-                                            target="_blank"
-                                            rel="noopener noreferrer">
-                                            <span>VIEW ON GITHUB</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- Open Analyst -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- chat with chart -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                <path d="M4.5 4.25h15a1.75 1.75 0 0 1 1.75 1.75v9.5a1.75 1.75 0 0 1-1.75 1.75H10l-4.75 3.5v-3.5h-.75A1.75 1.75 0 0 1 2.75 15.5V6a1.75 1.75 0 0 1 1.75-1.75Z" />
-                                                <path d="M8 13.25v-2.5" />
-                                                <path d="M12 13.25v-5" />
-                                                <path d="M16 13.25V9.5" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">05</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">Open Analyst</h5>
-
-                                            <p class="project-card-subtitle">
-                                                Open-Source Conversational Data Analyst
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                Upload a dataset, ask a question, and get statistics, charts, and plain-language insights without code.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>FastAPI</span>
-                                            <span>React</span>
-                                            <span>PostgreSQL</span>
-                                            <span>LLM</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">Open Analyst</h5>
-
-                                            <p>
-                                                Deterministic analysis tools do the maths while an LLM orchestrates them. Currently in active development.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">LLM Tool Orchestration</div>
-                                                <div class="project-feature">Accurate Deterministic Stats</div>
-                                                <div class="project-feature">Auto-Generated Visualisations</div>
-                                                <div class="project-feature">Dockerised Full Stack</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                        <a href="https://github.com/YOOSUF-HUB/Open-Analyst"
-                                            class="project-card-github"
-                                            target="_blank"
-                                            rel="noopener noreferrer">
-                                            <span>VIEW ON GITHUB</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                        </div>
+                <div data-selected-work></div>
+
+                <a href="projects.html" class="sw-cta">
+                    <span class="sw-cta__text">Explore all projects</span>
+                    <span class="sw-cta__meta">
+                        <span class="sw-cta__count"><span data-pj-total>20</span> projects &middot; 5 disciplines</span>
+                        <span class="sw-cta__arrow" aria-hidden="true">
+                            <svg viewBox="0 0 20 20" focusable="false"><path d="M3 10h14M11.5 4.5 17 10l-5.5 5.5"/></svg>
+                        </span>
+                    </span>
+                </a>
+            </div>
+        </section>
+        <!-- /Selected Work -->
+
+
+
+        <!-- EDUCATION — "The Learning Signal"
+             Markup carries all the content (works without JS).
+             assets/js/education.js draws the signal line, nodes,
+             particles and the scroll-linked reveal on top of it.
+             Styles: assets/css/education.css -->
+        <section class="section-education ls flat-spacing" id="educationScroll" aria-labelledby="ls-title" data-ls>
+            <div class="container">
+
+                <!-- Intro -->
+                <header class="ls-intro">
+                    <div class="ls-intro__main" data-ls-reveal>
+                        <p class="ls-label">Academic archive <span class="ls-label__sep">/</span> 001</p>
+                        <h2 class="ls-title" id="ls-title">The foundation.</h2>
+                    </div>
+                    <div class="ls-intro__aside" data-ls-reveal>
+                        <p class="ls-lede">A journey shaped by curiosity, analytical thinking, and continuous learning.</p>
+                        <dl class="ls-readout" aria-label="Archive summary">
+                            <div><dt>Instrument</dt><dd>The learning signal</dd></div>
+                            <div><dt>Milestones</dt><dd>02</dd></div>
+                            <div><dt>Range</dt><dd>2022 — 2027</dd></div>
+                        </dl>
+                    </div>
+                </header>
+
+                <!-- Instrument -->
+                <div class="ls-stage" data-ls-stage>
+                    <!-- Drawn by education.js (decorative) -->
+                    <canvas class="ls-particles" data-ls-canvas aria-hidden="true"></canvas>
+                    <svg class="ls-svg" data-ls-svg aria-hidden="true" focusable="false"></svg>
+
+                    <!-- Time axis (desktop) -->
+                    <div class="ls-axis" aria-hidden="true">
+                        <span class="ls-tick" style="--x:0">2022</span>
+                        <span class="ls-tick" style="--x:1">2023</span>
+                        <span class="ls-tick" style="--x:2">2024</span>
+                        <span class="ls-tick" style="--x:3">2025</span>
+                        <span class="ls-tick is-now" style="--x:4" data-ls-now>2026</span>
+                        <span class="ls-tick" style="--x:5" data-ls-end>2027</span>
+                        <span class="ls-node" data-ls-node="ug" style="--x:1"><span class="ls-node__core"></span></span>
+                        <span class="ls-node" data-ls-node="al" style="--x:0"><span class="ls-node__core"></span></span>
                     </div>
 
-                    <!-- ============================================
-                         CATEGORY — AI & MACHINE LEARNING
-                         ============================================ -->
-                    <div class="project-group">
-                        <div class="project-group-header effectFade fadeUp no-div">
-                            <h3 class="project-group-title">AI &amp; Machine Learning</h3>
-                            <span class="project-group-count">06 PROJECTS</span>
-                        </div>
+                    <ol class="ls-records">
+                        <!-- Milestone 01 — Undergraduate (dominant record) -->
+                        <li class="ls-record ls-record--major" data-ls-record="ug">
+                            <span class="ls-rail-node" data-ls-node-m="ug" aria-hidden="true"><span class="ls-node__core"></span></span>
+                            <article class="ls-panel" aria-labelledby="ls-ug-title">
+                                <span class="ls-corner ls-corner--tl" aria-hidden="true"></span>
+                                <span class="ls-corner ls-corner--tr" aria-hidden="true"></span>
+                                <span class="ls-corner ls-corner--bl" aria-hidden="true"></span>
+                                <span class="ls-corner ls-corner--br" aria-hidden="true"></span>
 
-                        <div class="project-grid">
-
-                            <!-- API Sentinel AI -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- shield with check -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                    <path d="M12 2.75 4.5 5.75v6c0 4.2 3 7.6 7.5 9 4.5-1.4 7.5-4.8 7.5-9v-6L12 2.75Z" />
-                                                    <path d="m8.75 11.75 2.25 2.25 4.25-4.25" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">06</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">API Sentinel AI</h5>
-
-                                            <p class="project-card-subtitle">
-                                                AI-Powered API Security &amp; Documentation Analysis
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                Detects API vulnerabilities and analyses specifications with LLM-driven semantic search.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>LLM</span>
-                                            <span>API Security</span>
-                                            <span>RAG</span>
-                                            <span>FastAPI</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">API Sentinel AI</h5>
-
-                                            <p>
-                                                Evaluates APIs, detects vulnerabilities, and returns security recommendations.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">AI-Based API Analysis</div>
-                                                <div class="project-feature">Security Vulnerability Detection</div>
-                                                <div class="project-feature">Semantic API Documentation Search</div>
-                                                <div class="project-feature">LLM-Powered Security Insights</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                            <a href="https://github.com/YOOSUF-HUB/API-Sentinel-AI"
-                                                class="project-card-github"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                <span>VIEW ON GITHUB</span>
-                                                <i class="icon icon-arrow-long-right"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-
+                                <div class="ls-panel__top ls-step">
+                                    <span class="ls-label">M.01 <span class="ls-label__sep">/</span> Undergraduate</span>
+                                    <span class="ls-status"><span class="ls-status__dot" aria-hidden="true"></span>Currently pursuing</span>
                                 </div>
-                            </div>
 
-                            <!-- ComplyAI -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
+                                <p class="ls-date ls-step">
+                                    <span class="ls-date__from">2023</span><span class="ls-date__dash" aria-hidden="true">—</span><span class="ls-visually-hidden"> to </span><span class="ls-date__to">2027</span>
+                                </p>
+                                <p class="ls-annot ls-step" aria-hidden="true">
+                                    <span>Δ 4 years</span><span>Expected graduation · 2027</span>
+                                </p>
 
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- document with folded corner -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                    <path d="M14 3.25H7.5A2.25 2.25 0 0 0 5.25 5.5v13A2.25 2.25 0 0 0 7.5 20.75h9a2.25 2.25 0 0 0 2.25-2.25V8L14 3.25Z" />
-                                                    <path d="M13.75 3.5V8h4.75" />
-                                                    <path d="M8.75 13.5h6.5" />
-                                                    <path d="M8.75 16.5h4" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">07</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">ComplyAI</h5>
-
-                                            <p class="project-card-subtitle">
-                                                AI Policy &amp; Document Compliance Assistant
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                A RAG assistant that turns long policy PDFs into answers, checklists, and risk reports.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>FastAPI</span>
-                                            <span>Gemini</span>
-                                            <span>FAISS</span>
-                                            <span>RAG</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">ComplyAI</h5>
-
-                                            <p>
-                                                Chunks and embeds uploaded PDFs into FAISS, then answers with the source passages cited.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">PDF Ingestion &amp; Chunking</div>
-                                                <div class="project-feature">FAISS Vector Retrieval</div>
-                                                <div class="project-feature">Compliance Checklist Generation</div>
-                                                <div class="project-feature">Source-Cited Answers</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                            <a href="https://github.com/YOOSUF-HUB/complyai-policy-assistant"
-                                                class="project-card-github"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                <span>VIEW ON GITHUB</span>
-                                                <i class="icon icon-arrow-long-right"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-
+                                <div class="ls-heading ls-step">
+                                    <h3 class="ls-degree" id="ls-ug-title">BSc (Hons) in Information Technology</h3>
+                                    <p class="ls-inst">
+                                        <span class="ls-inst__label">Institution</span>
+                                        Sri Lanka Institute of Information Technology <span class="ls-dim">(SLIIT)</span>
+                                    </p>
                                 </div>
-                            </div>
 
-                            <!-- Sentiment Analysis -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- speech bubble -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                    <path d="M20.75 11.75A7.75 7.75 0 0 1 9.4 18.63L4.25 20.25l1.66-4.98a7.75 7.75 0 1 1 14.84-3.52Z" />
-                                                    <path d="M9 10.5h6" />
-                                                    <path d="M9 13.5h3.5" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">08</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">Sentiment Analysis</h5>
-
-                                            <p class="project-card-subtitle">
-                                                LSTM Neural Network for Review Classification
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                A custom LSTM trained on 25,000 IMDB reviews, deployed live as an interactive Streamlit app.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>TensorFlow</span>
-                                            <span>Keras</span>
-                                            <span>NLTK</span>
-                                            <span>Streamlit</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
+                                <dl class="ls-data ls-step">
+                                    <div class="ls-data__row">
+                                        <dt>Specialization</dt>
+                                        <dd>Data Science</dd>
                                     </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">Sentiment Analysis</h5>
-
-                                            <p>
-                                                An embedding layer feeds an LSTM over NLTK-preprocessed text, reaching ~87% test accuracy.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">Custom LSTM Architecture</div>
-                                                <div class="project-feature">25K IMDB Review Training Set</div>
-                                                <div class="project-feature">NLTK Stemming &amp; Stopwords</div>
-                                                <div class="project-feature">Live Streamlit Deployment</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                            <a href="https://github.com/YOOSUF-HUB/LSTM-Sentiment-Analysis"
-                                                class="project-card-github"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                <span>GITHUB</span>
-                                                <i class="icon icon-arrow-long-right"></i>
-                                            </a>
-                                            <a href="https://lstm-sentiment-analysis-oywdyks2zngkjpzwzvxnvn.streamlit.app/"
-                                                class="project-card-github project-card-demo"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                <span>LIVE DEMO</span>
-                                                <i class="icon icon-arrow-long-right"></i>
-                                            </a>
-                                        </div>
+                                    <div class="ls-data__row">
+                                        <dt>Academic focus</dt>
+                                        <dd>
+                                            <ul class="ls-focus">
+                                                <li><span aria-hidden="true">01</span>Artificial Intelligence</li>
+                                                <li><span aria-hidden="true">02</span>Machine Learning</li>
+                                                <li><span aria-hidden="true">03</span>Analytics</li>
+                                                <li><span aria-hidden="true">04</span>Full-Stack Development</li>
+                                            </ul>
+                                        </dd>
                                     </div>
+                                    <div class="ls-data__row">
+                                        <dt>Core technologies</dt>
+                                        <dd class="ls-dim">Python · Java · TensorFlow · React</dd>
+                                    </div>
+                                </dl>
+                            </article>
+                        </li>
 
+                        <!-- Milestone 02 — Advanced Level (secondary record) -->
+                        <li class="ls-record ls-record--minor" data-ls-record="al">
+                            <span class="ls-rail-node" data-ls-node-m="al" aria-hidden="true"><span class="ls-node__core"></span></span>
+                            <article class="ls-panel" aria-labelledby="ls-al-title">
+                                <div class="ls-panel__top ls-step">
+                                    <span class="ls-label">M.02 <span class="ls-label__sep">/</span> Advanced Level</span>
+                                    <span class="ls-status ls-status--done">Completed</span>
                                 </div>
-                            </div>
-
-                            <!-- NeuroScan AI -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- brain -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                <path d="M12 5.5a3 3 0 0 0-5.5-1.5 3 3 0 0 0-2.25 4.75A3.25 3.25 0 0 0 5 14.5a3 3 0 0 0 3 4.25 2.75 2.75 0 0 0 4 .75" />
-                                                <path d="M12 5.5a3 3 0 0 1 5.5-1.5 3 3 0 0 1 2.25 4.75A3.25 3.25 0 0 1 19 14.5a3 3 0 0 1-3 4.25 2.75 2.75 0 0 1-4 .75" />
-                                                <path d="M12 5.5v14" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">09</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">NeuroScan AI</h5>
-
-                                            <p class="project-card-subtitle">
-                                                Brain Tumor Classification from MRI
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                A custom CNN that classifies MRI scans as glioma, meningioma, pituitary, or no tumor at 97% accuracy.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>TensorFlow</span>
-                                            <span>Keras</span>
-                                            <span>CNN</span>
-                                            <span>Streamlit</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
+                                <p class="ls-date ls-date--sm ls-step">2022 <span class="ls-dim">(2023)</span></p>
+                                <h3 class="ls-degree ls-degree--sm ls-step" id="ls-al-title">G.C.E. Advanced Level Examination</h3>
+                                <dl class="ls-data ls-step">
+                                    <div class="ls-data__row">
+                                        <dt>Stream</dt>
+                                        <dd>Physical Science</dd>
                                     </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">NeuroScan AI</h5>
-
-                                            <p>
-                                                Trained on 7,000+ MRI images and served through a drag-and-drop Streamlit dashboard.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">97% Test Accuracy</div>
-                                                <div class="project-feature">4-Class MRI Classification</div>
-                                                <div class="project-feature">Confidence Score Breakdown</div>
-                                                <div class="project-feature">Live Streamlit App</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                        <a href="https://github.com/YOOSUF-HUB/Brain_Tumor_Classification_CNN"
-                                            class="project-card-github"
-                                            target="_blank"
-                                            rel="noopener noreferrer">
-                                            <span>GITHUB</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </a>
-                                        <a href="https://braintumorclassificationcnn-btcnn.streamlit.app/"
-                                            class="project-card-github project-card-demo"
-                                            target="_blank"
-                                            rel="noopener noreferrer">
-                                            <span>LIVE DEMO</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- Breast Cancer ANN -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- ribbon -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                <path d="M12 11.5c-1.9-2.2-3-4.1-3-5.5a3 3 0 0 1 6 0c0 1.4-1.1 3.3-3 5.5Z" />
-                                                <path d="M12 11.5 6.75 20.25" />
-                                                <path d="M12 11.5l5.25 8.75" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">10</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">Breast Cancer ANN</h5>
-
-                                            <p class="project-card-subtitle">
-                                                Malignancy Prediction with Neural Networks
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                An artificial neural network that predicts whether a tumor is malignant or benign with ~98% accuracy.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>TensorFlow</span>
-                                            <span>Keras</span>
-                                            <span>Scikit-Learn</span>
-                                            <span>Pandas</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">Breast Cancer ANN</h5>
-
-                                            <p>
-                                                Analyses 30 cell features from the UCI Wisconsin Diagnostic dataset, with dropout to curb overfitting.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">~98% Test Accuracy</div>
-                                                <div class="project-feature">Dropout-Regularised ANN</div>
-                                                <div class="project-feature">Confusion Matrix Evaluation</div>
-                                                <div class="project-feature">Simulated Patient Diagnosis</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                        <a href="https://github.com/YOOSUF-HUB/breast-cancer-ANN"
-                                            class="project-card-github"
-                                            target="_blank"
-                                            rel="noopener noreferrer">
-                                            <span>VIEW ON GITHUB</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- Plant Doctor AI -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- leaf -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                <path d="M5 19c0-8 5-13.5 15-14-.5 10-6 15-14 15" />
-                                                <path d="M5 19 13 11" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">11</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">Plant Doctor AI</h5>
-
-                                            <p class="project-card-subtitle">
-                                                Plant Disease Detection from Leaf Images
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                A CNN, quantised with TensorFlow Lite, that diagnoses plant diseases from a leaf photo in under a second.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>TensorFlow</span>
-                                            <span>TFLite</span>
-                                            <span>Flask</span>
-                                            <span>Tailwind</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">Plant Doctor AI</h5>
-
-                                            <p>
-                                                Trained on PlantVillage with augmentation, reaching 96.5% validation accuracy.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">96.5% Validation Accuracy</div>
-                                                <div class="project-feature">TFLite Quantised Inference</div>
-                                                <div class="project-feature">Drag-and-Drop Web UI</div>
-                                                <div class="project-feature">Cloud Deployable</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                        <a href="https://github.com/YOOSUF-HUB/Plant-Disease-Detection-CNN"
-                                            class="project-card-github"
-                                            target="_blank"
-                                            rel="noopener noreferrer">
-                                            <span>VIEW ON GITHUB</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <!-- ============================================
-                         CATEGORY — DATA ANALYSIS
-                         ============================================ -->
-                    <div class="project-group">
-                        <div class="project-group-header effectFade fadeUp no-div">
-                            <h3 class="project-group-title">Data Analysis</h3>
-                            <span class="project-group-count">02 PROJECTS</span>
-                        </div>
-
-                        <div class="project-grid">
-
-                            <!-- Football xG Model -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- football -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                    <circle cx="12" cy="12" r="9" />
-                                                    <path d="m12 7.25 3.75 2.75-1.45 4.4h-4.6L8.25 10 12 7.25Z" />
-                                                    <path d="M12 3v4.25" />
-                                                    <path d="m20.5 9.5-4.75.5" />
-                                                    <path d="m3.5 9.5 4.75.5" />
-                                                    <path d="m6.75 19.5 2.95-5.1" />
-                                                    <path d="m17.25 19.5-2.95-5.1" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">12</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">Football xG Model</h5>
-
-                                            <p class="project-card-subtitle">
-                                                Expected Goals &amp; Match Outcome Prediction
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                A two-stage model scoring shot quality, then predicting win, draw, or loss from real match events.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>PyTorch</span>
-                                            <span>LightGBM</span>
-                                            <span>StatsBomb</span>
-                                            <span>SHAP</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">Football xG Model</h5>
-
-                                            <p>
-                                                Built on StatsBomb's complete La Liga 2015/16 season — 380 matches and 9,168 shots.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">1.3M Real Match Events</div>
-                                                <div class="project-feature">Gradient-Boosted xG Baseline</div>
-                                                <div class="project-feature">PyTorch Sequence Model</div>
-                                                <div class="project-feature">Match Outcome Prediction</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                            <a href="https://github.com/YOOSUF-HUB/Football-xG-Match-Outcome-Prediction"
-                                                class="project-card-github"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                <span>VIEW ON GITHUB</span>
-                                                <i class="icon icon-arrow-long-right"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- Real Estate Price Predictor -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- house -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                <path d="M3.75 10.5 12 3.75l8.25 6.75" />
-                                                <path d="M5.75 9v11.25h12.5V9" />
-                                                <path d="M12 11.5v6" />
-                                                <path d="M13.75 12.75h-2.5a1.25 1.25 0 0 0 0 2.5h1.5a1.25 1.25 0 0 1 0 2.5h-2.5" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">13</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">Real Estate Price Predictor</h5>
-
-                                            <p class="project-card-subtitle">
-                                                House Price Prediction on the Ames Dataset
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                A Random Forest model served through Flask that estimates house prices from 12 key property features.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>Scikit-Learn</span>
-                                            <span>Flask</span>
-                                            <span>Pandas</span>
-                                            <span>Random Forest</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">Real Estate Price Predictor</h5>
-
-                                            <p>
-                                                Cut 80 raw columns down to the 12 strongest price drivers and still reached an R² of ~0.91.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">R² Score of ~0.91</div>
-                                                <div class="project-feature">Feature Selection (80 → 12)</div>
-                                                <div class="project-feature">REST Prediction API</div>
-                                                <div class="project-feature">Glassmorphism UI</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                        <a href="https://github.com/YOOSUF-HUB/Real-Estate-Price-Pred-App"
-                                            class="project-card-github"
-                                            target="_blank"
-                                            rel="noopener noreferrer">
-                                            <span>VIEW ON GITHUB</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <!-- ============================================
-                         CATEGORY — FULL-STACK DEVELOPMENT
-                         ============================================ -->
-                    <div class="project-group">
-                        <div class="project-group-header effectFade fadeUp no-div">
-                            <h3 class="project-group-title">Full-Stack Development</h3>
-                            <span class="project-group-count">06 PROJECTS</span>
-                        </div>
-
-                        <div class="project-grid">
-
-                            <!-- MediSync -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- medical case -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                    <rect x="2.75" y="6.5" width="18.5" height="14" rx="3" />
-                                                    <path d="M8.75 6.5V5a1.5 1.5 0 0 1 1.5-1.5h3.5A1.5 1.5 0 0 1 15.25 5v1.5" />
-                                                    <path d="M12 10.5v6" />
-                                                    <path d="M9 13.5h6" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">14</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">MediSync</h5>
-
-                                            <p class="project-card-subtitle">
-                                                Smart Pharmacy Management System
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                Centralised inventory, prescriptions, sales, and batch tracking for pharmacy operations.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>Django</span>
-                                            <span>MongoDB</span>
-                                            <span>AI</span>
-                                            <span>REST API</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">MediSync</h5>
-
-                                            <p>
-                                                Centralises pharmacy inventory, prescriptions, sales, and stock control.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">Pharmacy Inventory Management</div>
-                                                <div class="project-feature">Prescription &amp; Sales Management</div>
-                                                <div class="project-feature">Batch &amp; Expiry Tracking</div>
-                                                <div class="project-feature">AI-Assisted Pharmacy Workflows</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                            <a href="https://github.com/YOOSUF-HUB/Smart-Pharmacy-System"
-                                                class="project-card-github"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                <span>VIEW ON GITHUB</span>
-                                                <i class="icon icon-arrow-long-right"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- CampusCore -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- campus building -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                    <path d="M3.25 20.75h17.5" />
-                                                    <path d="M5.25 20.75V9.5L12 5.25l6.75 4.25v11.25" />
-                                                    <path d="M9.5 20.75v-4.5h5v4.5" />
-                                                    <path d="M9.5 11.75h1.5" />
-                                                    <path d="M13 11.75h1.5" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">15</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">CampusCore</h5>
-
-                                            <p class="project-card-subtitle">
-                                                Smart Campus Management Platform
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                A Spring Boot and React platform for campus facilities, space bookings, and maintenance ticketing.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>Spring Boot</span>
-                                            <span>React</span>
-                                            <span>PostgreSQL</span>
-                                            <span>OAuth 2.0</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">CampusCore</h5>
-
-                                            <p>
-                                                A four-module team monorepo; I owned Module B, booking management, from API through to UI.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">Spring Boot 3.5 &amp; React 19</div>
-                                                <div class="project-feature">Google OAuth 2.0 to JWT</div>
-                                                <div class="project-feature">PostgreSQL on Neon</div>
-                                                <div class="project-feature">Dockerised CI/CD</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                            <a href="https://github.com/YOOSUF-HUB/PAF-smart-campus"
-                                                class="project-card-github"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                <span>GITHUB</span>
-                                                <i class="icon icon-arrow-long-right"></i>
-                                            </a>
-                                            <a href="https://it3030-paf-2026-smart-campus.vercel.app"
-                                                class="project-card-github project-card-demo"
-                                                target="_blank"
-                                                rel="noopener noreferrer">
-                                                <span>LIVE DEMO</span>
-                                                <i class="icon icon-arrow-long-right"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- Sub Tracker -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- credit card -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                <rect x="2.75" y="5.25" width="18.5" height="13.5" rx="2.5" />
-                                                <path d="M2.75 9.75h18.5" />
-                                                <path d="M6.5 15h3" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">16</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">Sub Tracker</h5>
-
-                                            <p class="project-card-subtitle">
-                                                Personal Subscription Tracker
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                Tracks paid subscriptions, upcoming renewals, and monthly and yearly spend in one dashboard.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>Next.js</span>
-                                            <span>TypeScript</span>
-                                            <span>Turso</span>
-                                            <span>Tailwind</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">Sub Tracker</h5>
-
-                                            <p>
-                                                Covers renewal alerts and analytics on spend by category, net burn, and subscription inflation.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">Spending Analytics Dashboard</div>
-                                                <div class="project-feature">Renewal Reminders (7 / 30 Days)</div>
-                                                <div class="project-feature">Bulk Edit &amp; Drag-to-Sort</div>
-                                                <div class="project-feature">Signed-Session Auth</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                        <a href="https://github.com/YOOSUF-HUB/Sub-Tracker-App"
-                                            class="project-card-github"
-                                            target="_blank"
-                                            rel="noopener noreferrer">
-                                            <span>GITHUB</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </a>
-                                        <a href="https://sub-tracker-app-seven.vercel.app"
-                                            class="project-card-github project-card-demo"
-                                            target="_blank"
-                                            rel="noopener noreferrer">
-                                            <span>LIVE DEMO</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- Versori -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- shirt -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                <path d="M8.5 3.75 3.25 6.5l1.75 4 2.25-1v10.75h9.5V9.5l2.25 1 1.75-4-5.25-2.75a3.5 3.5 0 0 1-7 0Z" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">17</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">Versori</h5>
-
-                                            <p class="project-card-subtitle">
-                                                Textile &amp; Garment Management System
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                An end-to-end platform for textile inventory, client orders, production status, and staff.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>PHP</span>
-                                            <span>MySQL</span>
-                                            <span>JavaScript</span>
-                                            <span>RBAC</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">Versori</h5>
-
-                                            <p>
-                                                A team project I led, with a secure PHP back end and role-based access across every module.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">Inventory &amp; Raw Materials</div>
-                                                <div class="project-feature">Order &amp; Production Tracking</div>
-                                                <div class="project-feature">Role-Based Access Control</div>
-                                                <div class="project-feature">Operations Dashboard</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                        <a href="https://github.com/YOOSUF-HUB/Textile-Garment-Management-System"
-                                            class="project-card-github"
-                                            target="_blank"
-                                            rel="noopener noreferrer">
-                                            <span>GITHUB</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </a>
-                                        <a href="https://versoriapp.vercel.app"
-                                            class="project-card-github project-card-demo"
-                                            target="_blank"
-                                            rel="noopener noreferrer">
-                                            <span>LIVE DEMO</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- TechHub -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- boxes -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                <rect x="3.25" y="12.25" width="8" height="8" rx="1" />
-                                                <rect x="12.75" y="12.25" width="8" height="8" rx="1" />
-                                                <rect x="8" y="3.75" width="8" height="8" rx="1" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">18</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">TechHub</h5>
-
-                                            <p class="project-card-subtitle">
-                                                Online Stock Management System
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                A Java web app that manages stock, suppliers, customers, orders, and reports in one place.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>Java</span>
-                                            <span>Servlets</span>
-                                            <span>JSP</span>
-                                            <span>MySQL</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">TechHub</h5>
-
-                                            <p>
-                                                Uses an MVC servlet architecture with separate dashboards for stock managers, sales reps, and auditors.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">Stock &amp; Supplier Management</div>
-                                                <div class="project-feature">Customer Order Workflows</div>
-                                                <div class="project-feature">Role-Based Dashboards</div>
-                                                <div class="project-feature">Report Generation</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                        <a href="https://github.com/YOOSUF-HUB/Online-Stock-Management-System"
-                                            class="project-card-github"
-                                            target="_blank"
-                                            rel="noopener noreferrer">
-                                            <span>VIEW ON GITHUB</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <!-- Biome -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- globe -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                <circle cx="12" cy="12" r="9" />
-                                                <path d="M3 12h18" />
-                                                <path d="M12 3c2.5 2.6 3.75 5.6 3.75 9S14.5 18.4 12 21c-2.5-2.6-3.75-5.6-3.75-9S9.5 5.6 12 3Z" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">19</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">Biome</h5>
-
-                                            <p class="project-card-subtitle">
-                                                NASA Space Apps Challenge 2026 — Sri Lanka
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                Turns free NASA Earth data into drought, flood, and landslide warnings for every Sri Lankan district.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>NASA Earth Data</span>
-                                            <span>Python</span>
-                                            <span>Geospatial</span>
-                                            <span>Vercel</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">Biome</h5>
-
-                                            <p>
-                                                A hackathon team build with daily risk levels and a 12-month outlook, in English, Sinhala, and Tamil.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">District &amp; Division Risk Levels</div>
-                                                <div class="project-feature">12-Month Climate Outlook</div>
-                                                <div class="project-feature">Safer-Places Mapping</div>
-                                                <div class="project-feature">Telegram Alerts</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                        <a href="https://github.com/YOOSUF-HUB/biome"
-                                            class="project-card-github"
-                                            target="_blank"
-                                            rel="noopener noreferrer">
-                                            <span>GITHUB</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </a>
-                                        <a href="https://biome-rosy.vercel.app"
-                                            class="project-card-github project-card-demo"
-                                            target="_blank"
-                                            rel="noopener noreferrer">
-                                            <span>LIVE DEMO</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <!-- ============================================
-                         CATEGORY — MOBILE DEVELOPMENT
-                         ============================================ -->
-                    <div class="project-group">
-                        <div class="project-group-header effectFade fadeUp no-div">
-                            <h3 class="project-group-title">Mobile Development</h3>
-                            <span class="project-group-count">01 PROJECT</span>
-                        </div>
-
-                        <div class="project-grid">
-
-                            <!-- Aura -->
-                            <div class="project-flashcard" tabindex="0">
-                                <div class="project-flashcard-inner">
-
-                                    <!-- FRONT -->
-                                    <div class="project-flashcard-front">
-                                        <div class="project-card-head">
-                                            <div class="project-card-icon">
-                                                <!-- smartphone -->
-                                                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                                                <rect x="6.25" y="2.75" width="11.5" height="18.5" rx="2.5" />
-                                                <path d="M10.5 18h3" />
-                                                <path d="M12 13.25c-1.6-1.3-2.5-2.2-2.5-3.1a1.25 1.25 0 0 1 2.5-.4 1.25 1.25 0 0 1 2.5.4c0 .9-.9 1.8-2.5 3.1Z" />
-                                                </svg>
-                                            </div>
-
-                                            <span class="project-card-number">20</span>
-                                        </div>
-
-                                        <div class="project-card-content">
-                                            <h5 class="project-card-title">Aura</h5>
-
-                                            <p class="project-card-subtitle">
-                                                Health &amp; Wellbeing Android App
-                                            </p>
-
-                                            <p class="project-card-description">
-                                                A native Android app for tracking mood, habits, and hydration to build healthier daily routines.
-                                            </p>
-                                        </div>
-
-                                        <div class="project-card-tech">
-                                            <span>Kotlin</span>
-                                            <span>Android</span>
-                                            <span>XML Layouts</span>
-                                            <span>Gradle</span>
-                                        </div>
-
-                                        <div class="project-card-hint">
-                                            <span class="hint-hover">Hover to explore</span>
-                                            <span class="hint-tap">Tap to explore</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- BACK -->
-                                    <div class="project-flashcard-back">
-                                        <span class="project-card-label">PROJECT OVERVIEW</span>
-
-                                        <div class="project-card-back-content">
-                                            <h5 class="project-card-back-title">Aura</h5>
-
-                                            <p>
-                                                A multi-screen Kotlin app with sign-up, a home hub, and dedicated wellbeing trackers.
-                                            </p>
-
-                                            <div class="project-card-features">
-                                                <div class="project-feature">Mood Selector</div>
-                                                <div class="project-feature">Habit Tracker</div>
-                                                <div class="project-feature">Hydration Reminders</div>
-                                                <div class="project-feature">User Sign-Up &amp; Login</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="project-card-links">
-                                        <a href="https://github.com/YOOSUF-HUB/Aura"
-                                            class="project-card-github"
-                                            target="_blank"
-                                            rel="noopener noreferrer">
-                                            <span>VIEW ON GITHUB</span>
-                                            <i class="icon icon-arrow-long-right"></i>
-                                        </a>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
+                                </dl>
+                            </article>
+                        </li>
+                    </ol>
+
+                    <!-- Legend (desktop) -->
+                    <ul class="ls-legend" aria-hidden="true">
+                        <li><i class="ls-legend__node"></i>Milestone</li>
+                        <li><i class="ls-legend__line"></i>Signal</li>
+                        <li><i class="ls-legend__dash"></i>Projected</li>
+                        <li>T = year</li>
+                    </ul>
+                </div>
+
+                <!-- Hand-off to Certifications -->
+                <div class="ls-handoff" aria-hidden="true">
+                    <span class="ls-handoff__end">End of archive 001</span>
+                    <span class="ls-handoff__line"></span>
+                    <span class="ls-handoff__next">002 / Credentials <svg viewBox="0 0 12 12" focusable="false"><path d="M6 1v10M2 7l4 4 4-4"/></svg></span>
                 </div>
             </div>
         </section>
-        <!-- /Feature -->
-
-
-
-        <!-- EDUCATION SECTION -->
-        <div class="section-education flat-spacing pb-0" id="educationScroll">
-            <div class="container">
-                <div class="row">
-                    <div class="col-12">
-                        <h6 class="mini-title text-caption text-white-64 effectFade fadeUp text-center">
-                            ACADEMIC BACKGROUND
-                        </h6>
-                        <h2 class="text-display-2 fw-semibold letter-space--3 effectFade fadeUp mb-5 text-center">
-                            Education
-                        </h2>
-                    </div>
-                </div>
-                <div class="education-timeline">
-                    <!-- Education Item 1 -->
-                    <div class="timeline-item effectFade fadeUp" style="margin-bottom: 10px;">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <div class="row align-items-center">
-                                <div class="col-md-7">
-                                    <span class="timeline-year text-primary">2023 - 2027</span>
-                                    <h3 class="h4 fw-bold mb-2">BSc (Hons) in Information Technology</h3>
-                                    <p class="h6 text-primary fw-semibold mb-2">Specialization: Data Science</p>
-                                    <p class="text-caption text-white-64 mb-3">Sri Lanka Institute of Information Technology (SLIIT)</p>
-                                    <ul class="text-white-64 text-body-3">
-                                        <li>Focus: AI, Machine Learning, Analytics & Full-Stack Development</li>
-                                        <li>Core Technologies: Python, Java, TensorFlow, React</li>
-                                        <li>Expected Graduation: 2027</li>
-                                    </ul>
-                                </div>
-                                <!-- <div class="col-md-5">
-                                    <div class="timeline-image">
-                                        <img src="assets/images/section/work-1.jpg" alt="University Campus" class="img-fluid">
-                                    </div>
-                                </div> -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Education Item 2 -->
-                    <div class="timeline-item effectFade fadeUp">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-content">
-                            <div class="row align-items-center">
-                                <div class="col-md-7">
-                                    <span class="timeline-year text-primary">2022 (2023)</span>
-                                    <h3 class="h4 fw-bold mb-2">Advanced Level</h3>
-                                    <p class="h6 text-primary fw-semibold mb-2">Physical Science Stream</p>
-                                    <p class="text-caption text-white-64 mb-3">G.C.E. Advanced Level Examination</p>
-                                </div>
-                                <!-- <div class="col-md-5">
-                                    <div class="timeline-image">
-                                        <img src="assets/images/section/work-3.jpg" alt="High School" class="img-fluid">
-                                    </div>
-                                </div> -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- /Education -->
 
 
         
@@ -3405,6 +1814,7 @@
                         </div>
                         <div class="col-6 col-sm-4 col-md-3">
                             <ul class="footer-menu-list mb-sm-0">
+                                <li><a href="projects.html" class="link letter-space--2 h5">Projects</a></li>
                                 <li><a href="#aboutScroll" class="link letter-space--2 h5">About</a></li>
                                 <li><a href="#certificationsScroll" class="link letter-space--2 h5">Certifications</a></li>
                                 <li><a href="#educationScroll" class="link letter-space--2 h5">Education</a></li>
@@ -3466,6 +1876,26 @@
                     </div>
                     <div class="canvas_center">
                         <ul class="nav-ul-mb">
+                            <li>
+                                <div class="item close-mb-menu">
+                                    <a href="projects.html" class="mb-menu-link text-display-1">
+                                        <span class="text">Projects</span>
+                                        <div class="infiniteSlide_text_main">
+                                            <div class="infiniteSlide infiniteSlide_text" data-clone="5">
+                                                <p class="text-body-2 letter-space--1">
+                                                    <span class="text-primary">//</span> View All Projects
+                                                </p>
+                                                <p class="text-body-2 letter-space--1">
+                                                    <span class="text-primary">//</span> View All Projects
+                                                </p>
+                                                <p class="text-body-2 letter-space--1">
+                                                    <span class="text-primary">//</span> View All Projects
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </li>
                             <li>
                                 <div class="item close-mb-menu">
                                     <a href="#educationScroll" class="mb-menu-link text-display-1">
@@ -3594,7 +2024,10 @@
     <script src="assets/js/gsapAnimation.js"></script>
 
     <script src="assets/js/main.js"></script>
-    <script src="assets/js/project-flashcards.js"></script>
+    <script src="assets/js/projects-data.js"></script>
+    <script src="assets/js/project-visuals.js"></script>
+    <script src="assets/js/projects-ui.js"></script>
+    <script src="assets/js/education.js"></script>
     <script src="assets/js/night-sky.js"></script>
     <script src="assets/js/hero-network.js"></script>
     <script src="assets/js/about-portrait.js"></script>
