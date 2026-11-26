@@ -1,0 +1,39 @@
+/* Contact form (Formspree) — honeypot, status line and invalid states */
+.form-cta .cf-hp {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.form-cta .cf-status {
+  order: 3;
+  flex-basis: 100%;
+  margin: 0;
+  min-height: 0;
+  color: var(--white-64);
+  font-size: 15px;
+}
+.form-cta .cf-status:empty {
+  display: none;
+}
+.form-cta .cf-status.is-error {
+  color: var(--white);
+}
+.form-cta .nice-select.cf-invalid,
+.form-cta .tf-field.cf-invalid .tf-input {
+  border-bottom-color: var(--white) !important;
+}
+.form-cta .nice-select.cf-invalid .current {
+  color: var(--white) !important;
+}
+.form-cta .tf-btn[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Show every "interest" option without an inner scroll */
+.form-cta .nice-select[data-cf-for="interest"] .list {
+  max-height: none;
+}
