@@ -1,0 +1,17 @@
+{
+  "name": "yoosufahamed-portfolio",
+  "private": true,
+  "description": "Static portfolio + FIELD NOTES journal generated from Pages CMS content.",
+  "scripts": {
+    "build": "node scripts/build-journal.mjs",
+    "journal": "node scripts/build-journal.mjs",
+    "journal:check": "node scripts/build-journal.mjs --check"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "marked": "18.2.0",
+    "yaml": "2.9.1"
+  }
+}
