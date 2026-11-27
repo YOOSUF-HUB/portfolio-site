@@ -1,30 +1,20 @@
 /* =========================================================
-   NEURAL ARBOR — A year of building  (ACTIVITY ARCHIVE / 003)
+   STELLAR NEURAL CORE — the activity archive (ACTIVITY ARCHIVE / 003)
 
-   The last 365 days of GitHub contributions (YOOSUF-HUB) drawn
-   as one biological neuron on a Canvas 2D scene.
+   The last 365 days of GitHub contributions (YOOSUF-HUB) as one
+   Canvas 2D scene: a circular contribution field around a small
+   neural core, with organic dendrites in a loose star silhouette.
 
-   SOMA       a small irregular cell body of layered particles.
-   DENDRITES  4 primary branches = the 4 quarters of the period
-              (clockwise from upper left). A month belongs to the
-              quarter its midpoint falls in, so a period that does
-              not start on the 1st gets one short extra branch.
-   MONTHS     each primary carries its monthly branches (secondary).
-              A month splits into 10-day segments (halves on
-              mobile): earlier segments are tertiary twigs, the
-              last runs along the month's own tip. Days are laid
-              out base → tip in date order.
-   PARTICLES  exactly one per date. Brightness, size, satellites
-              and glow come from that day's real count only.
-
-   Geometry is deterministic: every branch is seeded from its
-   quarter / calendar month, and a greedy placement pass keeps
-   particles from colliding. Counts never move the structure, so
-   a data refresh only changes brightness.
-
-   Motion is restrained: fine dust drifts, branch tips sway, and
-   signals only travel along the predefined routes (ambient pulse,
-   selected day, month tour, new activity, YEAR IN MOTION playback).
+   FIELD      one particle per date. 53 week columns run clockwise
+              from the top; 7 concentric tracks are the weekdays
+              (Sun inside → Sat outside). Size and brightness come
+              from that day's real count only.
+   CORE       a dense cluster of white / silver particles.
+   DENDRITES  6 primaries, each owning a run of weeks: core → spoke
+              → hub ring → between two week columns → outward with
+              secondary / tertiary branches and synaptic terminals.
+   SIGNALS    travel only along that structure (ambient, selected
+              day, week, month tour, new activity, YEAR IN MOTION).
 
    Data: GET /api/github-contributions (token stays server-side).
    The last good payload is cached in localStorage for offline
@@ -73,7 +63,7 @@
     var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     var MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     var TIER_NAMES = ["No activity", "Low intensity", "Moderate intensity", "High intensity", "Exceptional intensity"];
-    var ROMAN = ["I", "II", "III", "IV"];
+    var ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII"];
 
     function plural(n, w) { return n.toLocaleString("en-GB") + " " + w + (n === 1 ? "" : "s"); }
     function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -186,7 +176,7 @@
 
     var D = null, status = "loading";
     var N = 0, counts, tiers, monthOf, streakOf, dateMs, domOf;
-    var months = [], streaks = [], QM = [[], [], [], []];
+    var months = [], streaks = [];
     var maxDay = 1, maxMonth = 1;
 
     function prepare(p) {
@@ -194,7 +184,7 @@
         N = days.length;
         counts = new Int32Array(N); tiers = new Uint8Array(N); monthOf = new Int16Array(N);
         streakOf = new Int16Array(N); dateMs = new Float64Array(N); domOf = new Uint8Array(N);
-        months = []; streaks = []; QM = [[], [], [], []]; maxDay = 1; maxMonth = 1;
+        months = []; streaks = []; maxDay = 1; maxMonth = 1;
 
         var active = [];
         for (i = 0; i < N; i++) {
@@ -213,7 +203,7 @@
             tiers[i] = c === 0 ? 0 : lvl <= 1 ? 1 : lvl === 2 ? 2 : (lvl >= 4 && c >= p90 ? 4 : 3);
             var d = new Date(dateMs[i]), key = d.getUTCFullYear() * 12 + d.getUTCMonth();
             domOf[i] = d.getUTCDate();
-            if (key !== cur) { cur = key; months.push({ y: d.getUTCFullYear(), m: d.getUTCMonth(), first: i, last: i, total: 0, active: 0, q: 0 }); }
+            if (key !== cur) { cur = key; months.push({ y: d.getUTCFullYear(), m: d.getUTCMonth(), first: i, last: i, total: 0, active: 0 }); }
             var mo = months[months.length - 1]; mo.last = i; mo.total += c; if (c > 0) mo.active++;
             monthOf[i] = months.length - 1;
             if (c > 0) {
@@ -221,49 +211,39 @@
                 st.end = i; st.total += c; streakOf[i] = streaks.length - 1;
             } else { st = null; streakOf[i] = -1; }
         }
-        // quarters of the period: a month joins the quarter its midpoint falls in
-        months.forEach(function (mo, m) {
-            if (mo.total > maxMonth) maxMonth = mo.total;
-            mo.q = Math.min(3, Math.floor(((mo.first + mo.last) / 2) / (N / 4)));
-            QM[mo.q].push(m);
-        });
+        months.forEach(function (mo) { if (mo.total > maxMonth) maxMonth = mo.total; });
     }
 
     /* =========================================================
-       GEOMETRY — built in unit space (1 unit = gap between days),
-       then fitted to the stage
+       GEOMETRY — STELLAR NEURAL CORE
+       FIELD      every date is one particle: 53 week columns run
+                  clockwise from the top, 7 concentric tracks are the
+                  weekdays (Sun inside → Sat outside).
+       CORE       a small dense cluster of particles in the centre.
+       DENDRITES  6 primary branches, one per contiguous run of weeks.
+                  Each leaves the core as a spoke, joins the inner
+                  hub ring, slips between two week columns and grows
+                  outward with secondary and tertiary dendrites.
+                  Brightness follows the real activity of its weeks.
+       WEEKS      active weeks sprout a short twig on the outer spine.
+       Geometry is seeded from fixed keys / week dates only, so the
+       same data always draws the same structure.
        ========================================================= */
 
-    var G = { w: 0, h: 0, dpr: 1, mobile: false, S: 1, kk: 1, somaX: 0, somaY: 0, somaR: 0 };
-    var TR = [], ST = [], CH = [];             // trunks (quarters), stems (months), carriers (day segments)
-    var dayX, dayY, dayRad, dayCh, dayS;
-    var somaP, somaO, dustP, spineP, satP, tipP, linkP, axon = null, labels = [];
-    var nSoma = 0, nDust = 0, nSpine = 0, nSat = 0, nTip = 0, nLink = 0;
-    var GAP = 1, TAIL = 1.15;
-    var DIRS_D = [-2.2, -0.38, 0.95, 2.88], DIRS_M = [-1.98, -0.72, 1.3, 2.5];
-    var font = "10px sans-serif", fontQ = "10px sans-serif";
+    var G = { w: 0, h: 0, dpr: 1, mobile: false, kk: 1, cx: 0, cy: 0, R: 0, rIn: 0, rOut: 0, step: 0, rHub: 0, rSpine: 0, rLabel: 0, rCore: 0, a0: 0, sweep: 0, W: 53, WD0: 0, built: "" };
+    var NP = 6;
+    var weekOf, wdOf, weekTotal, weekPr, maxWeek = 1;
+    var dayX, dayY, dayRad;
+    var PR = [], twigs = [], coreF = [], monthEdges = [], labels = [];
+    var coreP, starP, satP, linkP, termP, glintP;
+    var nCore = 0, nStar = 0, nSat = 0, nLink = 0, nTerm = 0, nGlint = 0;
+    var trackR = new Float32Array(7);
+    var font = "10px sans-serif";
 
-    /* spatial hash used only while placing branches */
-    var GC = 1.5;
-    function Grid() { this.m = new Map(); }
-    Grid.prototype.add = function (x, y, owner, part) {
-        var k = (Math.floor(x / GC) + 2048) * 4096 + (Math.floor(y / GC) + 2048), a = this.m.get(k);
-        if (!a) { a = []; this.m.set(k, a); }
-        a.push(x, y, owner, part ? 1 : 0);
-    };
-    Grid.prototype.score = function (x, y, ig, rp, rf) {
-        var ix = Math.floor(x / GC), iy = Math.floor(y / GC), sc = 0, rp2 = rp * rp, rf2 = rf * rf;
-        for (var u = ix - 1; u <= ix + 1; u++) for (var v = iy - 1; v <= iy + 1; v++) {
-            var a = this.m.get((u + 2048) * 4096 + (v + 2048));
-            if (!a) continue;
-            for (var i = 0; i < a.length; i += 4) {
-                if (a[i + 2] === ig) continue;
-                var dx = a[i] - x, dy = a[i + 1] - y, d2 = dx * dx + dy * dy;
-                if (a[i + 3]) { if (d2 < rp2) sc += 1; } else if (d2 < rf2) sc += 0.5;
-            }
-        }
-        return sc;
-    };
+    function ang(w) { return G.a0 + ((w + 0.5) / G.W) * G.sweep; }
+    function edge(w) { return G.a0 + (w / G.W) * G.sweep; }
+    function px(r, a) { return G.cx + Math.cos(a) * r; }
+    function py(r, a) { return G.cy + Math.sin(a) * r; }
 
     function layout() {
         var w = Math.round(stage.clientWidth), h = Math.round(stage.clientHeight);
@@ -274,257 +254,252 @@
         var cw = Math.round(w * G.dpr), chh = Math.round(h * G.dpr);
         [canvas, baseA, baseB].forEach(function (cv) { if (cv.width !== cw || cv.height !== chh) { cv.width = cw; cv.height = chh; } });
         var ff = getComputedStyle(root).fontFamily || "sans-serif";
-        font = "500 " + (G.mobile ? 8 : 9.5) + "px " + ff;
-        fontQ = "500 " + (G.mobile ? 9 : 11) + "px " + ff;
+        font = "500 " + (G.mobile ? 7.5 : 9.5) + "px " + ff;
         var key = cw + "x" + chh + "|" + (D ? D.fetchedAt : "none");
         if (key !== G.built) { G.built = key; build(); }
         return true;
     }
 
     function build() {
-        var mob = G.mobile, i, j, k, q, t;
-        var grid = new Grid(), nextId = 2;
-        var U = { soma: [], dust: [], spine: [], sat: [], tip: [] };
-        TR = []; ST = []; CH = []; labels = [];
-
-        /* ---- soma: irregular lobed outline ---- */
-        var rs = mulberry(hash("soma"));
-        var SR = 3.5, lob = [];
-        for (k = 0; k < 4; k++) lob.push(0.045 + 0.07 * rs(), rs() * TAU);
-        var somaRad = function (a) { var r = 1; for (var k2 = 0; k2 < 4; k2++) r += lob[k2 * 2] * Math.sin((k2 + 2) * a + lob[k2 * 2 + 1]); return SR * r; };
-        for (t = 0; t < TAU; t += 0.2) { var sr = somaRad(t); grid.add(Math.cos(t) * sr, Math.sin(t) * sr, 1, false); grid.add(Math.cos(t) * sr * 0.5, Math.sin(t) * sr * 0.5, 1, false); }
-        var outline = []; for (t = 0; t < 64; t++) { var oa = t / 64 * TAU, orr = somaRad(oa) * 0.92; outline.push(Math.cos(oa) * orr, Math.sin(oa) * orr); }
-        var nucX = (rs() - 0.5) * 0.9, nucY = (rs() - 0.5) * 0.9;
-        var NS = mob ? 360 : 760;
-        for (i = 0; i < NS; i++) {
-            var sa = rs() * TAU, u = rs(), inner = i < NS * 0.16;
-            var rr = inner ? Math.pow(u, 0.7) * 0.85 : somaRad(sa) * Math.pow(u, 0.62) * 1.02;
-            var x0 = (inner ? nucX : 0) + Math.cos(sa) * rr, y0 = (inner ? nucY : 0) + Math.sin(sa) * rr;
-            var b = inner ? 0.75 + 0.25 * rs() : clamp(1 - rr / (SR * 1.08), 0, 1) * (0.55 + 0.45 * rs());
-            U.soma.push(x0, y0, b, rs() < 0.18 ? 1 : 0);
-        }
-
-        /* ---- primary dendrites (quarters) ---- */
-        var dirs = mob ? DIRS_M : DIRS_D;
-        for (q = 0; q < 4; q++) {
-            var ms = D ? QM[q] : [];
-            var rq = mulberry(hash("q" + q + (mob ? "m" : "d")));
-            var a = dirs[q] + (rq() - 0.5) * 0.16;
-            var sp = [], s = 3.6 + 0.8 * rq();
-            for (j = 0; j < ms.length; j++) {
-                sp.push(s);
-                if (j < ms.length - 1) s += 2.4 + 3.9 * Math.sqrt((months[ms[j]].last - months[ms[j]].first + 1) / 31);
-            }
-            var L = ms.length ? Math.max(7, sp[sp.length - 1]) : 8 + 3 * rq();
-            var r0 = somaRad(a) * 0.35;
-            var tp = curve(Math.cos(a) * r0, Math.sin(a) * r0, a, L, (rq() < 0.5 ? 1 : -1) * (0.3 + 0.35 * rq()), 52, (rq() - 0.5) * 0.7);
-            if (ms.length) sp[sp.length - 1] = tp.len;
-            var tid = nextId++;
-            for (i = 0; i < tp.n; i++) grid.add(tp.x[i], tp.y[i], tid, false);
-            var qTot = 0; ms.forEach(function (m) { qTot += months[m].total; });
-            TR.push({ q: q, path: tp, id: tid, sp: sp, ms: ms, total: qTot, act: 0, rng: rq });
-        }
-        var maxQ = 1; TR.forEach(function (T) { maxQ = Math.max(maxQ, T.total); });
-        TR.forEach(function (T) { T.act = Math.sqrt(T.total / maxQ); });
-
-        if (D) {
-            dayCh = new Int16Array(N); dayS = new Float32Array(N);
-            var OFF = [0, 0.22, -0.22, 0.44, -0.44, 0.68, -0.68, 0.94, -0.94, 1.2, -1.2];
-            var place = function (x, y, a, b, need, d0, n, ig, segs, wig) {
-                var best = null, r0b = Math.hypot(x, y);
-                for (var o = 0; o < OFF.length; o++) for (var bb = 0; bb < 2; bb++) {
-                    var p = curve(x, y, a + OFF[o], need, bb ? b * 0.3 : b, segs, wig), sc = 0, pts = [];
-                    for (var t2 = 0; t2 < n; t2++) { p.at(d0 + t2 * GAP, PT); pts.push(PT.x, PT.y); sc += grid.score(PT.x, PT.y, ig, 1.1, 0.95); }
-                    for (var t3 = 0; t3 < p.n; t3 += 2) if (p.l[t3] > 1.2) sc += 0.5 * grid.score(p.x[t3], p.y[t3], ig, 0.95, 0.8);
-                    if (Math.hypot(p.x[p.n - 1], p.y[p.n - 1]) < r0b + need * 0.4) sc += 3;
-                    var tot = sc + o * 0.02 + bb * 0.01;
-                    if (!best || tot < best.tot) best = { p: p, pts: pts, tot: tot, sc: sc };
-                    if (sc === 0) return best;
-                }
-                return best;
-            };
-            var commit = function (best, fid, pid) {
-                var p = best.p;
-                for (var i2 = 0; i2 < p.n; i2++) grid.add(p.x[i2], p.y[i2], fid, false);
-                for (i2 = 0; i2 < best.pts.length; i2 += 2) grid.add(best.pts[i2], best.pts[i2 + 1], pid, true);
-            };
-            var chunksOf = function (mo) {
-                var cuts = mob ? [16] : [11, 21], out = [], start = mo.first;
-                for (var d = mo.first + 1; d <= mo.last; d++) if (cuts.indexOf(domOf[d]) >= 0) { out.push([start, d - 1]); start = d; }
-                out.push([start, mo.last]);
-                return out;
-            };
-
-            /* pass 1 — month stems, carrying their last segment of days */
-            TR.forEach(function (T) {
-                T.ms.forEach(function (m, jj) {
-                    var mo = months[m], rm = mulberry(hash("m" + mo.y + "-" + mo.m + (mob ? "m" : "d")));
-                    var ch = chunksOf(mo), nTw = ch.length - 1, last = ch[nTw], lastN = last[1] - last[0] + 1;
-                    var twS = []; for (var k2 = 0; k2 < nTw; k2++) twS.push(1.5 + 2.8 * k2);
-                    var d0 = nTw ? twS[nTw - 1] + 2.0 : 1.3, need = d0 + (lastN - 1) * GAP + TAIL;
-                    var tipM = jj === T.ms.length - 1, sS = tipM ? T.path.len : T.sp[jj];
-                    T.path.at(sS, PT);
-                    var x = PT.x, y = PT.y, ta = tanAt(T.path, sS), side = (jj + T.q) % 2 ? 1 : -1;
-                    var a2 = tipM ? ta + (rm() - 0.5) * 0.3 : ta + side * (0.78 + 0.34 * rm());
-                    var b2 = tipM ? (rm() < 0.5 ? 1 : -1) * (0.2 + 0.35 * rm()) : -side * (0.12 + 0.32 * rm());
-                    var best = place(x, y, a2, b2, need, d0, lastN, T.id, 44, (rm() - 0.5) * 0.5);
-                    var sid = nextId++, pid = nextId++;
-                    commit(best, sid, pid);
-                    var cIdx = CH.length;
-                    CH.push({ m: m, path: best.p, first: last[0], last: last[1], s0: d0, terminal: true, sS: 0, k: nTw, total: 0, act: 0 });
-                    ST[m] = { m: m, q: T.q, path: best.p, id: sid, sS: sS, tip: tipM, twS: twS, ch: ch, chunks: [cIdx], side: side, rng: rm, act: Math.sqrt(mo.total / maxMonth) };
-                });
-            });
-            /* pass 2 — tertiary twigs for the earlier segments */
-            ST.forEach(function (st) {
-                var nTw = st.ch.length - 1, list = [];
-                for (var k2 = 0; k2 < nTw; k2++) {
-                    var c = st.ch[k2], n = c[1] - c[0] + 1, sS = st.twS[k2];
-                    st.path.at(sS, PT);
-                    var x = PT.x, y = PT.y, ta = tanAt(st.path, sS), side = (k2 % 2 ? 1 : -1) * -st.side;
-                    var a2 = ta + side * (0.62 + 0.34 * st.rng()), b2 = -side * (0.25 + 0.45 * st.rng());
-                    var d0 = 1.2, need = d0 + (n - 1) * GAP + TAIL;
-                    var best = place(x, y, a2, b2, need, d0, n, st.id, 26, (st.rng() - 0.5) * 0.5);
-                    var id = nextId++;
-                    commit(best, id, id);
-                    list.push(CH.length);
-                    CH.push({ m: st.m, path: best.p, first: c[0], last: c[1], s0: d0, terminal: false, sS: sS, k: k2, total: 0, act: 0 });
-                }
-                st.chunks = list.concat(st.chunks);
-            });
-            var maxChunk = 1;
-            CH.forEach(function (C, ci) {
-                for (var d = C.first; d <= C.last; d++) { dayCh[d] = ci; dayS[d] = C.s0 + (d - C.first) * GAP; C.total += counts[d]; }
-                maxChunk = Math.max(maxChunk, C.total);
-            });
-            CH.forEach(function (C) { C.act = Math.sqrt(C.total / maxChunk); });
-        }
-
-        /* ---- decoration: synaptic spines + fibre dust (seeded per branch) ---- */
-        var decorate = function (p, rng, mIdx, dens, spP) {
-            for (var i2 = 1; i2 < p.n - 1; i2++) {
-                if (rng() > dens) continue;
-                var dx = p.x[i2 + 1] - p.x[i2 - 1], dy = p.y[i2 + 1] - p.y[i2 - 1], dl = Math.hypot(dx, dy) || 1;
-                var off = gauss(rng) * (0.45 + 0.9 * rng()), al = (rng() - 0.5) * 0.5;
-                var lay = rng() < 0.5 ? 0 : rng() < 0.65 ? 1 : 2;
-                U.dust.push(p.x[i2] - dy / dl * off + dx / dl * al, p.y[i2] + dx / dl * off + dy / dl * al, lay, mIdx, rng() < 0.3 ? 1 : 0, rng() * TAU);
-            }
-            for (var s2 = 0.7 + rng() * 0.4; s2 < p.len - 0.4; s2 += 0.42 + rng() * 0.5) {
-                if (rng() > spP) continue;
-                p.at(s2, PT);
-                var sa2 = tanAt(p, s2) + (rng() < 0.5 ? 1 : -1) * (0.7 + 0.8 * rng()), sl = 0.12 + 0.26 * rng();
-                U.spine.push(PT.x, PT.y, PT.x + Math.cos(sa2) * sl, PT.y + Math.sin(sa2) * sl, mIdx);
-            }
-        };
-        var dMul = mob ? 0.45 : 1, sMul = mob ? 0.45 : 1;
-        TR.forEach(function (T) { decorate(T.path, mulberry(hash("dq" + T.q)), -1, 0.7 * dMul, 0.08 * sMul); });
-        ST.forEach(function (st) {
-            var mo = months[st.m];
-            decorate(st.path, mulberry(hash("ds" + mo.y + mo.m)), st.m, (0.5 + 0.6 * st.act) * dMul, (0.16 + 0.2 * st.act) * sMul);
-        });
-        CH.forEach(function (C) { if (!C.terminal) decorate(C.path, mulberry(hash("dc" + C.first)), C.m, (0.45 + 0.6 * C.act) * dMul, (0.14 + 0.2 * C.act) * sMul); });
-
-        /* ---- satellites around active days (count-driven) + tips ---- */
-        if (D) {
-            for (i = 0; i < N; i++) {
-                if (!counts[i]) continue;
-                var C = CH[dayCh[i]], r2 = mulberry(hash("sat" + dateMs[i]));
-                C.path.at(dayS[i], PT);
-                var ns = [0, 1, 2, 3, 5][tiers[i]] + (ST[C.m].act > 0.65 ? 1 : 0);
-                if (mob) ns = Math.ceil(ns / 2);
-                for (k = 0; k < ns; k++) { var aa = r2() * TAU, ra = 0.3 + 0.42 * r2(); U.sat.push(PT.x + Math.cos(aa) * ra, PT.y + Math.sin(aa) * ra, i, 0.35 + 0.5 * r2()); }
-            }
-            CH.forEach(function (C) { var p = C.path; U.tip.push(p.x[p.n - 1], p.y[p.n - 1], tanAt(p, p.len), C.m, (C.first * 1.7) % TAU); });
-            // labels: month name beyond its tip, quarter numeral beside its trunk
-            ST.forEach(function (st) {
-                var p = st.path, ta = tanAt(p, p.len);
-                var mo = months[st.m], dup = months.some(function (o) { return o !== mo && o.m === mo.m; });
-                var txt = MONTHS[mo.m].toUpperCase() + (dup ? " ’" + String(mo.y).slice(2) : ""), dl = 2.3, lx = 0, ly = 0;
-                for (var tries = 0; tries < 6; tries++, dl += 1.3) {
-                    lx = p.x[p.n - 1] + Math.cos(ta) * dl; ly = p.y[p.n - 1] + Math.sin(ta) * dl;
-                    var clash = labels.some(function (o) { return Math.abs(o.x - lx) < (o.t.length + txt.length) * 0.34 && Math.abs(o.y - ly) < 1.5; });
-                    if (!clash && grid.score(lx, ly, -99, 1.1, 0) === 0) break;
-                }
-                labels.push({ x: lx, y: ly, t: txt, m: st.m, q: -1 });
-            });
-            if (!mob) TR.forEach(function (T) {
-                if (!T.ms.length) return;
-                var s3 = Math.min(T.path.len * 0.5, T.sp[0] + 1.2), ta = tanAt(T.path, s3), sd = -ST[T.ms[0]].side;
-                T.path.at(s3, PT);
-                labels.push({ x: PT.x + Math.cos(ta + sd * Math.PI / 2) * 1.6, y: PT.y + Math.sin(ta + sd * Math.PI / 2) * 1.6, t: ROMAN[T.q], m: -1, q: T.q });
-            });
-        }
-
-        /* ---- axon: one long faint fibre through the widest gap ---- */
-        var angs = TR.map(function (T) { return Math.atan2(T.path.y[T.path.n - 1], T.path.x[T.path.n - 1]); }).sort(function (x, y) { return x - y; });
-        var gapA = 0, gapMid = Math.PI / 2;
-        for (i = 0; i < angs.length; i++) {
-            var a1 = angs[i], a3 = i + 1 < angs.length ? angs[i + 1] : angs[0] + TAU;
-            if (a3 - a1 > gapA) { gapA = a3 - a1; gapMid = (a1 + a3) / 2; }
-        }
-        var ar = somaRad(gapMid) * 0.8;
-        axon = curve(Math.cos(gapMid) * ar, Math.sin(gapMid) * ar, gapMid, 34, 0.42, 60, -0.3);
-
-        /* ---- fit unit space → stage ---- */
-        var minX = -SR, maxX = SR, minY = -SR, maxY = SR;
-        var ext = function (x, y) { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; };
-        var extP = function (p) { for (var i2 = 0; i2 < p.n; i2 += 2) ext(p.x[i2], p.y[i2]); ext(p.x[p.n - 1], p.y[p.n - 1]); };
-        TR.forEach(function (T) { extP(T.path); });
-        ST.forEach(function (st) { extP(st.path); });
-        CH.forEach(function (C) { if (!C.terminal) extP(C.path); });
-        labels.forEach(function (lb) { var hw = lb.t.length * 0.32; ext(lb.x - hw, lb.y - 0.8); ext(lb.x + hw, lb.y + 0.8); });
-        if (!D) { minX = Math.min(minX, mob ? -24 : -36); maxX = Math.max(maxX, mob ? 24 : 36); minY = Math.min(minY, mob ? -30 : -26); maxY = Math.max(maxY, mob ? 30 : 26); }
-        var pad = mob ? 10 : 22;
-        var S = Math.min((G.w - 2 * pad) / (maxX - minX), (G.h - 2 * pad) / (maxY - minY));
-        var ox = (G.w - (maxX - minX) * S) / 2 - minX * S, oy = (G.h - (maxY - minY) * S) / 2 - minY * S;
-        G.S = S; G.somaX = ox; G.somaY = oy; G.somaR = SR * S;
-        G.kk = clamp(S / 8.5, 0.6, 1.15);
+        var mob = G.mobile, w = G.w, h = G.h, i, j, k, q, t, tries;
+        G.cx = w / 2; G.cy = h / 2;
+        var R = Math.min(w, h) / 2 - 2; G.R = R;
+        G.kk = clamp(R / 330, 0.62, 1.12);
         var kk = G.kk;
+        if (mob) { G.rIn = 0.45 * R; G.rOut = 0.76 * R; G.sweep = TAU - 0.36; }
+        else { G.rIn = 0.43 * R; G.rOut = 0.665 * R; G.sweep = TAU - 0.42; }
+        G.step = (G.rOut - G.rIn) / 6;
+        G.rSpine = G.rOut + G.step * 0.75;
+        G.rHub = G.rIn - G.step * 0.8;
+        G.rLabel = G.rHub - (mob ? 0.05 : 0.045) * R;
+        G.rCore = (mob ? 0.17 : 0.16) * R;
+        G.a0 = -Math.PI / 2 + (TAU - G.sweep) / 2;
+        for (t = 0; t < 7; t++) trackR[t] = G.rIn + G.step * t;
 
-        TR.forEach(function (T) { T.path.transform(S, ox, oy); for (var j2 = 0; j2 < T.sp.length; j2++) T.sp[j2] *= S; });
-        ST.forEach(function (st) { st.path.transform(S, ox, oy); st.sS *= S; for (var j2 = 0; j2 < st.twS.length; j2++) st.twS[j2] *= S; });
-        CH.forEach(function (C) { if (!C.terminal) C.path.transform(S, ox, oy); C.s0 *= S; C.sS *= S; });
-        axon.transform(S, ox, oy);
-        labels.forEach(function (lb) { lb.x = ox + lb.x * S; lb.y = oy + lb.y * S; });
-
-        var toPx = function (src, stride, xy) {
-            var out = new Float32Array(src.length);
-            for (var i2 = 0; i2 < src.length; i2 += stride) {
-                for (var f = 0; f < stride; f++) out[i2 + f] = src[i2 + f];
-                for (var x2 = 0; x2 < xy.length; x2++) out[i2 + xy[x2]] = (xy[x2] % 2 ? oy : ox) + src[i2 + xy[x2]] * S;
+        // ---- calendar ----
+        G.WD0 = D ? new Date(dateMs[0]).getUTCDay() : 0;
+        G.W = D ? Math.floor((N - 1 + G.WD0) / 7) + 1 : 53;
+        var W = G.W;
+        weekTotal = new Int32Array(W); maxWeek = 1;
+        if (D) {
+            weekOf = new Int16Array(N); wdOf = new Uint8Array(N);
+            dayX = new Float32Array(N); dayY = new Float32Array(N); dayRad = new Float32Array(N);
+            var RAD = [0.95, 1.45, 1.95, 2.5, 3.1];
+            for (i = 0; i < N; i++) {
+                var g0 = i + G.WD0; weekOf[i] = Math.floor(g0 / 7); wdOf[i] = g0 % 7;
+                weekTotal[weekOf[i]] += counts[i];
+                var a = ang(weekOf[i]), r = trackR[wdOf[i]];
+                dayX[i] = px(r, a); dayY[i] = py(r, a);
+                // size follows the real count inside each tier; quiet days get a tiny seeded jitter
+                var ex = tiers[i] ? (tiers[i] >= 3 ? 0.5 : 0.3) * Math.sqrt(counts[i] / maxDay) : (((hash("z" + dateMs[i]) & 255) / 255) - 0.5) * 0.2;
+                dayRad[i] = (RAD[tiers[i]] + ex) * kk;
             }
-            return out;
-        };
-        somaP = toPx(U.soma, 4, [0, 1]); nSoma = U.soma.length / 4;
-        somaO = toPx(outline, 2, [0, 1]);
-        dustP = toPx(U.dust, 6, [0, 1]); nDust = U.dust.length / 6;
-        spineP = toPx(U.spine, 5, [0, 1, 2, 3]); nSpine = U.spine.length / 5;
-        satP = toPx(U.sat, 4, [0, 1]); nSat = U.sat.length / 4;
-        tipP = toPx(U.tip, 5, [0, 1]); nTip = U.tip.length / 5;
-
-        if (!D) { nSat = 0; nTip = 0; nLink = 0; return; }
-
-        /* ---- day particles ---- */
-        dayX = new Float32Array(N); dayY = new Float32Array(N); dayRad = new Float32Array(N);
-        var RAD = [0.95, 1.3, 1.65, 2.05, 2.55], rm2 = mob ? 1.15 : 1;
-        for (i = 0; i < N; i++) {
-            dayS[i] *= S;
-            CH[dayCh[i]].path.at(dayS[i], PT);
-            dayX[i] = PT.x; dayY[i] = PT.y;
-            dayRad[i] = Math.max(tiers[i] ? 1.05 : 0.8, (RAD[tiers[i]] + (tiers[i] >= 2 ? 0.45 * Math.sqrt(counts[i] / maxDay) : 0)) * kk * rm2);
+            for (k = 0; k < W; k++) if (weekTotal[k] > maxWeek) maxWeek = weekTotal[k];
         }
-        /* ---- temporal connections between consecutive active days ---- */
-        var Lk = [];
+        function firstDay(wk) { return clamp(wk * 7 - G.WD0, 0, Math.max(0, N - 1)); }
+        function lastDay(wk) { return clamp(wk * 7 + 6 - G.WD0, 0, Math.max(0, N - 1)); }
+
+        // field limit at angle a: stays inside the stage rectangle
+        var margin = mob ? 6 : 10;
+        function reach(a) {
+            var ca = Math.abs(Math.cos(a)), sa = Math.abs(Math.sin(a));
+            return Math.min(ca > 1e-4 ? (w / 2 - margin) / ca : 1e9, sa > 1e-4 ? (h / 2 - margin) / sa : 1e9, R * 1.5);
+        }
+        function inside(p, rmin) {
+            for (var n = 0; n < p.n; n += 2) {
+                var x = p.x[n], y = p.y[n];
+                if (x < margin || x > w - margin || y < margin || y > h - margin) return false;
+                if (rmin && Math.hypot(x - G.cx, y - G.cy) < rmin) return false;
+            }
+            return true;
+        }
+
+        // ---- primary dendrites: sectors of contiguous weeks (fixed, seeded split) ----
+        var rs = mulberry(hash("stellar-core|" + W));
+        var wts = [], sum = 0;
+        for (k = 0; k < NP; k++) { var v = 0.72 + 0.56 * rs(); wts.push(v); sum += v; }
+        var cuts = [0], acc = 0;
+        for (k = 0; k < NP; k++) { acc += wts[k]; cuts.push(Math.round((acc / sum) * W)); }
+        weekPr = new Int8Array(W);
+        var secTot = [], maxSec = 1;
+        PR = [];
+        for (k = 0; k < NP; k++) {
+            var w0 = cuts[k], w1 = cuts[k + 1] - 1, tot = 0;
+            for (q = w0; q <= w1; q++) { weekPr[q] = k; tot += weekTotal[q]; }
+            secTot.push(tot); if (tot > maxSec) maxSec = tot;
+            var wb = clamp(Math.round((w0 + w1 + 1) / 2 + (rs() - 0.5) * (w1 - w0) * 0.5), w0 + 1, w1);
+            PR.push({ k: k, w0: w0, w1: w1, wb: wb, a: edge(wb), act: 0, sp: null, cr: null, dp: null, route: null, sec: [], months: null, firstM: 0, d0: 0, d1: 0, total: tot });
+        }
+        var terms = [], glints = [];
+        PR.forEach(function (P) {
+            P.act = D ? Math.sqrt(secTot[P.k] / maxSec) : 0.35;
+            if (D) {
+                P.d0 = firstDay(P.w0); P.d1 = lastDay(P.w1);
+                P.months = new Uint8Array(months.length);
+                for (var d = P.d0; d <= P.d1; d++) P.months[monthOf[d]] = 1;
+                P.firstM = monthOf[P.d0];
+            }
+            var a = P.a;
+            // spoke: from inside the core to the hub ring, softly curved
+            var as = a + (rs() - 0.5) * 0.7, r0 = G.rCore * 0.3, bend = (rs() < 0.5 ? 1 : -1) * (0.3 + 0.35 * rs());
+            P.sp = new Path(24).bez(px(r0, as), py(r0, as),
+                px(G.rCore * 1.05, as + bend), py(G.rCore * 1.05, as + bend),
+                px((G.rCore + G.rHub) * 0.62, a - bend * 0.4), py((G.rCore + G.rHub) * 0.62, a - bend * 0.4),
+                px(G.rHub, a), py(G.rHub, a), 20);
+            // crossing: hub → spine between two week columns (no particle sits on this line)
+            P.cr = new Path(12);
+            for (q = 0; q <= 8; q++) { var rr = G.rHub + (G.rSpine - G.rHub) * q / 8; P.cr.push(px(rr, a), py(rr, a)); }
+            // dendrite: organic Bézier outward, length follows the sector's activity
+            var lean = (0.16 + 0.26 * rs()) * (rs() < 0.5 ? 1 : -1), wig = (rs() - 0.5) * 0.4;
+            var L = (reach(a + lean * 0.6) - G.rSpine) * (0.6 + 0.32 * P.act) * (0.86 + 0.18 * rs());
+            for (tries = 0; tries < 9; tries++) {
+                P.dp = curve(px(G.rSpine, a), py(G.rSpine, a), a, L, lean, 36, wig);
+                if (inside(P.dp, G.rSpine - 1)) break;
+                L *= 0.88;
+            }
+            // secondary dendrites (fewer on mobile), tertiary on some of them (desktop)
+            P.sec = [];
+            var ns = mob ? 2 : 3 + (rs() < 0.45 ? 1 : 0);
+            for (j = 0; j < ns; j++) {
+                var f = 0.2 + 0.66 * (j + 0.25 + 0.5 * rs()) / ns, s0 = f * P.dp.len;
+                P.dp.at(s0, PT);
+                var bx = PT.x, by = PT.y, ta = tanAt(P.dp, s0), side = (j % 2 ? 1 : -1) * (rs() < 0.25 ? -1 : 1);
+                var sl = P.dp.len * (0.46 - 0.2 * f) * (0.72 + 0.5 * rs()), sp2 = null;
+                for (tries = 0; tries < 7; tries++) {
+                    var sa = ta + side * (0.42 + 0.42 * rs());
+                    var cp = curve(bx, by, sa, sl, -side * (0.12 + 0.3 * rs()), 20, (rs() - 0.5) * 0.2);
+                    if (inside(cp, G.rSpine + 3)) { sp2 = cp; break; }
+                    sl *= 0.82; if (tries === 3) side = -side;
+                }
+                if (!sp2) continue;
+                var sec = { path: sp2, s0: s0, tert: [] };
+                if (!mob && rs() < 0.55) {
+                    var nt = rs() < 0.4 ? 2 : 1;
+                    for (var u = 0; u < nt; u++) {
+                        var tf = 0.4 + 0.3 * u + 0.1 * rs(), ts = tf * sp2.len;
+                        sp2.at(ts, PT);
+                        var tside = (u % 2 ? 1 : -1) * side, tl = sp2.len * (0.3 + 0.12 * rs());
+                        var tp = curve(PT.x, PT.y, tanAt(sp2, ts) + tside * (0.5 + 0.35 * rs()), tl, -tside * 0.25, 12, 0);
+                        if (inside(tp, G.rSpine + 3)) { sec.tert.push(tp); terms.push(tp.x[tp.n - 1], tp.y[tp.n - 1], 0.55, P.k, 0.35); }
+                    }
+                }
+                terms.push(sp2.x[sp2.n - 1], sp2.y[sp2.n - 1], 0.75, P.k, 0.45);
+                P.sec.push(sec);
+            }
+            terms.push(P.dp.x[P.dp.n - 1], P.dp.y[P.dp.n - 1], 1.05, P.k, 0.6);
+            if (P.act > 0.55 && glints.length < (mob ? 8 : 16)) glints.push(P.dp.x[P.dp.n - 1], P.dp.y[P.dp.n - 1], rs() * TAU, P.k);
+            // full route core → dendrite tip (signals travel it)
+            P.route = new Path(96);
+            appendSeg(P.route, P.sp, 0, P.sp.len); appendSeg(P.route, P.cr, 0, P.cr.len); appendSeg(P.route, P.dp, 0, P.dp.len);
+            P.hubS = P.sp.len; P.dpS = P.sp.len + P.cr.len;
+        });
+        termP = new Float32Array(terms); nTerm = terms.length / 5;
+        glintP = new Float32Array(glints); nGlint = glints.length / 4;
+
+        // ---- week twigs on the outer spine (active weeks only) ----
+        twigs = new Array(W);
+        for (k = 0; k < W; k++) {
+            twigs[k] = null;
+            if (!D || !weekTotal[k]) continue;
+            var r2 = mulberry(hash("t" + dateMs[firstDay(k)]));
+            var tw = Math.sqrt(weekTotal[k] / maxWeek), aw = ang(k);
+            var tl2 = (0.02 + (mob ? 0.035 : 0.05) * tw) * R * (0.8 + 0.4 * r2());
+            var tpp = curve(px(G.rSpine, aw), py(G.rSpine, aw), aw + (r2() - 0.5) * 0.3, tl2, (r2() - 0.5) * 0.7, 10, 0);
+            twigs[k] = { path: tpp, t: tw };
+        }
+
+        // ---- core: dense layered particles + fine inner fibres ----
+        var rc = mulberry(hash("stellar-core|nucleus")), cpts = [], nc = mob ? 140 : 260;
+        for (i = 0; i < nc; i++) {
+            var cr = Math.min(G.rCore, Math.abs(gauss(rc)) * 0.4 * G.rCore), ca = rc() * TAU;
+            cpts.push(G.cx + Math.cos(ca) * cr * (1 + 0.1 * Math.cos(ca * 3 + 1)), G.cy + Math.sin(ca) * cr * 0.94, (1 - cr / G.rCore) * 0.85 + rc() * 0.15, rc() < 0.08 ? 1 : 0);
+        }
+        coreP = new Float32Array(cpts); nCore = nc;
+        coreF = [];
+        for (i = 0; i < (mob ? 5 : 9); i++) {
+            var fa = rc() * TAU;
+            coreF.push(curve(G.cx + Math.cos(fa) * G.rCore * 0.12, G.cy + Math.sin(fa) * G.rCore * 0.12, fa, G.rCore * (0.55 + 0.45 * rc()), (rc() - 0.5) * 1.3, 12, 0));
+        }
+
+        // ---- fine star-like particles along the dendrites + a sparse stellar field ----
+        var st = [], r3 = mulberry(hash("stellar-core|stars"));
+        function sprinkle(p, n, spread, pk) {
+            for (var m = 0; m < n; m++) {
+                var s = r3() * p.len; p.at(s, PT);
+                var tg = tanAt(p, s), off = gauss(r3) * spread, x = PT.x - Math.sin(tg) * off, y = PT.y + Math.cos(tg) * off;
+                if (x < 2 || x > w - 2 || y < 2 || y > h - 2) continue;
+                var lr = r3();
+                st.push(x, y, lr < 0.15 ? 2 : lr < 0.5 ? 1 : 0, r3() < 0.3 ? 1 : 0, r3() * TAU, pk);
+            }
+        }
+        PR.forEach(function (P) {
+            sprinkle(P.dp, Math.round(P.dp.len / (mob ? 10 : 6.5)), 3 * kk, P.k);
+            P.sec.forEach(function (sc) { sprinkle(sc.path, Math.round(sc.path.len / (mob ? 14 : 9)), 2.2 * kk, P.k); });
+        });
+        for (i = 0; i < (mob ? 36 : 80); i++) {
+            var ra = r3() * TAU, lim = reach(ra), rd = G.rSpine + 0.04 * R + r3() * Math.max(0, lim - G.rSpine - 0.04 * R);
+            st.push(px(rd, ra), py(rd, ra), r3() < 0.1 ? 1 : 0, r3() < 0.25 ? 1 : 0, r3() * TAU, -1);
+        }
+        starP = new Float32Array(st); nStar = st.length / 6;
+
+        if (!D) { satP = new Float32Array(0); nSat = 0; linkP = new Float32Array(0); nLink = 0; monthEdges = []; labels = []; return; }
+
+        // ---- satellites around high days (seeded by date) ----
+        var sat = [];
+        for (i = 0; i < N; i++) {
+            if (tiers[i] < 3) continue;
+            var sr = mulberry(hash("s" + dateMs[i])), nsat = tiers[i] === 4 ? 3 : 2, sa2 = sr() * TAU;
+            for (j = 0; j < nsat; j++) {
+                sa2 += 1.6 + sr() * 1.4;
+                var sd = dayRad[i] + (2.2 + 2.2 * sr()) * kk;
+                sat.push(dayX[i] + Math.cos(sa2) * sd, dayY[i] + Math.sin(sa2) * sd, i, 0.45 + 0.35 * sr());
+            }
+        }
+        satP = new Float32Array(sat); nSat = sat.length / 4;
+
+        // ---- temporal links between consecutive active days ----
+        var lk = [];
         for (i = 1; i < N; i++) {
             if (!counts[i] || !counts[i - 1]) continue;
-            var mx = (dayX[i] + dayX[i - 1]) / 2, my = (dayY[i] + dayY[i - 1]) / 2, same = dayCh[i] === dayCh[i - 1];
-            Lk.push(i, same ? 1 : 0, same ? mx : mx + (G.somaX - mx) * 0.16, same ? my : my + (G.somaY - my) * 0.16);
+            if (weekOf[i] === weekOf[i - 1]) lk.push(i, 1, 0, 0);
+            else { var am = (ang(weekOf[i]) + ang(weekOf[i - 1])) / 2, rm = (trackR[6] + trackR[0]) / 2; lk.push(i, 0, px(rm, am), py(rm, am)); }
         }
-        linkP = new Float32Array(Lk); nLink = Lk.length / 4;
+        linkP = new Float32Array(lk); nLink = lk.length / 4;
+
+        // ---- stepped month boundaries + labels inside the field ----
+        monthEdges = []; labels = [];
+        var hs = G.step / 2;
+        for (var m = 1; m < months.length; m++) {
+            var fi = months[m].first, fw = weekOf[fi], fk = wdOf[fi], e = new Path(16);
+            var rI = G.rIn - hs, rO = G.rOut + hs;
+            if (fk === 0) { e.push(px(rI, edge(fw)), py(rI, edge(fw))); e.push(px(rO, edge(fw)), py(rO, edge(fw))); }
+            else {
+                var rb = (trackR[fk - 1] + trackR[fk]) / 2, e1 = edge(fw + 1), e0 = edge(fw);
+                e.push(px(rI, e1), py(rI, e1)); e.push(px(rb, e1), py(rb, e1));
+                for (var s9 = 1; s9 <= 8; s9++) { var aa = e1 + (e0 - e1) * (s9 / 8); e.push(px(rb, aa), py(rb, aa)); }
+                e.push(px(rO, e0), py(rO, e0));
+            }
+            monthEdges.push({ p: e, m: m });
+        }
+        months.forEach(function (mo, mi) {
+            if (mo.last - mo.first < 6) return;
+            var am2 = (ang(weekOf[mo.first]) + ang(weekOf[mo.last])) / 2;
+            PR.forEach(function (P) { // keep the label clear of a spoke arriving at the hub
+                var da = am2 - P.a, room = (mob ? 15 : 20) / G.rLabel;
+                if (Math.abs(da) < room) am2 = P.a + (da >= 0 ? room : -room);
+            });
+            labels.push({ m: mi, t: MONTHS[mo.m].toUpperCase(), x: px(G.rLabel, am2), y: py(G.rLabel, am2) });
+        });
+    }
+
+    function dendNames(m) {
+        var ks = [];
+        PR.forEach(function (P) { if (P.months && P.months[m]) ks.push(ROMAN[P.k]); });
+        return ks.length > 1 ? "Dendrites " + ks[0] + "–" + ks[ks.length - 1] : "Dendrite " + (ks[0] || "I");
     }
 
     /* =========================================================
-       BASE LAYER (static anatomy, redrawn only when focus changes)
+       BASE LAYER (static structure, redrawn only when focus changes)
        ========================================================= */
 
     var baseA = document.createElement("canvas"), baseB = document.createElement("canvas");
@@ -536,152 +511,159 @@
     function lit(m) { return (focus.month < 0 || m === focus.month) && (revealM < 0 || m <= revealM); }
     function anyDim() { return focus.month >= 0 || revealM >= 0; }
     function mf(m) { return lit(m) ? 1 : DIM; }
-    function qf(q) {
-        if (focus.month >= 0) return ST[focus.month] && ST[focus.month].q === q ? 1 : DIM * 1.3;
-        if (revealM >= 0) return TR[q] && TR[q].ms.length && TR[q].ms[0] <= revealM ? 1 : DIM * 1.3;
+    function prf(k) { // primary dendrite under month focus / playback reveal
+        var P = PR[k];
+        if (!P || !D || !P.months) return 1;
+        if (focus.month >= 0) return P.months[focus.month] ? 1 : DIM * 1.3;
+        if (revealM >= 0) return P.firstM <= revealM ? 1 : DIM * 1.3;
         return 1;
     }
 
     function taper(c, p, w0, w1) {
-        var n = p.n, i, a, b, dx, dy, d, w;
+        var n = p.n, i, a, b, dx, dy, d, wd;
         if (n < 2) return;
         c.beginPath();
         for (i = 0; i < n; i++) {
             a = Math.max(0, i - 1); b = Math.min(n - 1, i + 1); dx = p.x[b] - p.x[a]; dy = p.y[b] - p.y[a]; d = Math.hypot(dx, dy) || 1;
-            w = (w0 + (w1 - w0) * (p.l[i] / p.len)) * 0.5;
-            if (i === 0) c.moveTo(p.x[i] - dy / d * w, p.y[i] + dx / d * w); else c.lineTo(p.x[i] - dy / d * w, p.y[i] + dx / d * w);
+            wd = (w0 + (w1 - w0) * Math.pow(p.l[i] / p.len, 0.75)) * 0.5;
+            if (i === 0) c.moveTo(p.x[i] - dy / d * wd, p.y[i] + dx / d * wd); else c.lineTo(p.x[i] - dy / d * wd, p.y[i] + dx / d * wd);
         }
         for (i = n - 1; i >= 0; i--) {
             a = Math.max(0, i - 1); b = Math.min(n - 1, i + 1); dx = p.x[b] - p.x[a]; dy = p.y[b] - p.y[a]; d = Math.hypot(dx, dy) || 1;
-            w = (w0 + (w1 - w0) * (p.l[i] / p.len)) * 0.5;
-            c.lineTo(p.x[i] + dy / d * w, p.y[i] - dx / d * w);
+            wd = (w0 + (w1 - w0) * Math.pow(p.l[i] / p.len, 0.75)) * 0.5;
+            c.lineTo(p.x[i] + dy / d * wd, p.y[i] - dx / d * wd);
         }
         c.closePath(); c.fill();
     }
     function strokeAll(c, p) { strokeTo(c, p, p.len + 1); }
-
-    function drawBase(cv) {
-        var c = cv.getContext("2d"), kk = G.kk, i, a;
-        c.setTransform(G.dpr, 0, 0, G.dpr, 0, 0);
-        c.clearRect(0, 0, G.w, G.h);
-        c.lineCap = "round"; c.lineJoin = "round";
-
-        // axon — long, faint, fading away from the soma
-        var AX = 5;
-        c.strokeStyle = "#888888";
-        for (i = 0; i < AX; i++) {
-            c.globalAlpha = (D ? 0.22 : 0.14) * Math.pow(1 - i / AX, 1.6) * (focus.month >= 0 ? 0.5 : 1);
-            c.lineWidth = (1.5 - i * 0.24) * kk;
-            c.beginPath(); strokeSeg(c, axon, axon.len * i / AX, axon.len * (i + 1) / AX); c.stroke();
-        }
-
-        // primary dendrites
-        TR.forEach(function (T) {
-            var f = D ? qf(T.q) : 0.5;
-            c.fillStyle = "#888888"; c.globalAlpha = (0.42 + 0.3 * T.act) * f;
-            taper(c, T.path, (5.4 + 2.2 * T.act) * kk, (D ? 1.05 : 0.4) * kk);
-            c.strokeStyle = "#d9d9d9"; c.globalAlpha = (0.14 + 0.22 * T.act) * f; c.lineWidth = 0.55 * kk;
-            c.beginPath(); strokeAll(c, T.path); c.stroke();
-        });
-
-        if (D) {
-            // monthly branches + tertiary twigs (activity sets their presence)
-            ST.forEach(function (st) {
-                var f = mf(st.m);
-                c.fillStyle = "#888888"; c.globalAlpha = (0.26 + 0.44 * st.act) * f;
-                taper(c, st.path, (1.1 + 1.3 * st.act) * kk, 0.3 * kk);
-            });
-            CH.forEach(function (C) {
-                if (C.terminal) return;
-                var f = mf(C.m);
-                c.fillStyle = "#888888"; c.globalAlpha = (0.22 + 0.48 * C.act) * f;
-                taper(c, C.path, (0.62 + 0.62 * C.act) * kk, 0.2 * kk);
-            });
-            // luminous cores on active branches
-            c.strokeStyle = "#d9d9d9"; c.lineWidth = 0.45 * kk;
-            ST.forEach(function (st) { if (st.act < 0.05) return; c.globalAlpha = 0.24 * st.act * mf(st.m); c.beginPath(); strokeAll(c, st.path); c.stroke(); });
-        }
-
-        // synaptic spines
-        c.strokeStyle = "#888888"; c.lineWidth = 0.45 * kk;
-        for (var pass = 0; pass < 2; pass++) {
-            if (pass === 1 && !anyDim()) break;
-            c.globalAlpha = pass === 0 ? 0.32 : 0.32 * DIM;
-            c.beginPath();
-            for (i = 0; i < nSpine; i++) {
-                var o = i * 5, m = spineP[o + 4], on = m < 0 || lit(m);
-                if ((pass === 0) !== on) continue;
-                c.moveTo(spineP[o], spineP[o + 1]); c.lineTo(spineP[o + 2], spineP[o + 3]);
-            }
-            c.stroke();
-        }
-        c.fillStyle = "#a3a3a3";
-        c.globalAlpha = 0.45;
-        c.beginPath();
-        for (i = 0; i < nSpine; i++) { var o2 = i * 5; if (spineP[o2 + 4] >= 0 && !lit(spineP[o2 + 4])) continue; c.rect(spineP[o2 + 2] - 0.4 * kk, spineP[o2 + 3] - 0.4 * kk, 0.8 * kk, 0.8 * kk); }
-        c.fill();
-
-        // static fibre dust (three depth layers); drifting dust is drawn per frame
-        var LA = [0.2, 0.38, 0.6], LS = [0.7, 0.95, 1.2], LC = ["#555555", "#888888", "#a3a3a3"];
-        for (var lay = 0; lay < 3; lay++) {
-            c.fillStyle = LC[lay]; c.beginPath();
-            for (i = 0; i < nDust; i++) {
-                var d6 = i * 6;
-                if (dustP[d6 + 2] !== lay || (dustP[d6 + 4] && !reduce)) continue;
-                var df = dustP[d6 + 3] < 0 || lit(dustP[d6 + 3]);
-                if (!df) continue;
-                c.rect(dustP[d6], dustP[d6 + 1], LS[lay] * kk, LS[lay] * kk);
-            }
-            c.globalAlpha = LA[lay]; c.fill();
-        }
-
-        // soma: translucent membrane body the trunks flow out of, then layered points
-        var bg = c.createRadialGradient(G.somaX, G.somaY, 0, G.somaX, G.somaY, G.somaR * 1.05);
-        bg.addColorStop(0, "rgba(217,217,217,0.34)");
-        bg.addColorStop(0.55, "rgba(136,136,136,0.26)");
-        bg.addColorStop(1, "rgba(85,85,85,0.16)");
-        c.fillStyle = bg; c.globalAlpha = D ? 1 : 0.6;
-        c.beginPath();
-        for (i = 0; i < somaO.length; i += 2) { if (i) c.lineTo(somaO[i], somaO[i + 1]); else c.moveTo(somaO[i], somaO[i + 1]); }
-        c.closePath(); c.fill();
-        c.strokeStyle = "#888888"; c.lineWidth = 0.6 * kk; c.globalAlpha = 0.35; c.stroke();
-        glow(c, G.somaX, G.somaY, G.somaR * 2.6, D ? 0.12 : 0.06);
-        var SC = ["#555555", "#888888", "#d9d9d9", "#ffffff"];
-        for (var band = 0; band < 4; band++) {
-            c.fillStyle = SC[band]; c.beginPath();
-            for (i = 0; i < nSoma; i++) {
-                var s4 = i * 4, bb = somaP[s4 + 2], bi = bb < 0.3 ? 0 : bb < 0.55 ? 1 : bb < 0.8 ? 2 : 3;
-                if (bi !== band) continue;
-                var sz = (somaP[s4 + 3] ? 1.25 : 0.8) * kk;
-                c.rect(somaP[s4] - sz / 2, somaP[s4 + 1] - sz / 2, sz, sz);
-            }
-            c.globalAlpha = [0.55, 0.65, 0.7, 0.75][band] * (D ? 1 : 0.6); c.fill();
-        }
-
-        // static tip filaments (animated version drawn per frame)
-        if (reduce) drawTips(c, 0);
-
-        // labels
-        if (D) {
-            c.textAlign = "center"; c.textBaseline = "middle";
-            labels.forEach(function (lb) {
-                if (lb.m >= 0) {
-                    c.font = font;
-                    c.fillStyle = focus.month === lb.m ? "#ffffff" : !lit(lb.m) ? "#252525" : revealM === lb.m ? "#a3a3a3" : "#555555";
-                } else {
-                    c.font = fontQ;
-                    c.fillStyle = focus.month >= 0 && ST[focus.month].q === lb.q ? "#a3a3a3" : qf(lb.q) < 1 ? "#252525" : "#555555";
-                }
-                c.globalAlpha = 1; c.fillText(lb.t, lb.x, lb.y);
-            });
-        }
-        c.globalAlpha = 1;
-    }
     function strokeSeg(c, p, s0, s1) {
         var i0 = p.index(s0), i1 = p.index(s1);
         p.at(s0, PT); c.moveTo(PT.x, PT.y);
         for (var i = i0 + 1; i <= i1; i++) c.lineTo(p.x[i], p.y[i]);
         p.at(s1, PT); c.lineTo(PT.x, PT.y);
+    }
+
+    var LCOL = ["#555555", "#888888", "#d9d9d9"], LALP = [0.32, 0.45, 0.6], LSZ = [0.7, 0.95, 1.25];
+
+    function drawBase(cv) {
+        var c = cv.getContext("2d"), kk = G.kk, i, k, t;
+        c.setTransform(G.dpr, 0, 0, G.dpr, 0, 0);
+        c.clearRect(0, 0, G.w, G.h);
+        c.lineCap = "round"; c.lineJoin = "round";
+
+        // guide rings: inner hub and outer spine
+        c.lineWidth = 1; c.strokeStyle = "#252525";
+        c.globalAlpha = 0.9; c.beginPath(); c.arc(G.cx, G.cy, G.rSpine, G.a0, G.a0 + G.sweep); c.stroke();
+        c.globalAlpha = 0.7; c.beginPath(); c.arc(G.cx, G.cy, G.rHub, G.a0, G.a0 + G.sweep); c.stroke();
+        // start / today ticks
+        c.globalAlpha = 1; c.strokeStyle = "#555555";
+        c.beginPath(); c.moveTo(px(G.rHub, G.a0), py(G.rHub, G.a0)); c.lineTo(px(G.rSpine + 5, G.a0), py(G.rSpine + 5, G.a0)); c.stroke();
+        var ae = G.a0 + G.sweep;
+        c.strokeStyle = "#a3a3a3";
+        c.beginPath(); c.moveTo(px(G.rHub, ae), py(G.rHub, ae)); c.lineTo(px(G.rSpine + 7, ae), py(G.rSpine + 7, ae)); c.stroke();
+        // weekday letters in the gap
+        c.font = font; c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = "#555555";
+        var letters = "SMTWTFS";
+        for (t = 0; t < 7; t++) c.fillText(letters[t], G.cx, G.cy - trackR[t]);
+
+        if (!D) {
+            c.strokeStyle = "#252525"; c.globalAlpha = 0.5;
+            for (t = 0; t < 7; t++) { c.beginPath(); c.arc(G.cx, G.cy, trackR[t], G.a0, G.a0 + G.sweep); c.stroke(); }
+        } else {
+            // month boundaries
+            c.lineWidth = 0.75;
+            for (i = 0; i < monthEdges.length; i++) {
+                var me = monthEdges[i], fo = focus.month >= 0 && (focus.month === me.m || focus.month === me.m - 1);
+                c.strokeStyle = fo ? "#555555" : "#252525"; c.globalAlpha = fo ? 1 : 0.8;
+                c.beginPath(); strokeAll(c, me.p); c.stroke();
+            }
+        }
+
+        // primary dendrites: spoke (thick at the core) → crossing hairline → tapered dendrite
+        PR.forEach(function (P) {
+            var f = D ? prf(P.k) : 0.45, act = P.act;
+            c.fillStyle = "#888888"; c.globalAlpha = (0.3 + 0.25 * act) * f;
+            taper(c, P.sp, (1.4 + 0.7 * act) * kk, (0.55 + 0.25 * act) * kk);
+            // crossing between week columns: a beaded line, distinct from month boundaries
+            c.fillStyle = "#888888"; c.globalAlpha = 0.55 * f; c.beginPath();
+            for (var bs = 2.5 * kk; bs < P.cr.len; bs += 5 * kk) { P.cr.at(bs, PT); c.moveTo(PT.x + 0.6 * kk, PT.y); c.arc(PT.x, PT.y, 0.6 * kk, 0, TAU); }
+            c.fill();
+            c.fillStyle = "#a3a3a3"; c.globalAlpha = (0.32 + 0.4 * act) * f;
+            taper(c, P.dp, (1.5 + 1.1 * act) * kk, 0.22 * kk);
+            for (var j = 0; j < P.sec.length; j++) {
+                var sc = P.sec[j];
+                c.fillStyle = "#888888"; c.globalAlpha = (0.28 + 0.34 * act) * f;
+                taper(c, sc.path, (0.8 + 0.45 * act) * kk, 0.16 * kk);
+                c.globalAlpha = (0.2 + 0.2 * act) * f;
+                for (var u = 0; u < sc.tert.length; u++) taper(c, sc.tert[u], 0.5 * kk, 0.12 * kk);
+            }
+            // luminous core line along the main dendrite
+            c.strokeStyle = "#d9d9d9"; c.lineWidth = 0.45 * kk; c.globalAlpha = 0.22 * act * f;
+            c.beginPath(); strokeAll(c, P.dp); c.stroke();
+        });
+
+        if (D) {
+            // week twigs on the spine
+            for (k = 0; k < G.W; k++) {
+                var tw = twigs[k];
+                if (!tw) continue;
+                var wf = mf(monthOf[clamp(k * 7 + 3 - G.WD0, 0, N - 1)]);
+                c.strokeStyle = "#888888"; c.globalAlpha = (0.22 + 0.4 * tw.t) * wf; c.lineWidth = (0.45 + 0.55 * tw.t) * kk;
+                c.beginPath(); strokeAll(c, tw.path); c.stroke();
+                c.fillStyle = "#d9d9d9"; c.globalAlpha = (0.3 + 0.35 * tw.t) * wf;
+                c.beginPath(); c.arc(tw.path.x[tw.path.n - 1], tw.path.y[tw.path.n - 1], (0.55 + 0.45 * tw.t) * kk, 0, TAU); c.fill();
+            }
+        }
+
+        // synaptic terminals
+        c.fillStyle = "#d9d9d9";
+        for (i = 0; i < nTerm; i++) {
+            var o = i * 5, f2 = D ? prf(termP[o + 3]) : 0.45;
+            c.globalAlpha = termP[o + 4] * f2;
+            c.beginPath(); c.arc(termP[o], termP[o + 1], termP[o + 2] * kk, 0, TAU); c.fill();
+        }
+
+        // static star particles (drifting ones are drawn per frame)
+        for (var lay = 0; lay < 3; lay++) {
+            for (var pass = 0; pass < 2; pass++) {
+                if (pass && !anyDim()) break;
+                c.fillStyle = LCOL[lay]; c.beginPath();
+                for (i = 0; i < nStar; i++) {
+                    var s6 = i * 6;
+                    if (starP[s6 + 2] !== lay || (starP[s6 + 3] && !reduce)) continue;
+                    var on = starP[s6 + 5] < 0 || prf(starP[s6 + 5]) >= 1;
+                    if (on === !!pass) continue;
+                    c.rect(starP[s6], starP[s6 + 1], LSZ[lay] * kk, LSZ[lay] * kk);
+                }
+                c.globalAlpha = LALP[lay] * (pass ? DIM : 1); c.fill();
+            }
+        }
+
+        // central core: faint inner fibres, small highlight, layered particles
+        c.strokeStyle = "#888888"; c.lineWidth = 0.45 * kk; c.globalAlpha = D ? 0.3 : 0.18;
+        c.beginPath(); for (i = 0; i < coreF.length; i++) strokeAll(c, coreF[i]); c.stroke();
+        glow(c, G.cx, G.cy, G.rCore * 1.4, D ? 0.11 : 0.05);
+        var SC = ["#555555", "#888888", "#d9d9d9", "#ffffff"], SA = [0.5, 0.6, 0.7, 0.8];
+        for (var band = 0; band < 4; band++) {
+            c.fillStyle = SC[band]; c.beginPath();
+            for (i = 0; i < nCore; i++) {
+                var c4 = i * 4, bb = coreP[c4 + 2], bi = bb < 0.3 ? 0 : bb < 0.55 ? 1 : bb < 0.8 ? 2 : 3;
+                if (bi !== band) continue;
+                var sz = (coreP[c4 + 3] ? 1.3 : 0.8) * kk;
+                c.rect(coreP[c4] - sz / 2, coreP[c4 + 1] - sz / 2, sz, sz);
+            }
+            c.globalAlpha = SA[band] * (D ? 1 : 0.55); c.fill();
+        }
+
+        // month labels inside the field
+        if (D) {
+            c.font = font; c.textAlign = "center"; c.textBaseline = "middle"; c.globalAlpha = 1;
+            labels.forEach(function (lb) {
+                c.fillStyle = focus.month === lb.m ? "#ffffff" : !lit(lb.m) ? "#252525" : revealM === lb.m ? "#a3a3a3" : "#555555";
+                c.fillText(lb.t, lb.x, lb.y);
+            });
+        }
+        c.globalAlpha = 1;
     }
 
     function refreshBase(force) {
@@ -700,7 +682,7 @@
        ========================================================= */
 
     var SIG = [], FLR = [], DLY = [];
-    for (var si = 0; si < 12; si++) SIG.push({ on: false, path: null, s: 0, end: 0, v: 0, trail: 0, a: 1, kind: 0, marks: null, mi: 0, day: -1, strong: 0 });
+    for (var si = 0; si < 12; si++) SIG.push({ on: false, path: null, s: 0, end: 0, v: 0, trail: 0, a: 1, kind: 0, marks: null, mi: 0, day: -1, strong: 0, tx: 0, ty: 0, tip: false });
     for (var fi = 0; fi < 48; fi++) FLR.push({ on: false, x: 0, y: 0, t: 0, dur: 0, size: 0, a: 0, ring: false });
     for (var di = 0; di < 24; di++) DLY.push({ on: false, day: 0, at: 0, s: 0 });
     var nextAmbient = 0;
@@ -709,7 +691,7 @@
         for (var i = 0; i < SIG.length; i++) if (!SIG[i].on) {
             var g = SIG[i];
             g.on = true; g.path = path; g.s = 0; g.end = path.len; g.v = v; g.kind = kind;
-            g.trail = 0.09 * Math.min(G.w, G.h); g.a = a || 1; g.marks = null; g.mi = 0; g.day = -1; g.strong = 0;
+            g.trail = 0.08 * Math.min(G.w, G.h); g.a = a || 1; g.marks = null; g.mi = 0; g.day = -1; g.strong = 0; g.tip = false;
             return g;
         }
         return null;
@@ -721,52 +703,63 @@
     }
     function flareDay(i, strength) {
         var tr = tiers[i];
-        flare(dayX[i], dayY[i], (8 + 5 * tr) * G.kk * (0.75 + 0.5 * strength), (0.22 + 0.11 * tr) * strength, 0.8 + 0.18 * tr, tr >= 3 && strength >= 0.9);
+        flare(dayX[i], dayY[i], (8 + 4.5 * tr) * G.kk * (0.75 + 0.5 * strength), Math.min(0.62, (0.22 + 0.1 * tr) * strength), 0.8 + 0.18 * tr, tr >= 3 && strength >= 0.9);
     }
     function delayFlare(i, ms, s) {
         for (var k = 0; k < DLY.length; k++) if (!DLY[k].on) { var q = DLY[k]; q.on = true; q.day = i; q.at = performance.now() + ms; q.s = s; return; }
     }
 
-    /* routes along the real anatomy: soma → quarter → month → segment → day */
+    /* route along the real structure: core → spoke → hub ring → the day's week column → the day */
     function routeTo(i) {
-        var C = CH[dayCh[i]], st = ST[C.m], T = TR[st.q], p = new Path(160);
-        p.push(G.somaX, G.somaY);
-        appendSeg(p, T.path, 0, st.sS);
-        if (C.terminal) appendSeg(p, st.path, 0, dayS[i]);
-        else { appendSeg(p, st.path, 0, C.sS); appendSeg(p, C.path, 0, dayS[i]); }
+        var P = PR[weekPr[weekOf[i]]], p = new Path(160);
+        appendSeg(p, P.sp, 0, P.sp.len);
+        var a1 = P.a, a2 = ang(weekOf[i]), n = Math.max(2, Math.ceil(Math.abs(a2 - a1) * G.rHub / 4));
+        for (var q = 1; q <= n; q++) { var aa = a1 + (a2 - a1) * q / n; p.push(px(G.rHub, aa), py(G.rHub, aa)); }
+        p.push(dayX[i], dayY[i]);
+        return p;
+    }
+    /* core → dendrite, optionally turning into one of its secondary branches */
+    function dendRoute(k, secIdx) {
+        var P = PR[k];
+        if (secIdx < 0 || !P.sec[secIdx]) return P.route;
+        var sc = P.sec[secIdx], p = new Path(140);
+        appendSeg(p, P.route, 0, P.dpS + sc.s0); appendSeg(p, sc.path, 0, sc.path.len);
         return p;
     }
     function monthTour(m) {
-        var st = ST[m], T = TR[st.q], p = new Path(512), mk = { s: [], d: [] }, pos = 0;
-        p.push(G.somaX, G.somaY);
-        appendSeg(p, T.path, 0, st.sS);
-        st.chunks.forEach(function (ci) {
-            var C = CH[ci], cur;
-            if (!C.terminal) { appendSeg(p, st.path, pos, C.sS); pos = C.sS; cur = 0; }
-            else cur = pos;
-            for (var d = C.first; d <= C.last; d++) { appendSeg(p, C.path, cur, dayS[d]); cur = dayS[d]; mk.s.push(p.len); mk.d.push(d); }
-            if (!C.terminal) { appendSeg(p, C.path, cur, C.path.len); appendSeg(p, C.path, C.path.len, 0); }
-            else appendSeg(p, C.path, cur, C.path.len);
-        });
+        var mo = months[m], p = routeTo(mo.first), mk = { s: [p.len], d: [mo.first] };
+        for (var d = mo.first + 1; d <= mo.last; d++) { p.push(dayX[d], dayY[d]); mk.s.push(p.len); mk.d.push(d); }
         return { p: p, mk: mk };
     }
 
     function ambient(now) {
         if (!D || reduce || pb.playing || now < nextAmbient) return;
-        nextAmbient = now + 3800 + Math.random() * 5200; // irregular, unhurried
+        // irregular: mostly 3–8 s apart, now and then a quick second pulse
+        nextAmbient = now + (Math.random() < 0.18 ? 600 + Math.random() * 800 : 3000 + Math.random() * 5000);
         var live = 0, i;
         for (i = 0; i < SIG.length; i++) if (SIG[i].on && SIG[i].kind === 0) live++;
-        if (live >= 1) return;
-        // weighted by real activity: busy days are visited more often
+        if (live >= 2) return;
         var tot = 0; for (i = 0; i < N; i++) tot += counts[i];
         if (!tot) return;
-        var r = Math.random() * tot, pick = N - 1;
-        for (i = 0; i < N; i++) { r -= counts[i]; if (r <= 0) { pick = i; break; } }
-        var g = spawn(routeTo(pick), 0.26 * Math.min(G.w, G.h), 0, 0.7);
+        var g;
+        if (Math.random() < 0.45) { // out along a dendrite, weighted by its activity
+            var wsum = 0; PR.forEach(function (P) { wsum += 0.15 + P.act; });
+            var r = Math.random() * wsum, k = 0;
+            for (k = 0; k < PR.length; k++) { r -= 0.15 + PR[k].act; if (r <= 0) break; }
+            k = Math.min(k, PR.length - 1);
+            var P = PR[k], sx = Math.random() < 0.55 && P.sec.length ? Math.floor(Math.random() * P.sec.length) : -1, path = dendRoute(k, sx);
+            g = spawn(path, 0.22 * Math.min(G.w, G.h), 0, 0.65);
+            if (g) { g.tip = true; g.tx = path.x[path.n - 1]; g.ty = path.y[path.n - 1]; }
+            return;
+        }
+        // or to a day, weighted by its real count
+        var rr = Math.random() * tot, pick = N - 1;
+        for (i = 0; i < N; i++) { rr -= counts[i]; if (rr <= 0) { pick = i; break; } }
+        g = spawn(routeTo(pick), 0.24 * Math.min(G.w, G.h), 0, 0.7);
         if (g) g.day = pick;
     }
 
-    /* selected day: signal from the soma to the day, then its streak answers */
+    /* selected day: signal from the core to the day, then its streak answers */
     function trace(i) {
         if (!D) return;
         if (reduce) {
@@ -775,7 +768,7 @@
             staticTimer = setTimeout(function () { staticTrace = null; requestDraw(); }, 2600);
             requestDraw(); return;
         }
-        var g = spawn(routeTo(i), 0.42 * Math.min(G.w, G.h), 2, 1);
+        var g = spawn(routeTo(i), 0.4 * Math.min(G.w, G.h), 2, 1);
         if (g) { g.day = i; g.strong = 1; }
         wake();
     }
@@ -786,6 +779,14 @@
         var S2 = streaks[st], n = 0;
         for (var d = i + 1; d <= S2.end && n < 12; d++, n++) delayFlare(d, 110 * (n + 1), 0.75);
         for (d = i - 1, n = 0; d >= S2.start && n < 12; d--, n++) delayFlare(d, 110 * (n + 1), 0.6);
+    }
+    /* week selected: a pulse out along its dendrite */
+    function pulseWeek(w) {
+        if (!D) return;
+        if (reduce) { var tw = twigs[w]; if (tw) flare(tw.path.x[tw.path.n - 1], tw.path.y[tw.path.n - 1], 14 * G.kk, 0.5, 1); requestDraw(); return; }
+        var P = PR[weekPr[w]], g = spawn(P.route, 0.36 * Math.min(G.w, G.h), 5, 0.9);
+        if (g) { g.tip = true; g.tx = P.dp.x[P.dp.n - 1]; g.ty = P.dp.y[P.dp.n - 1]; g.strong = 1; }
+        wake();
     }
 
     /* month selected: one controlled signal through all of its daily nodes */
@@ -805,7 +806,7 @@
         list.forEach(function (i, n) {
             setTimeout(function () {
                 if (reduce) { flareDay(i, 1.3); requestDraw(); return; }
-                var g = spawn(routeTo(i), 0.34 * Math.min(G.w, G.h), 3, 1);
+                var g = spawn(routeTo(i), 0.32 * Math.min(G.w, G.h), 3, 1);
                 if (g) { g.day = i; g.strong = 1; }
                 wake();
             }, 400 + n * 1100);
@@ -816,33 +817,28 @@
        YEAR IN MOTION — playback state
        ========================================================= */
 
-    var pb = { t: 0, playing: false, lastD: -1, lastM: -1, timer: 0 };
+    var pb = { t: 0, playing: false, lastD: -1, lastM: -1, lastK: -1, timer: 0, scrub: false };
+    var HEAD = { x: 0, y: 0 };
+    var HT = new Float32Array(48), htN = 0, htI = 0; // head trail ring buffer (24 points)
 
-    function headPos(t, out) { // luminous head moving through the chronological paths
+    function headPos(t, out) { // the head moves through the field in date order
         var d = Math.floor(t), f = t - d;
         if (d >= N - 1) { d = N - 1; f = 0; }
-        var ci = dayCh[d], s = dayS[d];
-        if (d + 1 < N && f > 0) {
-            if (dayCh[d + 1] === ci) s += (dayS[d + 1] - s) * f;
-            else if (f < 0.5) s += (CH[ci].path.len - s) * (f * 2);
-            else { ci = dayCh[d + 1]; s = dayS[d + 1] * ((f - 0.5) * 2); }
-        }
-        out.ci = ci; out.s = s;
-        CH[ci].path.at(s, PT); out.x = PT.x; out.y = PT.y;
+        var e = f * f * (3 - 2 * f), d2 = Math.min(N - 1, d + 1);
+        out.x = dayX[d] + (dayX[d2] - dayX[d]) * e; out.y = dayY[d] + (dayY[d2] - dayY[d]) * e;
         return out;
     }
-    var HEAD = { ci: 0, s: 0, x: 0, y: 0 };
 
     function revealUpTo(d, flares) {
         for (var x = pb.lastD + 1; x <= d; x++) {
             if (flares && counts[x] > 0) flareDay(x, 0.85);
-            var m = monthOf[x];
-            if (m !== pb.lastM) {
-                pb.lastM = m;
-                if (flares && !reduce) { // conduction: soma → the new month's branch
-                    var st = ST[m], T = TR[st.q], p = new Path(96);
-                    p.push(G.somaX, G.somaY); appendSeg(p, T.path, 0, st.sS); appendSeg(p, st.path, 0, Math.min(st.path.len, 1.2 * G.S));
-                    spawn(p, 0.9 * Math.min(G.w, G.h), 4, 0.7);
+            pb.lastM = monthOf[x];
+            var k = weekPr[weekOf[x]];
+            if (k !== pb.lastK) {
+                pb.lastK = k;
+                if (flares && !reduce) { // conduction: core → the dendrite that owns these weeks
+                    var g = spawn(PR[k].route, 0.75 * Math.min(G.w, G.h), 4, 0.6);
+                    if (g) { g.tip = true; g.tx = PR[k].dp.x[PR[k].dp.n - 1]; g.ty = PR[k].dp.y[PR[k].dp.n - 1]; }
                 }
             }
         }
@@ -851,9 +847,9 @@
 
     function play() {
         if (!D) return;
-        if (pb.t >= N - 1) { pb.t = 0; pb.lastD = -1; pb.lastM = -1; }
-        pb.playing = true;
-        sel.day = -1; sel.month = -1; hover.day = hover.month = -1;
+        if (pb.t >= N - 1) { pb.t = 0; pb.lastD = -1; pb.lastM = -1; pb.lastK = -1; }
+        pb.playing = true; pb.scrub = false; htN = 0;
+        sel.day = -1; sel.month = -1; sel.week = -1; hover.day = hover.month = hover.week = -1;
         applyFocus(); refreshTip();
         playUI();
         announce("Playing the year from " + fmtLong.format(new Date(dateMs[Math.floor(pb.t)])) + ".");
@@ -862,7 +858,7 @@
     function pause(silent) {
         if (!pb.playing) return;
         pb.playing = false; clearTimeout(pb.timer);
-        playUI(); readout();
+        playUI(); readout(); requestDraw();
         if (!silent) announce("Playback paused on " + fmtLong.format(new Date(dateMs[Math.floor(pb.t)])) + ".");
     }
     function finish() {
@@ -881,8 +877,8 @@
     }
     function scrubTo(d) {
         pause(true);
-        pb.t = d; pb.lastD = d; pb.lastM = monthOf[d];
-        sel.month = -1; applyFocus();
+        pb.t = d; pb.lastD = d; pb.lastM = monthOf[d]; pb.lastK = weekPr[weekOf[d]]; pb.scrub = true;
+        sel.month = -1; sel.day = -1; sel.week = -1; applyFocus(); refreshTip();
         readout(); requestDraw();
     }
 
@@ -897,7 +893,7 @@
        ========================================================= */
 
     var inView = false, raf = 0, last = 0, drawQueued = false, lastPaint = 0;
-    var hover = { day: -1, month: -1 }, sel = { day: -1, month: -1 };
+    var hover = { day: -1, month: -1, week: -1 }, sel = { day: -1, month: -1, week: -1 };
     var focusAmt = 1, routeCache = { day: -1, p: null };
 
     function wake() {
@@ -912,7 +908,7 @@
     }
     function frame(now) {
         raf = 0;
-        var dt = Math.min(0.05, (now - last) / 1000);
+        var dt = clamp((now - last) / 1000, 0, 0.05); // rAF timestamps can precede the last performance.now()
         var active = busy();
         // only fine drift left → ~30 fps is plenty
         if (active || now - lastPaint > 31) { last = now; lastPaint = now; render(dt, now); }
@@ -927,22 +923,8 @@
         return false;
     }
 
-    function drawTips(c, time) {
-        var kk = G.kk, hl = (G.mobile ? 1.3 : 1.7) * kk * 4;
-        c.strokeStyle = "#888888"; c.lineWidth = 0.5 * kk; c.globalAlpha = 0.45;
-        c.beginPath();
-        for (var i = 0; i < nTip; i++) {
-            var o = i * 5, m = tipP[o + 3];
-            if (!lit(m)) continue;
-            var a = tipP[o + 2] + Math.sin(time * 0.55 + tipP[o + 4]) * 0.09, x = tipP[o], y = tipP[o + 1];
-            var mx = x + Math.cos(a) * hl * 0.55, my = y + Math.sin(a) * hl * 0.55, a2 = a + Math.sin(time * 0.8 + tipP[o + 4] * 1.3) * 0.12;
-            c.moveTo(x, y); c.quadraticCurveTo(mx, my, mx + Math.cos(a2) * hl * 0.45, my + Math.sin(a2) * hl * 0.45);
-        }
-        c.stroke();
-    }
-
     function render(dt, now) {
-        var c = ctx, kk = G.kk, i, g, time = now / 1000;
+        var c = ctx, kk = G.kk, i, j, g, time = now / 1000;
         c.setTransform(1, 0, 0, 1, 0, 0);
         c.globalAlpha = 1;
         c.clearRect(0, 0, canvas.width, canvas.height);
@@ -956,23 +938,32 @@
         c.setTransform(G.dpr, 0, 0, G.dpr, 0, 0);
         c.lineCap = "round"; c.lineJoin = "round";
 
-        // drifting fibre dust (low amplitude, per-particle phase)
         if (!reduce) {
-            var LA = [0.2, 0.38, 0.6], LS = [0.7, 0.95, 1.2], LC = ["#555555", "#888888", "#a3a3a3"], amp = 0.9 * kk;
+            // drifting star particles (tiny amplitude, per-particle phase)
+            var amp = 0.8 * kk;
             for (var lay = 0; lay < 3; lay++) {
-                c.fillStyle = LC[lay]; c.beginPath();
-                for (i = 0; i < nDust; i++) {
-                    var d6 = i * 6;
-                    if (!dustP[d6 + 4] || dustP[d6 + 2] !== lay) continue;
-                    if (dustP[d6 + 3] >= 0 && !lit(dustP[d6 + 3])) continue;
-                    var ph = dustP[d6 + 5];
-                    c.rect(dustP[d6] + Math.sin(time * 0.35 + ph) * amp * (1 + lay * 0.4), dustP[d6 + 1] + Math.cos(time * 0.28 + ph * 1.7) * amp * (1 + lay * 0.4), LS[lay] * kk, LS[lay] * kk);
+                c.fillStyle = LCOL[lay]; c.beginPath();
+                for (i = 0; i < nStar; i++) {
+                    var s6 = i * 6;
+                    if (!starP[s6 + 3] || starP[s6 + 2] !== lay) continue;
+                    if (starP[s6 + 5] >= 0 && prf(starP[s6 + 5]) < 1) continue;
+                    var ph = starP[s6 + 4];
+                    c.rect(starP[s6] + Math.sin(time * 0.33 + ph) * amp, starP[s6 + 1] + Math.cos(time * 0.27 + ph * 1.7) * amp, LSZ[lay] * kk, LSZ[lay] * kk);
                 }
-                c.globalAlpha = LA[lay]; c.fill();
+                c.globalAlpha = LALP[lay]; c.fill();
             }
-            drawTips(c, time);
-            // soma breathes very slightly
-            glow(c, G.somaX, G.somaY, G.somaR * (2.2 + 0.12 * Math.sin(time * 0.7)), D ? 0.07 + 0.03 * Math.sin(time * 0.7) : 0.03);
+            // the core breathes very slightly
+            glow(c, G.cx, G.cy, G.rCore * (1.15 + 0.06 * Math.sin(time * 0.7)), D ? 0.05 + 0.02 * Math.sin(time * 0.7) : 0.02);
+        }
+        // star glints at the brightest dendrite tips (slow twinkle; static under reduced motion)
+        c.strokeStyle = "#ffffff"; c.lineWidth = 0.6 * kk;
+        for (i = 0; i < nGlint; i++) {
+            var o4 = i * 4, gl = 3.2 * kk, ga = reduce ? 0.4 : 0.3 + 0.22 * Math.sin(time * 0.9 + glintP[o4 + 2]);
+            if (D && prf(glintP[o4 + 3]) < 1) ga *= DIM;
+            c.globalAlpha = ga; c.beginPath();
+            c.moveTo(glintP[o4] - gl, glintP[o4 + 1]); c.lineTo(glintP[o4] + gl, glintP[o4 + 1]);
+            c.moveTo(glintP[o4], glintP[o4 + 1] - gl); c.lineTo(glintP[o4], glintP[o4 + 1] + gl);
+            c.stroke();
         }
         if (!D) return;
 
@@ -980,7 +971,7 @@
 
         // playback progress
         if (pb.playing && !reduce && dt) {
-            pb.t = Math.min(N - 1, pb.t + dt * PLAY_RATE);
+            pb.t = clamp(pb.t + dt * PLAY_RATE, 0, N - 1);
             var dNow = Math.floor(pb.t);
             if (dNow !== pb.lastD) { revealUpTo(dNow, true); readout(); }
             if (pb.t >= N - 1) finish();
@@ -989,37 +980,49 @@
         var rmNow = revealing ? monthOf[rv] : -1;
         if (rmNow !== revealM) { revealM = rmNow; refreshBase(false); }
 
-        // selected month brightens progressively from the soma outwards
-        var fm = focus.month;
-        if (fm >= 0 && ST[fm]) {
-            if (focusAmt < 1) focusAmt = reduce ? 1 : Math.min(1, focusAmt + (dt || 0.016) / 1.1);
-            var st = ST[fm], T = TR[st.q], grow = (1 - Math.pow(1 - focusAmt, 2.2));
-            var Ltot = st.sS + st.path.len, reach = grow * Ltot * 1.05;
-            c.strokeStyle = "#ffffff";
-            c.globalAlpha = 0.7; c.lineWidth = 1.5 * kk;
-            c.beginPath(); strokeTo(c, T.path, Math.min(st.sS, reach)); c.stroke();
-            if (reach > st.sS) {
-                var sr = reach - st.sS;
-                c.globalAlpha = 0.8; c.lineWidth = 1.2 * kk;
-                c.beginPath(); strokeTo(c, st.path, sr); c.stroke();
-                c.lineWidth = 0.8 * kk; c.globalAlpha = 0.65; c.beginPath();
-                st.chunks.forEach(function (ci) { var C = CH[ci]; if (!C.terminal && sr > C.sS) strokeTo(c, C.path, (sr - C.sS) * 1.4); });
-                c.stroke();
+        var fm = focus.month, P;
+        if (fm >= 0 && months[fm]) {
+            // selected month: its circular region and dendrites illuminate, easing in
+            if (focusAmt < 1) focusAmt = reduce ? 1 : Math.min(1, focusAmt + (dt || 0.016) / 0.9);
+            var grow = 1 - Math.pow(1 - focusAmt, 2.2), mo = months[fm];
+            var e0 = edge(weekOf[mo.first]), e1 = edge(weekOf[mo.last] + 1), ea = e0 + (e1 - e0) * grow;
+            c.fillStyle = "#ffffff"; c.globalAlpha = 0.04 * grow; c.beginPath();
+            c.arc(G.cx, G.cy, G.rOut + G.step * 0.55, e0, ea); c.arc(G.cx, G.cy, G.rIn - G.step * 0.55, ea, e0, true); c.closePath(); c.fill();
+            c.strokeStyle = "#ffffff"; c.lineWidth = 1.4 * kk;
+            c.globalAlpha = 0.75; c.beginPath(); c.arc(G.cx, G.cy, G.rSpine, e0, ea); c.stroke();
+            c.globalAlpha = 0.45; c.beginPath(); c.arc(G.cx, G.cy, G.rHub, e0, ea); c.stroke();
+            c.lineWidth = 0.9 * kk; c.globalAlpha = 0.5; c.beginPath();
+            for (j = 0; j < PR.length; j++) if (PR[j].months[fm]) strokeTo(c, PR[j].route, PR[j].route.len * grow);
+            c.stroke();
+        } else if (pb.playing || revealing) {
+            // playback: the dendrite owning the current weeks responds softly, the month arc grows
+            P = PR[weekPr[weekOf[rv]]];
+            c.strokeStyle = "#ffffff"; c.globalAlpha = 0.3; c.lineWidth = 1 * kk;
+            c.beginPath(); strokeAll(c, P.route); for (j = 0; j < P.sec.length; j++) strokeAll(c, P.sec[j].path); c.stroke();
+            var m0 = months[monthOf[rv]];
+            c.globalAlpha = 0.55; c.lineWidth = 1.2 * kk; c.beginPath();
+            c.arc(G.cx, G.cy, G.rSpine, edge(weekOf[m0.first]), Math.max(edge(weekOf[m0.first]) + 0.002, ang(weekOf[rv]))); c.stroke();
+        }
+
+        // week hover / selection: its twig, its column, its dendrite
+        var hw = hover.week >= 0 ? hover.week : sel.week;
+        if (hw >= 0) {
+            P = PR[weekPr[hw]];
+            c.strokeStyle = "#ffffff"; c.globalAlpha = 0.4; c.lineWidth = 0.9 * kk;
+            c.beginPath(); strokeAll(c, P.route); c.stroke();
+            if (twigs[hw]) { c.globalAlpha = 0.95; c.lineWidth = 1.3 * kk; c.beginPath(); strokeAll(c, twigs[hw].path); c.stroke(); }
+            c.globalAlpha = 0.55; c.lineWidth = 0.8; c.beginPath();
+            for (i = Math.max(0, hw * 7 - G.WD0); i <= Math.min(N - 1, hw * 7 + 6 - G.WD0); i++) {
+                if (i > rv) continue;
+                c.moveTo(dayX[i] + dayRad[i] + 2.4 * kk, dayY[i]); c.arc(dayX[i], dayY[i], dayRad[i] + 2.4 * kk, 0, TAU);
             }
-        } else if (pb.playing || revealing) { // playback: current month branch softly lit
-            var m2 = monthOf[rv], st2 = ST[m2];
-            if (st2) {
-                c.strokeStyle = "#ffffff"; c.globalAlpha = 0.35; c.lineWidth = 1 * kk; c.beginPath();
-                strokeTo(c, TR[st2.q].path, st2.sS); strokeTo(c, st2.path, st2.path.len);
-                st2.chunks.forEach(function (ci) { if (!CH[ci].terminal) strokeTo(c, CH[ci].path, CH[ci].path.len); });
-                c.stroke();
-            }
+            c.stroke();
         }
 
         // temporal connections between consecutive active days
         c.strokeStyle = "#d9d9d9"; c.lineWidth = 0.6 * kk;
         for (var pass = 0; pass < 2; pass++) {
-            c.globalAlpha = pass ? 0.14 : 0.42; c.beginPath();
+            c.globalAlpha = pass ? 0.1 : 0.3; c.beginPath();
             for (i = 0; i < nLink; i++) {
                 var o = i * 4, b = linkP[o], sm = linkP[o + 1];
                 if ((sm === 1) === !!pass || b > rv) continue;
@@ -1030,8 +1033,11 @@
             c.stroke();
         }
 
-        // day particles, batched per tier (focus + playback reveal)
-        var FILL = ["#555555", "#888888", "#a3a3a3", "#d9d9d9", "#ffffff"], ALPHA = [0.95, 0.9, 0.95, 1, 1];
+        // day particles: dark collar (depth), body per tier, soft specular core
+        c.fillStyle = "#050505"; c.globalAlpha = 0.85; c.beginPath();
+        for (i = 0; i <= rv; i++) { if (!tiers[i]) continue; var cr = dayRad[i] + 1.2 * kk; c.moveTo(dayX[i] + cr, dayY[i]); c.arc(dayX[i], dayY[i], cr, 0, TAU); }
+        c.fill();
+        var FILL = ["#555555", "#888888", "#a3a3a3", "#d9d9d9", "#ffffff"], ALPHA = [0.9, 0.9, 0.95, 1, 1];
         for (var tier = 0; tier < 5; tier++) {
             for (var on = 1; on >= 0; on--) {
                 if (!on && fm < 0) continue;
@@ -1044,39 +1050,53 @@
                 c.fill();
             }
         }
+        c.fillStyle = "#ffffff";
+        for (var ring = 0; ring < 2; ring++) {
+            c.globalAlpha = ring ? 0.7 : 0.3; c.beginPath();
+            for (i = 0; i <= rv; i++) {
+                if (tiers[i] < 2 || (fm >= 0 && monthOf[i] !== fm)) continue;
+                var r2 = dayRad[i] * (ring ? 0.42 : 0.72);
+                c.moveTo(dayX[i] + r2, dayY[i]); c.arc(dayX[i], dayY[i], r2, 0, TAU);
+            }
+            c.fill();
+        }
         if (revealing) { // not reached yet: faint graphite seeds
             c.fillStyle = "#252525"; c.globalAlpha = 1; c.beginPath();
             for (i = rv + 1; i < N; i++) { var rr = 0.85 * kk; c.moveTo(dayX[i] + rr, dayY[i]); c.arc(dayX[i], dayY[i], rr, 0, TAU); }
             c.fill();
         }
-        // satellites (small surrounding details scaled by the day's count)
+        // satellites (small synaptic details scaled by the day's count)
         c.fillStyle = "#d9d9d9"; c.beginPath();
-        var ssz = 0.75 * kk;
         for (i = 0; i < nSat; i++) {
-            var s4 = i * 4, sd = satP[s4 + 2];
+            var s4 = i * 4, sd = satP[s4 + 2], ss = 0.75 * kk * satP[s4 + 3] * 1.5;
             if (sd > rv || (fm >= 0 && monthOf[sd] !== fm)) continue;
-            c.rect(satP[s4] - ssz / 2, satP[s4 + 1] - ssz / 2, ssz * satP[s4 + 3] * 1.6, ssz * satP[s4 + 3] * 1.6);
+            c.rect(satP[s4] - ss / 2, satP[s4 + 1] - ss / 2, ss, ss);
         }
-        c.globalAlpha = 0.45; c.fill();
-        // local glow: subtle for high, a soft halo for exceptional
+        c.globalAlpha = 0.5; c.fill();
+        // restrained glow: subtle for high, a small halo for exceptional
         for (i = 0; i <= rv; i++) {
             if (tiers[i] < 3) continue;
             var gf = fm < 0 || monthOf[i] === fm ? 1 : 0.2;
-            if (tiers[i] === 4) glow(c, dayX[i], dayY[i], 15 * kk, 0.34 * gf);
-            else glow(c, dayX[i], dayY[i], 8.5 * kk, 0.16 * gf);
+            if (tiers[i] === 4) glow(c, dayX[i], dayY[i], 13 * kk, 0.32 * gf);
+            else glow(c, dayX[i], dayY[i], 8 * kk, 0.14 * gf);
         }
 
-        // hover / selected day: its route from the soma, ring, glow
+        // hovered / selected / scrubbed day: its route from the core, its dendrite, ring, glow
         var hd = hover.day >= 0 ? hover.day : sel.day;
+        if (hd < 0 && pb.scrub && !pb.playing && fm < 0 && hw < 0) hd = rv;
         if (hd >= 0) {
             if (routeCache.day !== hd) { routeCache.day = hd; routeCache.p = routeTo(hd); }
-            c.strokeStyle = "#ffffff"; c.globalAlpha = 0.75; c.lineWidth = 1.05 * kk;
-            c.beginPath(); strokeTo(c, routeCache.p, routeCache.p.len); c.stroke();
+            P = PR[weekPr[weekOf[hd]]];
+            c.strokeStyle = "#ffffff"; c.globalAlpha = 0.3; c.lineWidth = 0.8 * kk;
+            c.beginPath(); strokeSeg(c, P.route, P.hubS, P.route.len); c.stroke();
+            c.globalAlpha = 0.8; c.lineWidth = 1.05 * kk;
+            c.beginPath(); strokeAll(c, routeCache.p); c.stroke();
+            if (twigs[weekOf[hd]]) { c.globalAlpha = 0.6; c.beginPath(); strokeAll(c, twigs[weekOf[hd]].path); c.stroke(); }
             c.globalAlpha = 1; c.lineWidth = 1;
             c.beginPath(); c.arc(dayX[hd], dayY[hd], dayRad[hd] + 3.6 * kk, 0, TAU); c.stroke();
-            glow(c, dayX[hd], dayY[hd], 14 * kk, 0.45);
+            glow(c, dayX[hd], dayY[hd], 13 * kk, 0.42);
         }
-        if (staticTrace) { c.strokeStyle = "#ffffff"; c.globalAlpha = 0.9; c.lineWidth = 1.3 * kk; c.beginPath(); strokeTo(c, staticTrace, staticTrace.len); c.stroke(); }
+        if (staticTrace) { c.strokeStyle = "#ffffff"; c.globalAlpha = 0.9; c.lineWidth = 1.3 * kk; c.beginPath(); strokeAll(c, staticTrace); c.stroke(); }
 
         // signals
         for (i = 0; i < SIG.length; i++) {
@@ -1087,27 +1107,32 @@
             var done = g.s >= g.end;
             if (done) g.s = g.end;
             var env = Math.min(1, g.s / (0.06 * g.path.len + 1) + 0.25);
-            drawTrail(c, g.path, g.s, g.trail, 0.8 * g.a * env, (g.kind === 2 ? 1.25 : 1) * kk);
+            drawTrail(c, g.path, g.s, g.trail, 0.75 * g.a * env, (g.kind === 2 ? 1.2 : 0.9) * kk);
+            sparks(c, g.path, g.s, g.trail, g.a * env, now, i);
             g.path.at(g.s, PT);
-            glow(c, PT.x, PT.y, (g.kind === 2 ? 14 : 11) * kk, 0.9 * g.a * env);
-            c.globalAlpha = g.a * env; c.fillStyle = "#ffffff"; c.beginPath(); c.arc(PT.x, PT.y, 1.15 * kk, 0, TAU); c.fill();
+            glow(c, PT.x, PT.y, (g.kind === 2 ? 12 : 10) * kk, 0.8 * g.a * env);
+            c.globalAlpha = g.a * env; c.fillStyle = "#ffffff"; c.beginPath(); c.arc(PT.x, PT.y, 1.1 * kk, 0, TAU); c.fill();
             if (done) {
                 g.on = false;
                 if (g.day >= 0) {
                     flareDay(g.day, g.strong ? 1.2 : 0.7);
                     if (g.kind === 2 || g.kind === 3) streakRipple(g.day);
-                }
+                } else if (g.tip) flare(g.tx, g.ty, (g.strong ? 16 : 11) * kk, g.strong ? 0.45 : 0.28, 1, false);
             }
         }
         // delayed flares (streak ripples)
         for (i = 0; i < DLY.length; i++) if (DLY[i].on && now >= DLY[i].at) { DLY[i].on = false; if (DLY[i].day <= rv) flareDay(DLY[i].day, DLY[i].s); }
 
-        // playback head
+        // playback head: bright particle moving through the field in date order, short particle trail
         if (pb.playing && !reduce) {
             headPos(pb.t, HEAD);
-            var hp = CH[HEAD.ci].path;
-            drawTrail(c, hp, HEAD.s, 0.05 * Math.min(G.w, G.h), 0.8, 1.2 * kk);
-            glow(c, HEAD.x, HEAD.y, 16 * kk, 0.85);
+            HT[htI * 2] = HEAD.x; HT[htI * 2 + 1] = HEAD.y; htI = (htI + 1) % 24; if (htN < 24) htN++;
+            c.fillStyle = "#d9d9d9";
+            for (j = 1; j < htN; j++) {
+                var q2 = ((htI - 1 - j) % 24 + 24) % 24;
+                c.globalAlpha = 0.5 * (1 - j / htN); c.beginPath(); c.arc(HT[q2 * 2], HT[q2 * 2 + 1], (1.2 - 0.9 * j / htN) * kk, 0, TAU); c.fill();
+            }
+            glow(c, HEAD.x, HEAD.y, 14 * kk, 0.75);
             c.globalAlpha = 1; c.fillStyle = "#ffffff"; c.beginPath(); c.arc(HEAD.x, HEAD.y, 1.5 * kk, 0, TAU); c.fill();
         }
 
@@ -1145,6 +1170,20 @@
             if (started) c.stroke();
         }
     }
+    /* silver-white particles shed behind a signal head (reuses PT / PT2, no allocation) */
+    var PT2 = { x: 0, y: 0 };
+    function sparks(c, p, s, len, a, now, seed) {
+        c.fillStyle = "#d9d9d9";
+        for (var n = 1; n <= 5; n++) {
+            var sd = s - len * (n / 5.5);
+            if (sd <= 0) break;
+            p.at(sd, PT); p.at(Math.max(0, sd - 2), PT2);
+            var dx = PT.x - PT2.x, dy = PT.y - PT2.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+            var off = Math.sin(now * 0.004 + n * 1.9 + seed) * (0.6 + 0.35 * n) * G.kk;
+            c.globalAlpha = a * 0.5 * (1 - n / 6);
+            c.beginPath(); c.arc(PT.x - dy / d * off, PT.y + dx / d * off, (0.75 - 0.08 * n) * G.kk, 0, TAU); c.fill();
+        }
+    }
 
     /* =========================================================
        INTERACTION
@@ -1153,30 +1192,35 @@
     function local(e) { var r = canvas.getBoundingClientRect(); return { x: (e.clientX - r.left) * (G.w / r.width), y: (e.clientY - r.top) * (G.h / r.height) }; }
 
     function hitDay(x, y, tol, touch) { // distance to the particle's edge: larger (busier) days are easier targets
+        var dx = x - G.cx, dy = y - G.cy, r = Math.hypot(dx, dy);
+        if (r < G.rIn - G.step - tol || r > G.rOut + G.step + tol) return -1;
         var best = -1, bd = tol, rv = Math.floor(pb.t);
         for (var i = 0; i <= rv; i++) {
-            var d = Math.hypot(dayX[i] - x, dayY[i] - y) - dayRad[i] * (touch ? 2.2 : 1);
+            var d = Math.hypot(dayX[i] - x, dayY[i] - y) - dayRad[i] * (touch ? 1.6 : 1);
             if (d < bd) { bd = d; best = i; }
         }
         return best;
     }
+    function hitWeek(x, y, tol) { // the band between the field and the spine, or a week's twig
+        var dx = x - G.cx, dy = y - G.cy, r = Math.hypot(dx, dy);
+        if (r < G.rOut + G.step * 0.55 || r > G.rSpine + 0.09 * G.R + tol) return -1;
+        var a = ((Math.atan2(dy, dx) - G.a0) % TAU + TAU) % TAU;
+        if (a > G.sweep) return -1;
+        var w = clamp(Math.floor((a / G.sweep) * G.W), 0, G.W - 1);
+        if (r <= G.rSpine + tol * 0.6) return w;
+        for (var k = w - 1; k <= w + 1; k++) {
+            var tw = twigs[k];
+            if (!tw) continue;
+            for (var i = 0; i < tw.path.n; i++) if (Math.hypot(tw.path.x[i] - x, tw.path.y[i] - y) < tol) return k;
+        }
+        return -1;
+    }
     function hitMonth(x, y, tol) {
-        var best = -1, bd = tol * tol, i;
-        for (var m = 0; m < ST.length; m++) {
-            var st = ST[m];
-            if (!st) continue;
-            var list = [st.path];
-            for (var k = 0; k < st.chunks.length; k++) if (!CH[st.chunks[k]].terminal) list.push(CH[st.chunks[k]].path);
-            for (var j = 0; j < list.length; j++) {
-                var p = list[j];
-                for (i = 0; i < p.n; i += 2) { var dx = p.x[i] - x, dy = p.y[i] - y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = m; } }
-            }
-        }
-        for (i = 0; i < labels.length; i++) {
+        for (var i = 0; i < labels.length; i++) {
             var lb = labels[i];
-            if (lb.m >= 0 && Math.abs(lb.x - x) < 15 && Math.abs(lb.y - y) < 8) return lb.m;
+            if (Math.abs(lb.x - x) < 9 + tol && Math.abs(lb.y - y) < 3 + tol) return lb.m;
         }
-        return best;
+        return -1;
     }
 
     function applyFocus() {
@@ -1190,8 +1234,12 @@
     }
 
     function branchName(i) {
-        var C = CH[dayCh[i]], st = ST[C.m], n = st.chunks.length, pos = st.chunks.indexOf(dayCh[i]) + 1;
-        return "Branch " + ROMAN[st.q] + " › " + MONTHS[months[C.m].m] + (n > 1 ? " › segment " + pos + " of " + n : "");
+        return "Week " + (weekOf[i] + 1) + " of " + G.W + " › Dendrite " + ROMAN[weekPr[weekOf[i]]];
+    }
+    function weekText(w) {
+        var a = Math.max(0, w * 7 - G.WD0), b = Math.min(N - 1, w * 7 + 6 - G.WD0), act = 0;
+        for (var d = a; d <= b; d++) if (counts[d]) act++;
+        return { k: "Week of " + fmtShort.format(new Date(dateMs[a])), v: plural(weekTotal[w], "contribution") + "<small>" + plural(act, "active day") + " of " + (b - a + 1) + " · Dendrite " + ROMAN[weekPr[w]] + "</small>" };
     }
     function dayText(i) {
         var c = counts[i], mo = months[monthOf[i]], stI = streakOf[i], extra = "";
@@ -1205,7 +1253,7 @@
     }
     function monthText(m) {
         var mo = months[m];
-        return { k: MONTHS_LONG[mo.m] + " " + mo.y, v: plural(mo.total, "contribution") + "<small>" + plural(mo.active, "active day") + " of " + (mo.last - mo.first + 1) + " · Branch " + ROMAN[mo.q] + "</small>" };
+        return { k: MONTHS_LONG[mo.m] + " " + mo.y, v: plural(mo.total, "contribution") + "<small>" + plural(mo.active, "active day") + " of " + (mo.last - mo.first + 1) + " · " + dendNames(m) + "</small>" };
     }
 
     function showTip(t, x, y, pinned) {
@@ -1225,18 +1273,21 @@
     function hideTip() { el.tip.hidden = true; el.tip.removeAttribute("data-pinned"); }
     function announce(s) { el.live.textContent = s; }
 
-    function monthAnchor(m) { for (var i = 0; i < labels.length; i++) if (labels[i].m === m) return labels[i]; return { x: G.somaX, y: G.somaY }; }
+    function monthAnchor(m) { for (var i = 0; i < labels.length; i++) if (labels[i].m === m) return labels[i]; return { x: G.cx, y: G.cy }; }
+    function weekAnchor(w) { var t = twigs[w]; return t ? { x: t.path.x[t.path.n - 1], y: t.path.y[t.path.n - 1] } : { x: px(G.rSpine, ang(w)), y: py(G.rSpine, ang(w)) }; }
     function refreshTip() {
         if (!D) return hideTip();
         if (hover.day >= 0) return showTip(dayText(hover.day), dayX[hover.day], dayY[hover.day], false);
+        if (hover.week >= 0) { var wa = weekAnchor(hover.week); return showTip(weekText(hover.week), wa.x, wa.y, false); }
         if (sel.day >= 0) return showTip(dayText(sel.day), dayX[sel.day], dayY[sel.day], true);
+        if (sel.week >= 0) { var wb = weekAnchor(sel.week); return showTip(weekText(sel.week), wb.x, wb.y, true); }
         if (hover.month >= 0 && lastPointer === "mouse" && hoverOnCanvas) { var a = monthAnchor(hover.month); return showTip(monthText(hover.month), a.x, a.y, false); }
         hideTip();
     }
 
     function selectDay(i, doTrace) {
         if (pb.t < N - 1 && i > Math.floor(pb.t)) scrubTo(N - 1); // never inspect an unrevealed date
-        sel.day = i; sel.month = -1;
+        sel.day = i; sel.month = -1; sel.week = -1; pb.scrub = false;
         applyFocus(); refreshTip();
         announce(fmtLong.format(new Date(dateMs[i])) + ": " + (counts[i] ? plural(counts[i], "contribution") + ". " + TIER_NAMES[tiers[i]] + "." : "no contributions.") + " " + MONTHS_LONG[months[monthOf[i]].m] + ", " + branchName(i).replace(/›/g, ",") + ".");
         if (doTrace) trace(i);
@@ -1249,16 +1300,23 @@
         }
         if (pb.t < N - 1) { pb.t = N - 1; pb.lastD = N - 1; pb.lastM = monthOf[N - 1]; }
         sel.month = toggle && sel.month === m ? -1 : m;
-        sel.day = -1; hover.day = -1;
+        sel.day = -1; sel.week = -1; hover.day = -1; pb.scrub = false;
         applyFocus(); refreshTip();
         if (sel.month >= 0) {
             tourMonth(m);
             var mo = months[m];
-            announce(MONTHS_LONG[mo.m] + " " + mo.y + " selected: " + plural(mo.total, "contribution") + ", " + plural(mo.active, "active day") + ", branch " + ROMAN[mo.q] + ".");
+            announce(MONTHS_LONG[mo.m] + " " + mo.y + " selected: " + plural(mo.total, "contribution") + ", " + plural(mo.active, "active day") + ", " + dendNames(m) + ".");
         } else announce("Showing the whole year.");
     }
+    function selectWeek(w) {
+        sel.week = w; sel.day = -1; sel.month = -1; pb.scrub = false;
+        applyFocus(); refreshTip();
+        var t = weekText(w);
+        announce(t.k + ": " + plural(weekTotal[w], "contribution") + ", Dendrite " + ROMAN[weekPr[w]] + ".");
+        pulseWeek(w);
+    }
     function clearSel(all) {
-        sel.day = -1; if (all) sel.month = -1;
+        sel.day = -1; sel.week = -1; if (all) sel.month = -1;
         applyFocus(); refreshTip();
     }
 
@@ -1271,16 +1329,18 @@
         hoverOnCanvas = true;
         var p = local(e), d = hitDay(p.x, p.y, tolFor(false));
         if (d > Math.floor(pb.t)) d = -1;
-        var m = d < 0 ? hitMonth(p.x, p.y, 7) : -1;
-        canvas.style.cursor = d >= 0 || m >= 0 ? "pointer" : "default";
-        if (d === hover.day && m === hover.month) return;
-        hover.day = d; hover.month = m;
+        var m = d < 0 ? hitMonth(p.x, p.y, 2) : -1;
+        var wk = d < 0 && m < 0 ? hitWeek(p.x, p.y, 6) : -1;
+        if (wk >= 0 && pb.playing) wk = -1;
+        canvas.style.cursor = d >= 0 || m >= 0 || wk >= 0 ? "pointer" : "default";
+        if (d === hover.day && m === hover.month && wk === hover.week) return;
+        hover.day = d; hover.month = m; hover.week = wk;
         applyFocus(); refreshTip();
     });
     canvas.addEventListener("pointerleave", function () {
         hoverOnCanvas = false;
-        if (hover.day < 0 && hover.month < 0) return;
-        hover.day = hover.month = -1;
+        if (hover.day < 0 && hover.month < 0 && hover.week < 0) return;
+        hover.day = hover.month = hover.week = -1;
         applyFocus(); refreshTip();
     });
     canvas.addEventListener("pointerdown", function (e) { downAt = { x: e.clientX, y: e.clientY }; lastPointer = e.pointerType; });
@@ -1289,9 +1349,11 @@
         var touch = lastPointer !== "mouse";
         if (downAt && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 12) return;
         var p = local(e), d = hitDay(p.x, p.y, tolFor(touch), touch);
-        if (d >= 0) { hover.day = hover.month = -1; if (sel.day === d && !touch) return clearSel(false); return selectDay(d, true); }
-        var m = hitMonth(p.x, p.y, touch ? 12 : 7);
-        if (m >= 0) { hover.month = -1; return selectMonth(m, true); }
+        if (d >= 0) { hover.day = hover.month = hover.week = -1; if (sel.day === d && !touch) return clearSel(false); return selectDay(d, true); }
+        var m = hitMonth(p.x, p.y, touch ? 6 : 2);
+        if (m >= 0) { hover.month = hover.week = -1; return selectMonth(m, true); }
+        var wk = pb.playing ? -1 : hitWeek(p.x, p.y, touch ? 12 : 6);
+        if (wk >= 0) { hover.week = -1; if (sel.week === wk && !touch) return clearSel(false); return selectWeek(wk); }
         clearSel(true);
     });
 
@@ -1318,7 +1380,7 @@
         var step = +b.getAttribute("data-no-step");
         if (step && sel.day >= 0) { selectDay(clamp(sel.day + step, 0, N - 1), false); flareDay(sel.day, 0.9); wake(); }
     });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && sel.day >= 0 && root.contains(document.activeElement)) clearSel(false); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && (sel.day >= 0 || sel.week >= 0) && root.contains(document.activeElement)) clearSel(false); });
 
     /* Month buttons */
     function buildMonthButtons() {
@@ -1329,7 +1391,7 @@
             b.setAttribute("aria-pressed", "false");
             var yr = m === 0 || mo.m === 0 || (m === months.length - 1 && months[0].m === mo.m);
             b.innerHTML = MONTHS[mo.m] + (yr ? "<em>’" + String(mo.y).slice(2) + "</em>" : "") + "<span>" + mo.total + "</span>";
-            b.setAttribute("aria-label", MONTHS_LONG[mo.m] + " " + mo.y + ", " + plural(mo.total, "contribution") + ", " + plural(mo.active, "active day") + ", branch " + ROMAN[mo.q]);
+            b.setAttribute("aria-label", MONTHS_LONG[mo.m] + " " + mo.y + ", " + plural(mo.total, "contribution") + ", " + plural(mo.active, "active day") + ", " + dendNames(m));
             b.addEventListener("click", function () { selectMonth(m, true); });
             b.addEventListener("mouseenter", function () { if (lastPointer === "mouse" && !pb.playing) { hover.month = m; applyFocus(); } });
             b.addEventListener("mouseleave", function () { if (hover.month === m) { hover.month = -1; applyFocus(); } });
@@ -1427,7 +1489,7 @@
         prepare(p);
         pause(true);
         pb.t = N - 1; pb.lastD = N - 1; pb.lastM = monthOf[N - 1];
-        sel.day = hover.day = hover.month = -1; sel.month = -1; routeCache.day = -1; staticTrace = null;
+        sel.day = hover.day = hover.month = hover.week = sel.week = -1; sel.month = -1; routeCache.day = -1; staticTrace = null; pb.scrub = false;
         SIG.forEach(function (g) { g.on = false; });
         if (keep >= 0) months.forEach(function (mo, m) { if (mo.y * 12 + mo.m === keep) sel.month = m; });
         focus.month = sel.month; focusAmt = 1; revealM = -1;
