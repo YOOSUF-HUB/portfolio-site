@@ -967,7 +967,9 @@
         <!-- /Tech Stack — Explore my toolkit -->
 
 
-        <!-- Activity Archive — "Neural Orbit": the last 365 days of GitHub contributions.
+        <!-- Activity Archive — "Neural Arbor": a year of GitHub contributions as one neuron.
+             4 primary dendrites = 4 quarters of the period, each carrying its monthly
+             branches; every particle is one real calendar date.
              Data: /api/github-contributions (api/github-contributions.js, token server-side)
              UI: assets/js/neural-orbit.js · Styles: assets/css/neural-orbit.css -->
         <section class="no" id="activityScroll" aria-labelledby="no-title" data-no>
@@ -975,10 +977,10 @@
                 <header class="no-head">
                     <div class="no-head__main">
                         <p class="no-eyebrow"><span>Activity archive</span><span class="no-eyebrow__sep" aria-hidden="true">/</span><span>003</span></p>
-                        <h2 class="no-title" id="no-title">Code in motion.</h2>
+                        <h2 class="no-title" id="no-title">A year of building.</h2>
                     </div>
                     <div class="no-head__aside">
-                        <p class="no-lede">Every contribution leaves a trace. A living record of building, experimenting, and engineering.</p>
+                        <p class="no-lede">Every contribution leaves a trace. Explore a year of building, experimenting, and engineering.</p>
                         <a class="no-gh" href="https://github.com/YOOSUF-HUB" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile YOOSUF-HUB (opens in a new tab)">
                             <span>GitHub</span><span class="no-gh__sep" aria-hidden="true">/</span><span>YOOSUF-HUB</span>
                             <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 9.5 9.5 2.5M4 2.5h5.5V8"/></svg>
@@ -990,14 +992,11 @@
                     <div class="no-viz">
                         <div class="no-stage" data-no-stage data-state="loading">
                             <canvas class="no-canvas" data-no-canvas tabindex="0" role="application"
-                                aria-roledescription="contribution orbit"
-                                aria-label="GitHub contribution calendar for the last 365 days, drawn as a circular orbit. Use the arrow keys to move between days, Enter to trace a day's signal, Escape to clear."></canvas>
+                                aria-roledescription="neural contribution arbor"
+                                aria-label="A year of GitHub contributions drawn as a neuron: four primary branches are the four quarters, each holding its monthly branches, and every particle is one day. Use the arrow keys to move between days, Page Up and Page Down to move between months, Enter to send a signal to the selected day, Escape to clear."></canvas>
 
-                            <div class="no-core" data-no-core>
-                                <span class="no-core__value" data-no-total>—</span>
-                                <span class="no-core__label">Contributions</span>
-                                <span class="no-core__period" data-no-period>Last 365 days</span>
-                                <span class="no-sync" data-no-sync data-sync="loading"><i aria-hidden="true"></i><span data-no-sync-text>Synchronising</span></span>
+                            <div class="no-state" data-no-state>
+                                <p class="no-state__text" data-no-state-text>Synchronising with GitHub</p>
                                 <button class="no-retry" type="button" hidden data-no-retry>Retry</button>
                             </div>
 
@@ -1010,11 +1009,42 @@
                                     <button type="button" aria-label="Close details" data-no-close><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 3l6 6M9 3l-6 6"/></svg></button>
                                 </div>
                             </div>
+
                         </div>
-                        <p class="no-read" aria-hidden="true"><span>Clockwise from <b data-no-from>—</b></span><span>Inner track Sun → outer Sat</span></p>
+                        <p class="no-key" aria-hidden="true"><span>I – IV</span> quarters, clockwise · one particle per day</p>
+
+                        <!-- Year in motion: optional playback, never tied to scrolling -->
+                        <div class="no-play" data-no-play>
+                            <p class="no-label no-play__title">Year in motion</p>
+                            <div class="no-play__row">
+                                <button class="no-play__btn" type="button" data-no-play-btn data-playing="false" aria-label="Play the year" disabled>
+                                    <svg class="no-i-play" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3.5 2.2v7.6L9.6 6z"/></svg>
+                                    <svg class="no-i-pause" viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3.4 2.4h1.8v7.2H3.4zM6.8 2.4h1.8v7.2H6.8z"/></svg>
+                                </button>
+                                <div class="no-play__track">
+                                    <input class="no-range" type="range" min="0" max="364" step="1" value="364" data-no-range aria-label="Timeline: choose a date to reveal the year up to" disabled>
+                                    <div class="no-play__ticks" data-no-ticks aria-hidden="true"></div>
+                                </div>
+                            </div>
+                            <dl class="no-read">
+                                <div><dt>Month</dt><dd data-no-r-month>—</dd></div>
+                                <div><dt>Date</dt><dd data-no-r-date>—</dd></div>
+                                <div><dt>Month activity</dt><dd data-no-r-stat>—</dd></div>
+                                <div><dt>Progress</dt><dd data-no-r-prog>—</dd></div>
+                            </dl>
+                        </div>
                     </div>
 
                     <aside class="no-side" aria-label="Contribution summary">
+                        <div class="no-total">
+                            <p class="no-label">Total contributions</p>
+                            <p class="no-total__value" data-no-total>—</p>
+                            <p class="no-total__meta">
+                                <span data-no-period>Last 365 days</span>
+                                <span class="no-sync" data-no-sync data-sync="loading"><i aria-hidden="true"></i><span data-no-sync-text>Synchronising</span></span>
+                            </p>
+                        </div>
+
                         <dl class="no-stats">
                             <div class="no-stat">
                                 <dt>Commit contributions</dt>
@@ -1035,7 +1065,7 @@
                         </dl>
 
                         <div class="no-months">
-                            <p class="no-label" id="no-months-label">Months <span>— select to inspect</span></p>
+                            <p class="no-label" id="no-months-label">Months <span>— select a branch</span></p>
                             <div class="no-months__grid" role="group" aria-labelledby="no-months-label" data-no-months></div>
                         </div>
 
@@ -1055,7 +1085,7 @@
                 <p class="no-sr" aria-live="polite" data-no-live></p>
             </div>
         </section>
-        <!-- /Activity Archive — Neural Orbit -->
+        <!-- /Activity Archive — Neural Arbor -->
 
 
         <!-- Award -->

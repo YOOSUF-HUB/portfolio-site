@@ -1,33 +1,36 @@
 /* =========================================================
-   NEURAL ORBIT — Code in motion  (ACTIVITY ARCHIVE / 003)
+   NEURAL ARBOR — A year of building  (ACTIVITY ARCHIVE / 003)
 
-   The last 365 days of GitHub contributions (YOOSUF-HUB) as one
-   Canvas 2D scene:
+   The last 365 days of GitHub contributions (YOOSUF-HUB) drawn
+   as one biological neuron on a Canvas 2D scene.
 
-   ORBIT   every date is one particle. 53 week columns run
-           clockwise from the top; 7 concentric tracks are the
-           weekdays (Sun inside → Sat outside). Brightness and
-           size encode the day's real contribution count.
-   FIELD   neural fibres grown from the same data. Each week owns
-           one dendrite rooted on the outer "spine": its length
-           follows the weekly total, every active day of the week
-           sprouts a child branch (length ∝ that day's count, tip
-           = activation point), very active days add twigs.
-           Consecutive active days are joined inside the ring,
-           consecutive active weeks by faint temporal arcs.
-           Quiet weeks keep a short dark stub. Geometry is seeded
-           from the week's date, so shapes are stable per data.
-   SIGNAL  a white head with a silver trail travels clockwise
-           along the spine at irregular intervals, flares active
-           days as it passes and sometimes branches into a week.
-           Selecting a day traces its streak → spine → branch.
-           New activity found by a refresh fires once per change.
+   SOMA       a small irregular cell body of layered particles.
+   DENDRITES  4 primary branches = the 4 quarters of the period
+              (clockwise from upper left). A month belongs to the
+              quarter its midpoint falls in, so a period that does
+              not start on the 1st gets one short extra branch.
+   MONTHS     each primary carries its monthly branches (secondary).
+              A month splits into 10-day segments (halves on
+              mobile): earlier segments are tertiary twigs, the
+              last runs along the month's own tip. Days are laid
+              out base → tip in date order.
+   PARTICLES  exactly one per date. Brightness, size, satellites
+              and glow come from that day's real count only.
+
+   Geometry is deterministic: every branch is seeded from its
+   quarter / calendar month, and a greedy placement pass keeps
+   particles from colliding. Counts never move the structure, so
+   a data refresh only changes brightness.
+
+   Motion is restrained: fine dust drifts, branch tips sway, and
+   signals only travel along the predefined routes (ambient pulse,
+   selected day, month tour, new activity, YEAR IN MOTION playback).
 
    Data: GET /api/github-contributions (token stays server-side).
-   Last good payload cached in localStorage for offline fallback;
-   nothing is generated when no data is available.
+   The last good payload is cached in localStorage for offline
+   use; nothing is generated when no data exists.
    Pauses off-screen / hidden tab; prefers-reduced-motion keeps
-   every interaction but drops the ambient animation.
+   every interaction but drops the ambient motion.
    ========================================================= */
 
 (function () {
@@ -44,10 +47,13 @@
     var $ = function (s) { return root.querySelector(s); };
     var el = {
         total: $("[data-no-total]"), period: $("[data-no-period]"),
-        sync: $("[data-no-sync]"), syncText: $("[data-no-sync-text]"), retry: $("[data-no-retry]"),
+        sync: $("[data-no-sync]"), syncText: $("[data-no-sync-text]"),
+        stateText: $("[data-no-state-text]"), retry: $("[data-no-retry]"),
         tip: $("[data-no-tip]"), tipK: $("[data-no-tip-k]"), tipV: $("[data-no-tip-v]"), tipNav: $("[data-no-tip-nav]"),
         commits: $("[data-no-commits]"), active: $("[data-no-active]"), streak: $("[data-no-streak]"), updated: $("[data-no-updated]"),
-        months: $("[data-no-months]"), live: $("[data-no-live]"), from: $("[data-no-from]"),
+        months: $("[data-no-months]"), live: $("[data-no-live]"),
+        play: $("[data-no-play-btn]"), range: $("[data-no-range]"), ticks: $("[data-no-ticks]"),
+        rMonth: $("[data-no-r-month]"), rDate: $("[data-no-r-date]"), rStat: $("[data-no-r-stat]"), rProg: $("[data-no-r-prog]"),
     };
 
     var API = "/api/github-contributions";
@@ -55,6 +61,7 @@
     var LS_SEEN = "neural-orbit:seen:v1";
     var REFRESH_MS = 30 * 60 * 1000;
     var TAU = Math.PI * 2;
+    var PLAY_RATE = 14; // days per second during YEAR IN MOTION
 
     var reduceMQ = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
     var reduce = reduceMQ.matches;
@@ -66,8 +73,10 @@
     var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     var MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     var TIER_NAMES = ["No activity", "Low intensity", "Moderate intensity", "High intensity", "Exceptional intensity"];
+    var ROMAN = ["I", "II", "III", "IV"];
 
-    function plural(n, w) { return n + " " + w + (n === 1 ? "" : "s"); }
+    function plural(n, w) { return n.toLocaleString("en-GB") + " " + w + (n === 1 ? "" : "s"); }
+    function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
     function lsGet(k) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
     function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage unavailable */ } }
     function mulberry(seed) {
@@ -79,19 +88,20 @@
         };
     }
     function hash(str) { var h = 2166136261; for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+    function gauss(r) { return (r() + r() + r() - 1.5) * 1.15; }
 
     /* ---------- Polyline paths (sampled once, reused every frame) ---------- */
 
     function Path(cap) { this.x = new Float32Array(cap); this.y = new Float32Array(cap); this.l = new Float32Array(cap); this.n = 0; this.len = 0; }
     Path.prototype.push = function (x, y) {
         var n = this.n;
-        if (n >= this.x.length) { // grow (only during construction)
+        if (n >= this.x.length) { // grow (only while building)
             var c = this.x.length * 2, nx = new Float32Array(c), ny = new Float32Array(c), nl = new Float32Array(c);
             nx.set(this.x); ny.set(this.y); nl.set(this.l); this.x = nx; this.y = ny; this.l = nl;
         }
         if (n > 0) {
             var dx = x - this.x[n - 1], dy = y - this.y[n - 1], d = Math.sqrt(dx * dx + dy * dy);
-            if (d < 0.01) return;
+            if (d < 0.001) return;
             this.len += d;
         }
         this.x[n] = x; this.y[n] = y; this.l[n] = this.len; this.n = n + 1;
@@ -104,7 +114,6 @@
         }
         return this;
     };
-    Path.prototype.append = function (p, from, to) { for (var i = from; i <= to; i++) this.push(p.x[i], p.y[i]); return this; };
     Path.prototype.index = function (s) { // last index with l <= s
         var lo = 0, hi = this.n - 1;
         if (s <= 0) return 0;
@@ -115,15 +124,46 @@
     var PT = { x: 0, y: 0 };
     Path.prototype.at = function (s, out) {
         var i = this.index(s), j = Math.min(i + 1, this.n - 1), seg = this.l[j] - this.l[i];
-        var t = seg > 0 ? (s - this.l[i]) / seg : 0;
+        var t = seg > 0 ? clamp((s - this.l[i]) / seg, 0, 1) : 0;
         out.x = this.x[i] + (this.x[j] - this.x[i]) * t; out.y = this.y[i] + (this.y[j] - this.y[i]) * t;
         return out;
     };
-    function strokePath(c, p, i0, i1) {
-        if (p.n < 2) return;
-        if (i0 === undefined) { i0 = 0; i1 = p.n - 1; }
-        c.moveTo(p.x[i0], p.y[i0]);
-        for (var i = i0 + 1; i <= i1; i++) c.lineTo(p.x[i], p.y[i]);
+    Path.prototype.transform = function (S, ox, oy) {
+        for (var i = 0; i < this.n; i++) { this.x[i] = ox + this.x[i] * S; this.y[i] = oy + this.y[i] * S; this.l[i] *= S; }
+        this.len *= S;
+    };
+    function tanAt(p, s) {
+        var i = p.index(s), a = Math.max(0, i - 1), b = Math.min(p.n - 1, i + 1);
+        return a === b ? 0 : Math.atan2(p.y[b] - p.y[a], p.x[b] - p.x[a]);
+    }
+    /* append the part of src between arc lengths s0 → s1 (either direction) */
+    function appendSeg(p, src, s0, s1) {
+        var i;
+        src.at(s0, PT); p.push(PT.x, PT.y);
+        if (s1 >= s0) { for (i = src.index(s0) + 1; i < src.n && src.l[i] < s1; i++) p.push(src.x[i], src.y[i]); }
+        else { for (i = src.index(s0); i >= 0 && src.l[i] > s1; i--) p.push(src.x[i], src.y[i]); }
+        src.at(s1, PT); p.push(PT.x, PT.y);
+        return p;
+    }
+    function strokeTo(c, p, s) { // prefix of p up to arc length s
+        if (p.n < 2 || s <= 0) return;
+        var hi = p.index(s);
+        c.moveTo(p.x[0], p.y[0]);
+        for (var i = 1; i <= hi; i++) c.lineTo(p.x[i], p.y[i]);
+        if (s < p.len) { p.at(s, PT); c.lineTo(PT.x, PT.y); }
+    }
+    function curve(x, y, a, L, bend, segs, wig) {
+        var p = null, Lc = L, w = wig || 0;
+        for (var it = 0; it < 4; it++) {
+            p = new Path(segs + 2);
+            var a1 = a + w, a2 = a + bend * 0.5 - w * 0.6, a3 = a + bend;
+            p.bez(x, y, x + Math.cos(a1) * Lc * 0.36, y + Math.sin(a1) * Lc * 0.36,
+                x + Math.cos(a2) * Lc * 0.7, y + Math.sin(a2) * Lc * 0.7,
+                x + Math.cos(a3) * Lc, y + Math.sin(a3) * Lc, segs);
+            if (p.len >= L * 0.998) break;
+            Lc *= (L / p.len) * 1.004;
+        }
+        return p;
     }
 
     /* ---------- Glow sprite ---------- */
@@ -133,8 +173,8 @@
     (function () {
         var g = sprite.getContext("2d"), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
         gr.addColorStop(0, "rgba(255,255,255,1)");
-        gr.addColorStop(0.18, "rgba(255,255,255,0.55)");
-        gr.addColorStop(0.45, "rgba(255,255,255,0.12)");
+        gr.addColorStop(0.2, "rgba(255,255,255,0.5)");
+        gr.addColorStop(0.5, "rgba(255,255,255,0.1)");
         gr.addColorStop(1, "rgba(255,255,255,0)");
         g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
     })();
@@ -144,30 +184,22 @@
        DATA
        ========================================================= */
 
-    var D = null;          // payload in use
-    var status = "loading";
-    var N = 0, W = 0, WD0 = 0;
-    var counts, tiers, weekOf, wdOf, monthOf, streakOf, dateMs;
-    var weekTotal, weekActive, weekMaxDay;
-    var months = [], streaks = [];
-    var maxDay = 1, maxWeek = 1;
+    var D = null, status = "loading";
+    var N = 0, counts, tiers, monthOf, streakOf, dateMs, domOf;
+    var months = [], streaks = [], QM = [[], [], [], []];
+    var maxDay = 1, maxMonth = 1;
 
     function prepare(p) {
-        var days = p.days;
+        var days = p.days, i, c;
         N = days.length;
-        counts = new Int32Array(N); tiers = new Uint8Array(N); weekOf = new Int16Array(N); wdOf = new Uint8Array(N);
-        monthOf = new Int16Array(N); streakOf = new Int16Array(N); dateMs = new Float64Array(N);
-        WD0 = new Date(days[0].date + "T00:00:00Z").getUTCDay();
-        W = Math.floor((N - 1 + WD0) / 7) + 1;
-        weekTotal = new Int32Array(W); weekActive = new Uint8Array(W); weekMaxDay = new Int16Array(W).fill(-1);
-        months = []; streaks = [];
-        maxDay = 1; maxWeek = 1;
+        counts = new Int32Array(N); tiers = new Uint8Array(N); monthOf = new Int16Array(N);
+        streakOf = new Int16Array(N); dateMs = new Float64Array(N); domOf = new Uint8Array(N);
+        months = []; streaks = []; QM = [[], [], [], []]; maxDay = 1; maxMonth = 1;
 
         var active = [];
-        for (var i = 0; i < N; i++) {
-            var c = days[i].count | 0, g = i + WD0;
+        for (i = 0; i < N; i++) {
+            c = days[i].count | 0;
             counts[i] = c; dateMs[i] = Date.parse(days[i].date + "T00:00:00Z");
-            weekOf[i] = Math.floor(g / 7); wdOf[i] = g % 7;
             if (c > 0) active.push(c);
             if (c > maxDay) maxDay = c;
         }
@@ -177,342 +209,483 @@
         var cur = -1, st = null;
         for (i = 0; i < N; i++) {
             c = counts[i];
-            var lvl = days[i].level | 0, w = weekOf[i];
+            var lvl = days[i].level | 0;
             tiers[i] = c === 0 ? 0 : lvl <= 1 ? 1 : lvl === 2 ? 2 : (lvl >= 4 && c >= p90 ? 4 : 3);
-            weekTotal[w] += c;
-            if (c > 0) { weekActive[w]++; if (weekMaxDay[w] < 0 || c > counts[weekMaxDay[w]]) weekMaxDay[w] = i; }
-
             var d = new Date(dateMs[i]), key = d.getUTCFullYear() * 12 + d.getUTCMonth();
-            if (key !== cur) { cur = key; months.push({ y: d.getUTCFullYear(), m: d.getUTCMonth(), first: i, last: i, total: 0, active: 0 }); }
+            domOf[i] = d.getUTCDate();
+            if (key !== cur) { cur = key; months.push({ y: d.getUTCFullYear(), m: d.getUTCMonth(), first: i, last: i, total: 0, active: 0, q: 0 }); }
             var mo = months[months.length - 1]; mo.last = i; mo.total += c; if (c > 0) mo.active++;
             monthOf[i] = months.length - 1;
-
             if (c > 0) {
                 if (!st) { st = { start: i, end: i, total: 0 }; streaks.push(st); }
                 st.end = i; st.total += c; streakOf[i] = streaks.length - 1;
             } else { st = null; streakOf[i] = -1; }
         }
-        for (w = 0; w < W; w++) if (weekTotal[w] > maxWeek) maxWeek = weekTotal[w];
+        // quarters of the period: a month joins the quarter its midpoint falls in
+        months.forEach(function (mo, m) {
+            if (mo.total > maxMonth) maxMonth = mo.total;
+            mo.q = Math.min(3, Math.floor(((mo.first + mo.last) / 2) / (N / 4)));
+            QM[mo.q].push(m);
+        });
     }
 
     /* =========================================================
-       GEOMETRY
+       GEOMETRY — built in unit space (1 unit = gap between days),
+       then fitted to the stage
        ========================================================= */
 
-    var G = { size: 0, dpr: 1, cx: 0, cy: 0, R: 0, rIn: 0, rOut: 0, step: 0, rSpine: 0, rField: 0, rLabel: 0, a0: 0, sweep: 0, k: 1, mobile: false };
-    var trackR = new Float32Array(7);
-    var dayX, dayY, dayRad;
-    var spine = null;
-    var weeks = [];       // per week: { rootX, rootY, ang, trunk:Path, children:[], arc:Path|null, twigs:[] }
-    var dayRoute = [];    // per day: Path (trunk→child route) used for highlights / signals
-    var dayChild = [];    // per day: child object or null
-    var streakSeg = [];   // per day i: Path joining i-1 → i inside the ring (when both active)
-    var monthEdges = [];  // per month (except first): Path stepped boundary
-    var font = "11px sans-serif";
+    var G = { w: 0, h: 0, dpr: 1, mobile: false, S: 1, kk: 1, somaX: 0, somaY: 0, somaR: 0 };
+    var TR = [], ST = [], CH = [];             // trunks (quarters), stems (months), carriers (day segments)
+    var dayX, dayY, dayRad, dayCh, dayS;
+    var somaP, somaO, dustP, spineP, satP, tipP, linkP, axon = null, labels = [];
+    var nSoma = 0, nDust = 0, nSpine = 0, nSat = 0, nTip = 0, nLink = 0;
+    var GAP = 1, TAIL = 1.15;
+    var DIRS_D = [-2.2, -0.38, 0.95, 2.88], DIRS_M = [-1.98, -0.72, 1.3, 2.5];
+    var font = "10px sans-serif", fontQ = "10px sans-serif";
 
-    function ang(w) { return G.a0 + ((w + 0.5) / W) * G.sweep; }
-    function edge(w) { return G.a0 + (w / W) * G.sweep; }
-    function px(r, a) { return G.cx + Math.cos(a) * r; }
-    function py(r, a) { return G.cy + Math.sin(a) * r; }
+    /* spatial hash used only while placing branches */
+    var GC = 1.5;
+    function Grid() { this.m = new Map(); }
+    Grid.prototype.add = function (x, y, owner, part) {
+        var k = (Math.floor(x / GC) + 2048) * 4096 + (Math.floor(y / GC) + 2048), a = this.m.get(k);
+        if (!a) { a = []; this.m.set(k, a); }
+        a.push(x, y, owner, part ? 1 : 0);
+    };
+    Grid.prototype.score = function (x, y, ig, rp, rf) {
+        var ix = Math.floor(x / GC), iy = Math.floor(y / GC), sc = 0, rp2 = rp * rp, rf2 = rf * rf;
+        for (var u = ix - 1; u <= ix + 1; u++) for (var v = iy - 1; v <= iy + 1; v++) {
+            var a = this.m.get((u + 2048) * 4096 + (v + 2048));
+            if (!a) continue;
+            for (var i = 0; i < a.length; i += 4) {
+                if (a[i + 2] === ig) continue;
+                var dx = a[i] - x, dy = a[i + 1] - y, d2 = dx * dx + dy * dy;
+                if (a[i + 3]) { if (d2 < rp2) sc += 1; } else if (d2 < rf2) sc += 0.5;
+            }
+        }
+        return sc;
+    };
 
     function layout() {
-        var size = Math.round(stage.clientWidth);
-        if (!size) return false;
-        G.size = size;
+        var w = Math.round(stage.clientWidth), h = Math.round(stage.clientHeight);
+        if (!w || !h) return false;
+        G.w = w; G.h = h;
         G.dpr = Math.min(window.devicePixelRatio || 1, 2);
-        G.mobile = size < 560;
-        G.cx = G.cy = size / 2;
-        G.R = size / 2 - 2;
-        var R = G.R;
-        if (G.mobile) { G.rIn = 0.475 * R; G.rOut = 0.8 * R; G.rSpine = 0.815 * R; G.rField = 0.99 * R; G.sweep = TAU - 0.36; G.k = 0.82; }
-        else { G.rIn = 0.47 * R; G.rOut = 0.71 * R; G.rSpine = 0.745 * R; G.rField = 0.985 * R; G.sweep = TAU - 0.42; G.k = Math.max(0.72, Math.min(1.15, R / 330)); }
-        G.rLabel = G.rIn - 0.055 * R;
-        G.a0 = -Math.PI / 2 + (TAU - G.sweep) / 2;
-        G.step = (G.rOut - G.rIn) / 6;
-        for (var t = 0; t < 7; t++) trackR[t] = G.rIn + G.step * t;
-
-        var w = Math.round(size * G.dpr);
-        [canvas, baseA, baseB].forEach(function (cv) { if (cv.width !== w) { cv.width = w; cv.height = w; } });
-
+        G.mobile = w < 560;
+        var cw = Math.round(w * G.dpr), chh = Math.round(h * G.dpr);
+        [canvas, baseA, baseB].forEach(function (cv) { if (cv.width !== cw || cv.height !== chh) { cv.width = cw; cv.height = chh; } });
         var ff = getComputedStyle(root).fontFamily || "sans-serif";
-        font = "500 " + (G.mobile ? 7.5 : 9.5) + "px " + ff;
-        spine = new Path(400);
-        for (var i = 0; i <= 360; i++) { var a = G.a0 + (i / 360) * G.sweep; spine.push(px(G.rSpine, a), py(G.rSpine, a)); }
-        if (D) build();
+        font = "500 " + (G.mobile ? 8 : 9.5) + "px " + ff;
+        fontQ = "500 " + (G.mobile ? 9 : 11) + "px " + ff;
+        var key = cw + "x" + chh + "|" + (D ? D.fetchedAt : "none");
+        if (key !== G.built) { G.built = key; build(); }
         return true;
     }
 
     function build() {
-        var R = G.R, k = G.k, i, w;
-        dayX = new Float32Array(N); dayY = new Float32Array(N); dayRad = new Float32Array(N);
-        var RAD = [0.95, 1.5, 2.0, 2.55, 3.2];
-        for (i = 0; i < N; i++) {
-            var a = ang(weekOf[i]), r = trackR[wdOf[i]];
-            dayX[i] = px(r, a); dayY[i] = py(r, a);
-            var extra = tiers[i] === 3 ? 0.4 * Math.sqrt(counts[i] / maxDay) : 0;
-            dayRad[i] = (RAD[tiers[i]] + extra) * k;
+        var mob = G.mobile, i, j, k, q, t;
+        var grid = new Grid(), nextId = 2;
+        var U = { soma: [], dust: [], spine: [], sat: [], tip: [] };
+        TR = []; ST = []; CH = []; labels = [];
+
+        /* ---- soma: irregular lobed outline ---- */
+        var rs = mulberry(hash("soma"));
+        var SR = 3.5, lob = [];
+        for (k = 0; k < 4; k++) lob.push(0.045 + 0.07 * rs(), rs() * TAU);
+        var somaRad = function (a) { var r = 1; for (var k2 = 0; k2 < 4; k2++) r += lob[k2 * 2] * Math.sin((k2 + 2) * a + lob[k2 * 2 + 1]); return SR * r; };
+        for (t = 0; t < TAU; t += 0.2) { var sr = somaRad(t); grid.add(Math.cos(t) * sr, Math.sin(t) * sr, 1, false); grid.add(Math.cos(t) * sr * 0.5, Math.sin(t) * sr * 0.5, 1, false); }
+        var outline = []; for (t = 0; t < 64; t++) { var oa = t / 64 * TAU, orr = somaRad(oa) * 0.92; outline.push(Math.cos(oa) * orr, Math.sin(oa) * orr); }
+        var nucX = (rs() - 0.5) * 0.9, nucY = (rs() - 0.5) * 0.9;
+        var NS = mob ? 360 : 760;
+        for (i = 0; i < NS; i++) {
+            var sa = rs() * TAU, u = rs(), inner = i < NS * 0.16;
+            var rr = inner ? Math.pow(u, 0.7) * 0.85 : somaRad(sa) * Math.pow(u, 0.62) * 1.02;
+            var x0 = (inner ? nucX : 0) + Math.cos(sa) * rr, y0 = (inner ? nucY : 0) + Math.sin(sa) * rr;
+            var b = inner ? 0.75 + 0.25 * rs() : clamp(1 - rr / (SR * 1.08), 0, 1) * (0.55 + 0.45 * rs());
+            U.soma.push(x0, y0, b, rs() < 0.18 ? 1 : 0);
         }
 
-        // ---- dendrites ----
-        weeks = []; dayRoute = new Array(N); dayChild = new Array(N);
-        var maxL = G.rField - G.rSpine, TRUNK_SEGS = 28;
-        for (w = 0; w < W; w++) {
-            var aw = ang(w), first = Math.max(0, w * 7 - WD0), seedDay = first < N ? first : N - 1;
-            var rnd = mulberry(hash("w" + dateMs[seedDay]));
-            var rx = px(G.rSpine, aw), ry = py(G.rSpine, aw);
-            var wk = { ang: aw, rootX: rx, rootY: ry, trunk: new Path(TRUNK_SEGS + 2), children: [], twigs: [], arc: null, quiet: weekTotal[w] === 0, t: 0 };
-            weeks.push(wk);
-            if (wk.quiet) {
-                var sl = (0.022 + 0.014 * rnd()) * R;
-                wk.trunk.push(rx, ry); wk.trunk.push(px(G.rSpine + sl, aw + 0.01), py(G.rSpine + sl, aw + 0.01));
-                continue;
+        /* ---- primary dendrites (quarters) ---- */
+        var dirs = mob ? DIRS_M : DIRS_D;
+        for (q = 0; q < 4; q++) {
+            var ms = D ? QM[q] : [];
+            var rq = mulberry(hash("q" + q + (mob ? "m" : "d")));
+            var a = dirs[q] + (rq() - 0.5) * 0.16;
+            var sp = [], s = 3.6 + 0.8 * rq();
+            for (j = 0; j < ms.length; j++) {
+                sp.push(s);
+                if (j < ms.length - 1) s += 2.4 + 3.9 * Math.sqrt((months[ms[j]].last - months[ms[j]].first + 1) / 31);
             }
-            var t = Math.sqrt(weekTotal[w] / maxWeek); wk.t = t;
-            var L = (0.2 + 0.8 * t) * maxL * (0.86 + 0.22 * rnd());
-            var lean = (0.16 + 0.2 * rnd()) * (rnd() < 0.8 ? 1 : -0.7);
-            var P = trunkPoints(rx, ry, aw, lean, L);
-            for (var tries = 0; tries < 6 && Math.hypot(P[6] - G.cx, P[7] - G.cy) > G.rField; tries++) { L *= 0.88; P = trunkPoints(rx, ry, aw, lean, L); }
-            wk.trunk.bez(P[0], P[1], P[2], P[3], P[4], P[5], P[6], P[7], TRUNK_SEGS);
+            var L = ms.length ? Math.max(7, sp[sp.length - 1]) : 8 + 3 * rq();
+            var r0 = somaRad(a) * 0.35;
+            var tp = curve(Math.cos(a) * r0, Math.sin(a) * r0, a, L, (rq() < 0.5 ? 1 : -1) * (0.3 + 0.35 * rq()), 52, (rq() - 0.5) * 0.7);
+            if (ms.length) sp[sp.length - 1] = tp.len;
+            var tid = nextId++;
+            for (i = 0; i < tp.n; i++) grid.add(tp.x[i], tp.y[i], tid, false);
+            var qTot = 0; ms.forEach(function (m) { qTot += months[m].total; });
+            TR.push({ q: q, path: tp, id: tid, sp: sp, ms: ms, total: qTot, act: 0, rng: rq });
+        }
+        var maxQ = 1; TR.forEach(function (T) { maxQ = Math.max(maxQ, T.total); });
+        TR.forEach(function (T) { T.act = Math.sqrt(T.total / maxQ); });
 
-            // one child per active day (mobile: the three most active days)
-            var daysIn = [];
-            for (i = first; i < Math.min(N, w * 7 + 7 - WD0); i++) if (counts[i] > 0) daysIn.push(i);
-            if (G.mobile && daysIn.length > 3) daysIn = daysIn.slice().sort(function (a, b) { return counts[b] - counts[a]; }).slice(0, 3).sort(function (a, b) { return a - b; });
-            for (var j = 0; j < daysIn.length; j++) {
-                var di = daysIn[j], wd = wdOf[di];
-                var f = Math.min(0.9, 0.2 + 0.64 * (wd / 6) + 0.06 * (rnd() - 0.5));
-                var si = Math.round(f * TRUNK_SEGS);
-                var sx = wk.trunk.x[si], sy = wk.trunk.y[si];
-                var j2 = Math.min(si + 1, wk.trunk.n - 1), j1 = Math.max(si - 1, 0);
-                var ta = Math.atan2(wk.trunk.y[j2] - wk.trunk.y[j1], wk.trunk.x[j2] - wk.trunk.x[j1]);
-                var side = (wd % 2 ? 1 : -1) * (rnd() < 0.18 ? -1 : 1);
-                var ca = ta + side * (0.5 + 0.38 * rnd());
-                var cl = L * (0.22 + 0.5 * Math.sqrt(counts[di] / maxDay)) * (1 - f * 0.3);
-                var C = childPoints(sx, sy, ca, side, cl);
-                for (tries = 0; tries < 6 && Math.hypot(C[6] - G.cx, C[7] - G.cy) > G.rField; tries++) { cl *= 0.85; C = childPoints(sx, sy, ca, side, cl); }
-                var cp = new Path(24).bez(C[0], C[1], C[2], C[3], C[4], C[5], C[6], C[7], 16);
-                var route = new Path(TRUNK_SEGS + 20).append(wk.trunk, 0, si).append(cp, 0, cp.n - 1);
-                var child = { day: di, path: cp, route: route, tipX: C[6], tipY: C[7], twigs: [] };
-                if (!G.mobile && tiers[di] >= 3) {
-                    var nt = tiers[di] === 4 ? 2 : 1;
-                    for (var q = 0; q < nt; q++) {
-                        var tf = 0.45 + 0.3 * q + 0.1 * rnd(), ti = Math.round(tf * (cp.n - 1));
-                        var tq = Math.min(ti + 1, cp.n - 1), tp = Math.max(ti - 1, 0);
-                        var tA = Math.atan2(cp.y[tq] - cp.y[tp], cp.x[tq] - cp.x[tp]) + (q % 2 ? 1 : -1) * side * (0.55 + 0.3 * rnd());
-                        var tl = cl * (0.28 + 0.12 * rnd()), bx = cp.x[ti], by = cp.y[ti];
-                        child.twigs.push(new Path(14).bez(bx, by, bx + Math.cos(tA) * tl * 0.4, by + Math.sin(tA) * tl * 0.4,
-                            bx + Math.cos(tA - side * 0.2) * tl * 0.75, by + Math.sin(tA - side * 0.2) * tl * 0.75,
-                            bx + Math.cos(tA - side * 0.35) * tl, by + Math.sin(tA - side * 0.35) * tl, 10));
-                    }
+        if (D) {
+            dayCh = new Int16Array(N); dayS = new Float32Array(N);
+            var OFF = [0, 0.22, -0.22, 0.44, -0.44, 0.68, -0.68, 0.94, -0.94, 1.2, -1.2];
+            var place = function (x, y, a, b, need, d0, n, ig, segs, wig) {
+                var best = null, r0b = Math.hypot(x, y);
+                for (var o = 0; o < OFF.length; o++) for (var bb = 0; bb < 2; bb++) {
+                    var p = curve(x, y, a + OFF[o], need, bb ? b * 0.3 : b, segs, wig), sc = 0, pts = [];
+                    for (var t2 = 0; t2 < n; t2++) { p.at(d0 + t2 * GAP, PT); pts.push(PT.x, PT.y); sc += grid.score(PT.x, PT.y, ig, 1.1, 0.95); }
+                    for (var t3 = 0; t3 < p.n; t3 += 2) if (p.l[t3] > 1.2) sc += 0.5 * grid.score(p.x[t3], p.y[t3], ig, 0.95, 0.8);
+                    if (Math.hypot(p.x[p.n - 1], p.y[p.n - 1]) < r0b + need * 0.4) sc += 3;
+                    var tot = sc + o * 0.02 + bb * 0.01;
+                    if (!best || tot < best.tot) best = { p: p, pts: pts, tot: tot, sc: sc };
+                    if (sc === 0) return best;
                 }
-                wk.children.push(child);
-                dayChild[di] = child; dayRoute[di] = route;
+                return best;
+            };
+            var commit = function (best, fid, pid) {
+                var p = best.p;
+                for (var i2 = 0; i2 < p.n; i2++) grid.add(p.x[i2], p.y[i2], fid, false);
+                for (i2 = 0; i2 < best.pts.length; i2 += 2) grid.add(best.pts[i2], best.pts[i2 + 1], pid, true);
+            };
+            var chunksOf = function (mo) {
+                var cuts = mob ? [16] : [11, 21], out = [], start = mo.first;
+                for (var d = mo.first + 1; d <= mo.last; d++) if (cuts.indexOf(domOf[d]) >= 0) { out.push([start, d - 1]); start = d; }
+                out.push([start, mo.last]);
+                return out;
+            };
+
+            /* pass 1 — month stems, carrying their last segment of days */
+            TR.forEach(function (T) {
+                T.ms.forEach(function (m, jj) {
+                    var mo = months[m], rm = mulberry(hash("m" + mo.y + "-" + mo.m + (mob ? "m" : "d")));
+                    var ch = chunksOf(mo), nTw = ch.length - 1, last = ch[nTw], lastN = last[1] - last[0] + 1;
+                    var twS = []; for (var k2 = 0; k2 < nTw; k2++) twS.push(1.5 + 2.8 * k2);
+                    var d0 = nTw ? twS[nTw - 1] + 2.0 : 1.3, need = d0 + (lastN - 1) * GAP + TAIL;
+                    var tipM = jj === T.ms.length - 1, sS = tipM ? T.path.len : T.sp[jj];
+                    T.path.at(sS, PT);
+                    var x = PT.x, y = PT.y, ta = tanAt(T.path, sS), side = (jj + T.q) % 2 ? 1 : -1;
+                    var a2 = tipM ? ta + (rm() - 0.5) * 0.3 : ta + side * (0.78 + 0.34 * rm());
+                    var b2 = tipM ? (rm() < 0.5 ? 1 : -1) * (0.2 + 0.35 * rm()) : -side * (0.12 + 0.32 * rm());
+                    var best = place(x, y, a2, b2, need, d0, lastN, T.id, 44, (rm() - 0.5) * 0.5);
+                    var sid = nextId++, pid = nextId++;
+                    commit(best, sid, pid);
+                    var cIdx = CH.length;
+                    CH.push({ m: m, path: best.p, first: last[0], last: last[1], s0: d0, terminal: true, sS: 0, k: nTw, total: 0, act: 0 });
+                    ST[m] = { m: m, q: T.q, path: best.p, id: sid, sS: sS, tip: tipM, twS: twS, ch: ch, chunks: [cIdx], side: side, rng: rm, act: Math.sqrt(mo.total / maxMonth) };
+                });
+            });
+            /* pass 2 — tertiary twigs for the earlier segments */
+            ST.forEach(function (st) {
+                var nTw = st.ch.length - 1, list = [];
+                for (var k2 = 0; k2 < nTw; k2++) {
+                    var c = st.ch[k2], n = c[1] - c[0] + 1, sS = st.twS[k2];
+                    st.path.at(sS, PT);
+                    var x = PT.x, y = PT.y, ta = tanAt(st.path, sS), side = (k2 % 2 ? 1 : -1) * -st.side;
+                    var a2 = ta + side * (0.62 + 0.34 * st.rng()), b2 = -side * (0.25 + 0.45 * st.rng());
+                    var d0 = 1.2, need = d0 + (n - 1) * GAP + TAIL;
+                    var best = place(x, y, a2, b2, need, d0, n, st.id, 26, (st.rng() - 0.5) * 0.5);
+                    var id = nextId++;
+                    commit(best, id, id);
+                    list.push(CH.length);
+                    CH.push({ m: st.m, path: best.p, first: c[0], last: c[1], s0: d0, terminal: false, sS: sS, k: k2, total: 0, act: 0 });
+                }
+                st.chunks = list.concat(st.chunks);
+            });
+            var maxChunk = 1;
+            CH.forEach(function (C, ci) {
+                for (var d = C.first; d <= C.last; d++) { dayCh[d] = ci; dayS[d] = C.s0 + (d - C.first) * GAP; C.total += counts[d]; }
+                maxChunk = Math.max(maxChunk, C.total);
+            });
+            CH.forEach(function (C) { C.act = Math.sqrt(C.total / maxChunk); });
+        }
+
+        /* ---- decoration: synaptic spines + fibre dust (seeded per branch) ---- */
+        var decorate = function (p, rng, mIdx, dens, spP) {
+            for (var i2 = 1; i2 < p.n - 1; i2++) {
+                if (rng() > dens) continue;
+                var dx = p.x[i2 + 1] - p.x[i2 - 1], dy = p.y[i2 + 1] - p.y[i2 - 1], dl = Math.hypot(dx, dy) || 1;
+                var off = gauss(rng) * (0.45 + 0.9 * rng()), al = (rng() - 0.5) * 0.5;
+                var lay = rng() < 0.5 ? 0 : rng() < 0.65 ? 1 : 2;
+                U.dust.push(p.x[i2] - dy / dl * off + dx / dl * al, p.y[i2] + dx / dl * off + dy / dl * al, lay, mIdx, rng() < 0.3 ? 1 : 0, rng() * TAU);
             }
-        }
-        for (i = 0; i < N; i++) if (!dayRoute[i]) dayRoute[i] = weeks[weekOf[i]].trunk;
-
-        // temporal arcs between consecutive active weeks
-        for (w = 0; w < W - 1; w++) {
-            var A = weeks[w], B = weeks[w + 1];
-            if (A.quiet || B.quiet) continue;
-            var ia = Math.round(A.trunk.n * 0.42), ib = Math.round(B.trunk.n * 0.42);
-            var ax = A.trunk.x[ia], ay = A.trunk.y[ia], bx2 = B.trunk.x[ib], by2 = B.trunk.y[ib];
-            var mx = (ax + bx2) / 2, my = (ay + by2) / 2, ma = Math.atan2(my - G.cy, mx - G.cx), push = 0.035 * R;
-            A.arc = new Path(14).bez(ax, ay, mx + Math.cos(ma) * push, my + Math.sin(ma) * push, mx + Math.cos(ma) * push, my + Math.sin(ma) * push, bx2, by2, 12);
-        }
-
-        // streak joins inside the ring
-        streakSeg = new Array(N);
-        for (i = 1; i < N; i++) if (counts[i] > 0 && counts[i - 1] > 0) streakSeg[i] = streakPath(i - 1, i);
-
-        // stepped month boundaries
-        monthEdges = [];
-        var hs = G.step / 2;
-        for (var m = 1; m < months.length; m++) {
-            var fi = months[m].first, fw = weekOf[fi], fk = wdOf[fi], e = new Path(48);
-            var rI = G.rIn - hs, rO = G.rOut + hs;
-            if (fk === 0) { e.push(px(rI, edge(fw)), py(rI, edge(fw))); e.push(px(rO, edge(fw)), py(rO, edge(fw))); }
-            else {
-                var rb = (trackR[fk - 1] + trackR[fk]) / 2, e1 = edge(fw + 1), e0 = edge(fw);
-                e.push(px(rI, e1), py(rI, e1)); e.push(px(rb, e1), py(rb, e1));
-                for (var s = 1; s <= 8; s++) { var aa = e1 + (e0 - e1) * (s / 8); e.push(px(rb, aa), py(rb, aa)); }
-                e.push(px(rO, e0), py(rO, e0));
+            for (var s2 = 0.7 + rng() * 0.4; s2 < p.len - 0.4; s2 += 0.42 + rng() * 0.5) {
+                if (rng() > spP) continue;
+                p.at(s2, PT);
+                var sa2 = tanAt(p, s2) + (rng() < 0.5 ? 1 : -1) * (0.7 + 0.8 * rng()), sl = 0.12 + 0.26 * rng();
+                U.spine.push(PT.x, PT.y, PT.x + Math.cos(sa2) * sl, PT.y + Math.sin(sa2) * sl, mIdx);
             }
-            monthEdges.push(e);
-        }
-    }
+        };
+        var dMul = mob ? 0.45 : 1, sMul = mob ? 0.45 : 1;
+        TR.forEach(function (T) { decorate(T.path, mulberry(hash("dq" + T.q)), -1, 0.7 * dMul, 0.08 * sMul); });
+        ST.forEach(function (st) {
+            var mo = months[st.m];
+            decorate(st.path, mulberry(hash("ds" + mo.y + mo.m)), st.m, (0.5 + 0.6 * st.act) * dMul, (0.16 + 0.2 * st.act) * sMul);
+        });
+        CH.forEach(function (C) { if (!C.terminal) decorate(C.path, mulberry(hash("dc" + C.first)), C.m, (0.45 + 0.6 * C.act) * dMul, (0.14 + 0.2 * C.act) * sMul); });
 
-    var TP = new Float64Array(8);
-    function trunkPoints(x, y, a, lean, L) {
-        TP[0] = x; TP[1] = y;
-        TP[2] = x + Math.cos(a) * L * 0.38; TP[3] = y + Math.sin(a) * L * 0.38;
-        TP[4] = x + Math.cos(a + lean) * L * 0.72; TP[5] = y + Math.sin(a + lean) * L * 0.72;
-        TP[6] = x + Math.cos(a + lean * 1.45) * L; TP[7] = y + Math.sin(a + lean * 1.45) * L;
-        return TP;
-    }
-    var CP = new Float64Array(8);
-    function childPoints(x, y, a, side, l) {
-        CP[0] = x; CP[1] = y;
-        CP[2] = x + Math.cos(a) * l * 0.45; CP[3] = y + Math.sin(a) * l * 0.45;
-        CP[4] = x + Math.cos(a - side * 0.25) * l * 0.8; CP[5] = y + Math.sin(a - side * 0.25) * l * 0.8;
-        CP[6] = x + Math.cos(a - side * 0.45) * l; CP[7] = y + Math.sin(a - side * 0.45) * l;
-        return CP;
-    }
-    function streakPath(a, b) {
-        var p = new Path(16);
-        if (weekOf[a] === weekOf[b]) {
-            var ux = dayX[b] - dayX[a], uy = dayY[b] - dayY[a], d = Math.hypot(ux, uy) || 1, ta = (dayRad[a] + 1.2) / d, tb = (dayRad[b] + 1.2) / d;
-            if (ta + tb >= 1) { p.push(dayX[a], dayY[a]); p.push(dayX[b], dayY[b]); return p; }
-            p.push(dayX[a] + ux * ta, dayY[a] + uy * ta); p.push(dayX[b] - ux * tb, dayY[b] - uy * tb);
-            return p;
+        /* ---- satellites around active days (count-driven) + tips ---- */
+        if (D) {
+            for (i = 0; i < N; i++) {
+                if (!counts[i]) continue;
+                var C = CH[dayCh[i]], r2 = mulberry(hash("sat" + dateMs[i]));
+                C.path.at(dayS[i], PT);
+                var ns = [0, 1, 2, 3, 5][tiers[i]] + (ST[C.m].act > 0.65 ? 1 : 0);
+                if (mob) ns = Math.ceil(ns / 2);
+                for (k = 0; k < ns; k++) { var aa = r2() * TAU, ra = 0.3 + 0.42 * r2(); U.sat.push(PT.x + Math.cos(aa) * ra, PT.y + Math.sin(aa) * ra, i, 0.35 + 0.5 * r2()); }
+            }
+            CH.forEach(function (C) { var p = C.path; U.tip.push(p.x[p.n - 1], p.y[p.n - 1], tanAt(p, p.len), C.m, (C.first * 1.7) % TAU); });
+            // labels: month name beyond its tip, quarter numeral beside its trunk
+            ST.forEach(function (st) {
+                var p = st.path, ta = tanAt(p, p.len);
+                var mo = months[st.m], dup = months.some(function (o) { return o !== mo && o.m === mo.m; });
+                var txt = MONTHS[mo.m].toUpperCase() + (dup ? " ’" + String(mo.y).slice(2) : ""), dl = 2.3, lx = 0, ly = 0;
+                for (var tries = 0; tries < 6; tries++, dl += 1.3) {
+                    lx = p.x[p.n - 1] + Math.cos(ta) * dl; ly = p.y[p.n - 1] + Math.sin(ta) * dl;
+                    var clash = labels.some(function (o) { return Math.abs(o.x - lx) < (o.t.length + txt.length) * 0.34 && Math.abs(o.y - ly) < 1.5; });
+                    if (!clash && grid.score(lx, ly, -99, 1.1, 0) === 0) break;
+                }
+                labels.push({ x: lx, y: ly, t: txt, m: st.m, q: -1 });
+            });
+            if (!mob) TR.forEach(function (T) {
+                if (!T.ms.length) return;
+                var s3 = Math.min(T.path.len * 0.5, T.sp[0] + 1.2), ta = tanAt(T.path, s3), sd = -ST[T.ms[0]].side;
+                T.path.at(s3, PT);
+                labels.push({ x: PT.x + Math.cos(ta + sd * Math.PI / 2) * 1.6, y: PT.y + Math.sin(ta + sd * Math.PI / 2) * 1.6, t: ROMAN[T.q], m: -1, q: T.q });
+            });
         }
-        var aa = ang(weekOf[a]), ab = ang(weekOf[b]), am = (aa + ab) / 2, r6 = trackR[wdOf[a]], r0 = trackR[wdOf[b]];
-        return p.bez(dayX[a], dayY[a], px(r6, am), py(r6, am), px(r0, am), py(r0, am), dayX[b], dayY[b], 14);
+
+        /* ---- axon: one long faint fibre through the widest gap ---- */
+        var angs = TR.map(function (T) { return Math.atan2(T.path.y[T.path.n - 1], T.path.x[T.path.n - 1]); }).sort(function (x, y) { return x - y; });
+        var gapA = 0, gapMid = Math.PI / 2;
+        for (i = 0; i < angs.length; i++) {
+            var a1 = angs[i], a3 = i + 1 < angs.length ? angs[i + 1] : angs[0] + TAU;
+            if (a3 - a1 > gapA) { gapA = a3 - a1; gapMid = (a1 + a3) / 2; }
+        }
+        var ar = somaRad(gapMid) * 0.8;
+        axon = curve(Math.cos(gapMid) * ar, Math.sin(gapMid) * ar, gapMid, 34, 0.42, 60, -0.3);
+
+        /* ---- fit unit space → stage ---- */
+        var minX = -SR, maxX = SR, minY = -SR, maxY = SR;
+        var ext = function (x, y) { if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y; };
+        var extP = function (p) { for (var i2 = 0; i2 < p.n; i2 += 2) ext(p.x[i2], p.y[i2]); ext(p.x[p.n - 1], p.y[p.n - 1]); };
+        TR.forEach(function (T) { extP(T.path); });
+        ST.forEach(function (st) { extP(st.path); });
+        CH.forEach(function (C) { if (!C.terminal) extP(C.path); });
+        labels.forEach(function (lb) { var hw = lb.t.length * 0.32; ext(lb.x - hw, lb.y - 0.8); ext(lb.x + hw, lb.y + 0.8); });
+        if (!D) { minX = Math.min(minX, mob ? -24 : -36); maxX = Math.max(maxX, mob ? 24 : 36); minY = Math.min(minY, mob ? -30 : -26); maxY = Math.max(maxY, mob ? 30 : 26); }
+        var pad = mob ? 10 : 22;
+        var S = Math.min((G.w - 2 * pad) / (maxX - minX), (G.h - 2 * pad) / (maxY - minY));
+        var ox = (G.w - (maxX - minX) * S) / 2 - minX * S, oy = (G.h - (maxY - minY) * S) / 2 - minY * S;
+        G.S = S; G.somaX = ox; G.somaY = oy; G.somaR = SR * S;
+        G.kk = clamp(S / 8.5, 0.6, 1.15);
+        var kk = G.kk;
+
+        TR.forEach(function (T) { T.path.transform(S, ox, oy); for (var j2 = 0; j2 < T.sp.length; j2++) T.sp[j2] *= S; });
+        ST.forEach(function (st) { st.path.transform(S, ox, oy); st.sS *= S; for (var j2 = 0; j2 < st.twS.length; j2++) st.twS[j2] *= S; });
+        CH.forEach(function (C) { if (!C.terminal) C.path.transform(S, ox, oy); C.s0 *= S; C.sS *= S; });
+        axon.transform(S, ox, oy);
+        labels.forEach(function (lb) { lb.x = ox + lb.x * S; lb.y = oy + lb.y * S; });
+
+        var toPx = function (src, stride, xy) {
+            var out = new Float32Array(src.length);
+            for (var i2 = 0; i2 < src.length; i2 += stride) {
+                for (var f = 0; f < stride; f++) out[i2 + f] = src[i2 + f];
+                for (var x2 = 0; x2 < xy.length; x2++) out[i2 + xy[x2]] = (xy[x2] % 2 ? oy : ox) + src[i2 + xy[x2]] * S;
+            }
+            return out;
+        };
+        somaP = toPx(U.soma, 4, [0, 1]); nSoma = U.soma.length / 4;
+        somaO = toPx(outline, 2, [0, 1]);
+        dustP = toPx(U.dust, 6, [0, 1]); nDust = U.dust.length / 6;
+        spineP = toPx(U.spine, 5, [0, 1, 2, 3]); nSpine = U.spine.length / 5;
+        satP = toPx(U.sat, 4, [0, 1]); nSat = U.sat.length / 4;
+        tipP = toPx(U.tip, 5, [0, 1]); nTip = U.tip.length / 5;
+
+        if (!D) { nSat = 0; nTip = 0; nLink = 0; return; }
+
+        /* ---- day particles ---- */
+        dayX = new Float32Array(N); dayY = new Float32Array(N); dayRad = new Float32Array(N);
+        var RAD = [0.95, 1.3, 1.65, 2.05, 2.55], rm2 = mob ? 1.15 : 1;
+        for (i = 0; i < N; i++) {
+            dayS[i] *= S;
+            CH[dayCh[i]].path.at(dayS[i], PT);
+            dayX[i] = PT.x; dayY[i] = PT.y;
+            dayRad[i] = Math.max(tiers[i] ? 1.05 : 0.8, (RAD[tiers[i]] + (tiers[i] >= 2 ? 0.45 * Math.sqrt(counts[i] / maxDay) : 0)) * kk * rm2);
+        }
+        /* ---- temporal connections between consecutive active days ---- */
+        var Lk = [];
+        for (i = 1; i < N; i++) {
+            if (!counts[i] || !counts[i - 1]) continue;
+            var mx = (dayX[i] + dayX[i - 1]) / 2, my = (dayY[i] + dayY[i - 1]) / 2, same = dayCh[i] === dayCh[i - 1];
+            Lk.push(i, same ? 1 : 0, same ? mx : mx + (G.somaX - mx) * 0.16, same ? my : my + (G.somaY - my) * 0.16);
+        }
+        linkP = new Float32Array(Lk); nLink = Lk.length / 4;
     }
 
     /* =========================================================
-       BASE LAYER (static scene, re-rendered only when focus changes)
+       BASE LAYER (static anatomy, redrawn only when focus changes)
        ========================================================= */
 
     var baseA = document.createElement("canvas"), baseB = document.createElement("canvas");
     var baseCur = baseA, basePrev = baseB, fade = 1, baseKey = "";
+    var focus = { month: -1 };
+    var DIM = 0.24;
 
-    var focus = { month: -1, week: -1 };
-    function inFocus(i) {
-        if (focus.month >= 0) return monthOf[i] === focus.month;
-        if (focus.week >= 0) return weekOf[i] === focus.week;
-        return true;
+    var revealM = -1; // playback / scrub: months after this one are not revealed yet
+    function lit(m) { return (focus.month < 0 || m === focus.month) && (revealM < 0 || m <= revealM); }
+    function anyDim() { return focus.month >= 0 || revealM >= 0; }
+    function mf(m) { return lit(m) ? 1 : DIM; }
+    function qf(q) {
+        if (focus.month >= 0) return ST[focus.month] && ST[focus.month].q === q ? 1 : DIM * 1.3;
+        if (revealM >= 0) return TR[q] && TR[q].ms.length && TR[q].ms[0] <= revealM ? 1 : DIM * 1.3;
+        return 1;
     }
-    function weekFocus(w) {
-        if (focus.month >= 0) { var mo = months[focus.month]; return w >= weekOf[mo.first] && w <= weekOf[mo.last]; }
-        if (focus.week >= 0) return w === focus.week;
-        return true;
+
+    function taper(c, p, w0, w1) {
+        var n = p.n, i, a, b, dx, dy, d, w;
+        if (n < 2) return;
+        c.beginPath();
+        for (i = 0; i < n; i++) {
+            a = Math.max(0, i - 1); b = Math.min(n - 1, i + 1); dx = p.x[b] - p.x[a]; dy = p.y[b] - p.y[a]; d = Math.hypot(dx, dy) || 1;
+            w = (w0 + (w1 - w0) * (p.l[i] / p.len)) * 0.5;
+            if (i === 0) c.moveTo(p.x[i] - dy / d * w, p.y[i] + dx / d * w); else c.lineTo(p.x[i] - dy / d * w, p.y[i] + dx / d * w);
+        }
+        for (i = n - 1; i >= 0; i--) {
+            a = Math.max(0, i - 1); b = Math.min(n - 1, i + 1); dx = p.x[b] - p.x[a]; dy = p.y[b] - p.y[a]; d = Math.hypot(dx, dy) || 1;
+            w = (w0 + (w1 - w0) * (p.l[i] / p.len)) * 0.5;
+            c.lineTo(p.x[i] + dy / d * w, p.y[i] - dx / d * w);
+        }
+        c.closePath(); c.fill();
     }
+    function strokeAll(c, p) { strokeTo(c, p, p.len + 1); }
 
     function drawBase(cv) {
-        var c = cv.getContext("2d"), R = G.R, k = G.k, i, w, a;
+        var c = cv.getContext("2d"), kk = G.kk, i, a;
         c.setTransform(G.dpr, 0, 0, G.dpr, 0, 0);
-        c.clearRect(0, 0, G.size, G.size);
+        c.clearRect(0, 0, G.w, G.h);
         c.lineCap = "round"; c.lineJoin = "round";
-        var anyFocus = focus.month >= 0 || focus.week >= 0, DIM = 0.2;
 
-        // guide rings
-        c.globalAlpha = 1; c.strokeStyle = "#1c1c1c"; c.lineWidth = 1;
-        c.beginPath(); c.arc(G.cx, G.cy, G.rIn - G.step * 0.9, G.a0, G.a0 + G.sweep); c.stroke();
-        c.strokeStyle = "#252525";
-        c.beginPath(); c.arc(G.cx, G.cy, G.rSpine, G.a0, G.a0 + G.sweep); c.stroke();
-        // start / today ticks
-        c.strokeStyle = "#555555"; c.lineWidth = 1;
+        // axon — long, faint, fading away from the soma
+        var AX = 5;
+        c.strokeStyle = "#888888";
+        for (i = 0; i < AX; i++) {
+            c.globalAlpha = (D ? 0.22 : 0.14) * Math.pow(1 - i / AX, 1.6) * (focus.month >= 0 ? 0.5 : 1);
+            c.lineWidth = (1.5 - i * 0.24) * kk;
+            c.beginPath(); strokeSeg(c, axon, axon.len * i / AX, axon.len * (i + 1) / AX); c.stroke();
+        }
+
+        // primary dendrites
+        TR.forEach(function (T) {
+            var f = D ? qf(T.q) : 0.5;
+            c.fillStyle = "#888888"; c.globalAlpha = (0.42 + 0.3 * T.act) * f;
+            taper(c, T.path, (5.4 + 2.2 * T.act) * kk, (D ? 1.05 : 0.4) * kk);
+            c.strokeStyle = "#d9d9d9"; c.globalAlpha = (0.14 + 0.22 * T.act) * f; c.lineWidth = 0.55 * kk;
+            c.beginPath(); strokeAll(c, T.path); c.stroke();
+        });
+
+        if (D) {
+            // monthly branches + tertiary twigs (activity sets their presence)
+            ST.forEach(function (st) {
+                var f = mf(st.m);
+                c.fillStyle = "#888888"; c.globalAlpha = (0.26 + 0.44 * st.act) * f;
+                taper(c, st.path, (1.1 + 1.3 * st.act) * kk, 0.3 * kk);
+            });
+            CH.forEach(function (C) {
+                if (C.terminal) return;
+                var f = mf(C.m);
+                c.fillStyle = "#888888"; c.globalAlpha = (0.22 + 0.48 * C.act) * f;
+                taper(c, C.path, (0.62 + 0.62 * C.act) * kk, 0.2 * kk);
+            });
+            // luminous cores on active branches
+            c.strokeStyle = "#d9d9d9"; c.lineWidth = 0.45 * kk;
+            ST.forEach(function (st) { if (st.act < 0.05) return; c.globalAlpha = 0.24 * st.act * mf(st.m); c.beginPath(); strokeAll(c, st.path); c.stroke(); });
+        }
+
+        // synaptic spines
+        c.strokeStyle = "#888888"; c.lineWidth = 0.45 * kk;
+        for (var pass = 0; pass < 2; pass++) {
+            if (pass === 1 && !anyDim()) break;
+            c.globalAlpha = pass === 0 ? 0.32 : 0.32 * DIM;
+            c.beginPath();
+            for (i = 0; i < nSpine; i++) {
+                var o = i * 5, m = spineP[o + 4], on = m < 0 || lit(m);
+                if ((pass === 0) !== on) continue;
+                c.moveTo(spineP[o], spineP[o + 1]); c.lineTo(spineP[o + 2], spineP[o + 3]);
+            }
+            c.stroke();
+        }
+        c.fillStyle = "#a3a3a3";
+        c.globalAlpha = 0.45;
         c.beginPath();
-        c.moveTo(px(G.rIn - G.step, G.a0), py(G.rIn - G.step, G.a0)); c.lineTo(px(G.rSpine + 5, G.a0), py(G.rSpine + 5, G.a0));
-        c.stroke();
-        c.strokeStyle = "#a3a3a3";
-        var ae = G.a0 + G.sweep;
-        c.beginPath(); c.moveTo(px(G.rIn - G.step, ae), py(G.rIn - G.step, ae)); c.lineTo(px(G.rSpine + 7, ae), py(G.rSpine + 7, ae)); c.stroke();
+        for (i = 0; i < nSpine; i++) { var o2 = i * 5; if (spineP[o2 + 4] >= 0 && !lit(spineP[o2 + 4])) continue; c.rect(spineP[o2 + 2] - 0.4 * kk, spineP[o2 + 3] - 0.4 * kk, 0.8 * kk, 0.8 * kk); }
+        c.fill();
 
-        // weekday letters in the gap
-        c.font = font; c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = "#555555";
-        var letters = "SMTWTFS";
-        for (var t = 0; t < 7; t++) c.fillText(letters[t], G.cx, G.cy - trackR[t]);
-
-        if (!D) { // loading skeleton: empty tracks only, no values
-            c.strokeStyle = "#161616";
-            for (t = 0; t < 7; t++) { c.beginPath(); c.arc(G.cx, G.cy, trackR[t], G.a0, G.a0 + G.sweep); c.stroke(); }
-            return;
+        // static fibre dust (three depth layers); drifting dust is drawn per frame
+        var LA = [0.2, 0.38, 0.6], LS = [0.7, 0.95, 1.2], LC = ["#555555", "#888888", "#a3a3a3"];
+        for (var lay = 0; lay < 3; lay++) {
+            c.fillStyle = LC[lay]; c.beginPath();
+            for (i = 0; i < nDust; i++) {
+                var d6 = i * 6;
+                if (dustP[d6 + 2] !== lay || (dustP[d6 + 4] && !reduce)) continue;
+                var df = dustP[d6 + 3] < 0 || lit(dustP[d6 + 3]);
+                if (!df) continue;
+                c.rect(dustP[d6], dustP[d6 + 1], LS[lay] * kk, LS[lay] * kk);
+            }
+            c.globalAlpha = LA[lay]; c.fill();
         }
 
-        // month boundaries + labels
-        c.lineWidth = 0.75;
-        for (var m = 0; m < monthEdges.length; m++) {
-            var mf = focus.month >= 0 && (focus.month === m + 1 || focus.month === m);
-            c.strokeStyle = mf ? "#555555" : "#202020";
-            c.beginPath(); strokePath(c, monthEdges[m]); c.stroke();
-        }
-        if (!G.mobile) {
-            for (m = 0; m < months.length; m++) {
-                var mo = months[m];
-                if (mo.last - mo.first < 6) continue;
-                var am = (ang(weekOf[mo.first]) + ang(weekOf[mo.last])) / 2;
-                c.fillStyle = focus.month === m ? "#ffffff" : anyFocus ? "#333333" : "#555555";
-                c.fillText(MONTHS[mo.m].toUpperCase(), px(G.rLabel, am), py(G.rLabel, am));
+        // soma: translucent membrane body the trunks flow out of, then layered points
+        var bg = c.createRadialGradient(G.somaX, G.somaY, 0, G.somaX, G.somaY, G.somaR * 1.05);
+        bg.addColorStop(0, "rgba(217,217,217,0.34)");
+        bg.addColorStop(0.55, "rgba(136,136,136,0.26)");
+        bg.addColorStop(1, "rgba(85,85,85,0.16)");
+        c.fillStyle = bg; c.globalAlpha = D ? 1 : 0.6;
+        c.beginPath();
+        for (i = 0; i < somaO.length; i += 2) { if (i) c.lineTo(somaO[i], somaO[i + 1]); else c.moveTo(somaO[i], somaO[i + 1]); }
+        c.closePath(); c.fill();
+        c.strokeStyle = "#888888"; c.lineWidth = 0.6 * kk; c.globalAlpha = 0.35; c.stroke();
+        glow(c, G.somaX, G.somaY, G.somaR * 2.6, D ? 0.12 : 0.06);
+        var SC = ["#555555", "#888888", "#d9d9d9", "#ffffff"];
+        for (var band = 0; band < 4; band++) {
+            c.fillStyle = SC[band]; c.beginPath();
+            for (i = 0; i < nSoma; i++) {
+                var s4 = i * 4, bb = somaP[s4 + 2], bi = bb < 0.3 ? 0 : bb < 0.55 ? 1 : bb < 0.8 ? 2 : 3;
+                if (bi !== band) continue;
+                var sz = (somaP[s4 + 3] ? 1.25 : 0.8) * kk;
+                c.rect(somaP[s4] - sz / 2, somaP[s4 + 1] - sz / 2, sz, sz);
             }
+            c.globalAlpha = [0.55, 0.65, 0.7, 0.75][band] * (D ? 1 : 0.6); c.fill();
         }
 
-        // ---- neural field ----
-        c.strokeStyle = "#a3a3a3";
-        for (w = 0; w < W; w++) {
-            var wk = weeks[w], wf = weekFocus(w) ? 1 : DIM;
-            if (wk.quiet) {
-                c.globalAlpha = wf; c.strokeStyle = "#252525"; c.lineWidth = 1 * k;
-                c.beginPath(); strokePath(c, wk.trunk); c.stroke(); c.strokeStyle = "#a3a3a3";
-                continue;
-            }
-            if (wk.arc) {
-                c.globalAlpha = 0.11 * (weekFocus(w) && weekFocus(w + 1) ? 1 : DIM);
-                c.lineWidth = 0.7 * k; c.beginPath(); strokePath(c, wk.arc); c.stroke();
-            }
-            c.globalAlpha = (0.14 + 0.46 * wk.t) * wf; c.lineWidth = (0.55 + 1.05 * wk.t) * k;
-            c.beginPath(); strokePath(c, wk.trunk); c.stroke();
-            for (var j = 0; j < wk.children.length; j++) {
-                var ch = wk.children[j], cf = Math.sqrt(counts[ch.day] / maxDay), df = inFocus(ch.day) ? 1 : DIM;
-                c.globalAlpha = (0.1 + 0.42 * cf) * wf * df; c.lineWidth = (0.45 + 0.75 * cf) * k;
-                c.beginPath(); strokePath(c, ch.path); c.stroke();
-                if (ch.twigs.length) {
-                    c.globalAlpha = 0.16 * wf * df; c.lineWidth = 0.45 * k; c.beginPath();
-                    for (var q = 0; q < ch.twigs.length; q++) strokePath(c, ch.twigs[q]);
-                    c.stroke();
+        // static tip filaments (animated version drawn per frame)
+        if (reduce) drawTips(c, 0);
+
+        // labels
+        if (D) {
+            c.textAlign = "center"; c.textBaseline = "middle";
+            labels.forEach(function (lb) {
+                if (lb.m >= 0) {
+                    c.font = font;
+                    c.fillStyle = focus.month === lb.m ? "#ffffff" : !lit(lb.m) ? "#252525" : revealM === lb.m ? "#a3a3a3" : "#555555";
+                } else {
+                    c.font = fontQ;
+                    c.fillStyle = focus.month >= 0 && ST[focus.month].q === lb.q ? "#a3a3a3" : qf(lb.q) < 1 ? "#252525" : "#555555";
                 }
-            }
+                c.globalAlpha = 1; c.fillText(lb.t, lb.x, lb.y);
+            });
         }
-        // activation points (tips)
-        c.fillStyle = "#ffffff";
-        for (w = 0; w < W; w++) {
-            wk = weeks[w];
-            for (j = 0; j < wk.children.length; j++) {
-                ch = wk.children[j];
-                var tr = tiers[ch.day], tf = weekFocus(w) && inFocus(ch.day) ? 1 : DIM;
-                c.globalAlpha = (0.25 + 0.16 * tr) * tf;
-                c.beginPath(); c.arc(ch.tipX, ch.tipY, (0.6 + 0.32 * tr) * k, 0, TAU); c.fill();
-            }
-        }
-
-        // ---- streak joins inside the orbit ----
-        c.strokeStyle = "#ffffff"; c.lineWidth = 0.8 * k;
-        for (i = 1; i < N; i++) {
-            if (!streakSeg[i]) continue;
-            var sf = inFocus(i) && inFocus(i - 1) ? 1 : DIM;
-            c.globalAlpha = (weekOf[i] === weekOf[i - 1] ? 0.16 : 0.08) * sf;
-            c.beginPath(); strokePath(c, streakSeg[i]); c.stroke();
-        }
-
-        // ---- day particles, batched per tier ----
-        var FILL = ["#4a4a4a", "#777777", "#a3a3a3", "#ffffff", "#ffffff"], ALPHA = [0.8, 0.9, 0.95, 0.95, 1];
-        for (var tier = 0; tier < 5; tier++) {
-            for (var pass = 0; pass < 2; pass++) {
-                var on = pass === 0;
-                if (!anyFocus && !on) continue;
-                c.fillStyle = FILL[tier]; c.globalAlpha = ALPHA[tier] * (on ? 1 : (tier === 0 ? 0.45 : 0.22));
-                c.beginPath();
-                for (i = 0; i < N; i++) {
-                    if (tiers[i] !== tier || (anyFocus && inFocus(i) !== on)) continue;
-                    c.moveTo(dayX[i] + dayRad[i], dayY[i]); c.arc(dayX[i], dayY[i], dayRad[i], 0, TAU);
-                }
-                c.fill();
-            }
-        }
-        // exceptional halos
-        for (i = 0; i < N; i++) if (tiers[i] === 4) glow(c, dayX[i], dayY[i], 17 * k, (inFocus(i) ? 0.5 : 0.12));
         c.globalAlpha = 1;
-
-        // today marker
-        var li = N - 1;
-        c.strokeStyle = "#a3a3a3"; c.lineWidth = 0.8; c.globalAlpha = 0.6;
-        c.beginPath(); c.arc(dayX[li], dayY[li], dayRad[li] + 3.2 * k, 0, TAU); c.stroke();
-        c.globalAlpha = 1;
+    }
+    function strokeSeg(c, p, s0, s1) {
+        var i0 = p.index(s0), i1 = p.index(s1);
+        p.at(s0, PT); c.moveTo(PT.x, PT.y);
+        for (var i = i0 + 1; i <= i1; i++) c.lineTo(p.x[i], p.y[i]);
+        p.at(s1, PT); c.lineTo(PT.x, PT.y);
     }
 
     function refreshBase(force) {
-        var key = (D ? D.fetchedAt + N : "none") + "|" + focus.month + "|" + focus.week + "|" + G.size;
+        var key = (D ? D.fetchedAt + N : "none") + "|" + focus.month + "|" + revealM + "|" + G.w + "x" + G.h + "|" + reduce;
         if (!force && key === baseKey) return;
         baseKey = key;
         var t = basePrev; basePrev = baseCur; baseCur = t;
@@ -526,17 +699,17 @@
        SIGNALS & FLARES (fixed pools, no per-frame allocation)
        ========================================================= */
 
-    var SIG = [], FLR = [];
-    for (var si = 0; si < 14; si++) SIG.push({ on: false, path: null, s: 0, s0: 0, end: 0, v: 0, trail: 0, a: 0, kind: 0, lastW: -1, marks: null, mi: 0, tipX: 0, tipY: 0, strong: 0, w: -1 });
-    for (var fi = 0; fi < 40; fi++) FLR.push({ on: false, x: 0, y: 0, t: 0, dur: 0, size: 0, a: 0, ring: false });
-    var illum = null; // per week highlight 0..1 (trace illumination)
+    var SIG = [], FLR = [], DLY = [];
+    for (var si = 0; si < 12; si++) SIG.push({ on: false, path: null, s: 0, end: 0, v: 0, trail: 0, a: 1, kind: 0, marks: null, mi: 0, day: -1, strong: 0 });
+    for (var fi = 0; fi < 48; fi++) FLR.push({ on: false, x: 0, y: 0, t: 0, dur: 0, size: 0, a: 0, ring: false });
+    for (var di = 0; di < 24; di++) DLY.push({ on: false, day: 0, at: 0, s: 0 });
     var nextAmbient = 0;
 
-    function spawn(path, s0, s1, v, kind) {
+    function spawn(path, v, kind, a) {
         for (var i = 0; i < SIG.length; i++) if (!SIG[i].on) {
             var g = SIG[i];
-            g.on = true; g.path = path; g.s = s0; g.s0 = s0; g.end = Math.min(s1, path.len); g.v = v; g.kind = kind;
-            g.trail = (kind === 0 ? 0.11 : 0.07) * G.R; g.a = 1; g.lastW = -1; g.marks = null; g.mi = 0; g.strong = 0; g.w = -1;
+            g.on = true; g.path = path; g.s = 0; g.end = path.len; g.v = v; g.kind = kind;
+            g.trail = 0.09 * Math.min(G.w, G.h); g.a = a || 1; g.marks = null; g.mi = 0; g.day = -1; g.strong = 0;
             return g;
         }
         return null;
@@ -548,83 +721,83 @@
     }
     function flareDay(i, strength) {
         var tr = tiers[i];
-        flare(dayX[i], dayY[i], (10 + 6 * tr) * G.k * (0.8 + strength), (0.35 + 0.12 * tr) * strength, 0.9 + 0.2 * tr, tr >= 3 && strength > 0.8);
+        flare(dayX[i], dayY[i], (8 + 5 * tr) * G.kk * (0.75 + 0.5 * strength), (0.22 + 0.11 * tr) * strength, 0.8 + 0.18 * tr, tr >= 3 && strength >= 0.9);
     }
-    function weekAtLen(s) { // spine distance → week index
-        var w = Math.floor((s / spine.len) * W);
-        return w < 0 ? 0 : w >= W ? W - 1 : w;
+    function delayFlare(i, ms, s) {
+        for (var k = 0; k < DLY.length; k++) if (!DLY[k].on) { var q = DLY[k]; q.on = true; q.day = i; q.at = performance.now() + ms; q.s = s; return; }
     }
-    function spineLenAtWeek(w) { return ((w + 0.5) / W) * spine.len; }
 
-    function branchInto(w, strong) {
-        var wk = weeks[w];
-        if (!wk || wk.quiet) return;
-        var best = null;
-        for (var j = 0; j < wk.children.length; j++) if (!best || counts[wk.children[j].day] > counts[best.day]) best = wk.children[j];
-        var path = best ? best.route : wk.trunk;
-        var g = spawn(path, 0, path.len, (0.18 + 0.1 * Math.random()) * G.R, 1);
-        if (g) { g.tipX = best ? best.tipX : path.x[path.n - 1]; g.tipY = best ? best.tipY : path.y[path.n - 1]; g.strong = strong ? 1 : 0; g.w = w; }
+    /* routes along the real anatomy: soma → quarter → month → segment → day */
+    function routeTo(i) {
+        var C = CH[dayCh[i]], st = ST[C.m], T = TR[st.q], p = new Path(160);
+        p.push(G.somaX, G.somaY);
+        appendSeg(p, T.path, 0, st.sS);
+        if (C.terminal) appendSeg(p, st.path, 0, dayS[i]);
+        else { appendSeg(p, st.path, 0, C.sS); appendSeg(p, C.path, 0, dayS[i]); }
+        return p;
+    }
+    function monthTour(m) {
+        var st = ST[m], T = TR[st.q], p = new Path(512), mk = { s: [], d: [] }, pos = 0;
+        p.push(G.somaX, G.somaY);
+        appendSeg(p, T.path, 0, st.sS);
+        st.chunks.forEach(function (ci) {
+            var C = CH[ci], cur;
+            if (!C.terminal) { appendSeg(p, st.path, pos, C.sS); pos = C.sS; cur = 0; }
+            else cur = pos;
+            for (var d = C.first; d <= C.last; d++) { appendSeg(p, C.path, cur, dayS[d]); cur = dayS[d]; mk.s.push(p.len); mk.d.push(d); }
+            if (!C.terminal) { appendSeg(p, C.path, cur, C.path.len); appendSeg(p, C.path, C.path.len, 0); }
+            else appendSeg(p, C.path, cur, C.path.len);
+        });
+        return { p: p, mk: mk };
     }
 
     function ambient(now) {
-        if (!D || reduce || now < nextAmbient) return;
-        var live = 0;
-        for (var i = 0; i < SIG.length; i++) if (SIG[i].on && SIG[i].kind === 0) live++;
-        nextAmbient = now + 2600 + Math.random() * 4600; // irregular pulse timing
-        if (live >= 2) return;
-        // start a few weeks ahead of an active week, travel a partial arc clockwise
-        var pick = -1, tries = 0;
-        while (tries++ < 24) { var w = Math.floor(Math.random() * W); if (!weeks[w].quiet) { pick = w; break; } }
-        if (pick < 0) pick = Math.floor(Math.random() * W);
-        var back = 3 + Math.random() * 7, span = 9 + Math.random() * 16;
-        var s0 = Math.max(0, spineLenAtWeek(pick - back)), s1 = Math.min(spine.len, s0 + (span / W) * spine.len);
-        spawn(spine, s0, s1, ((2.2 + Math.random() * 1.6) / W) * spine.len, 0);
+        if (!D || reduce || pb.playing || now < nextAmbient) return;
+        nextAmbient = now + 3800 + Math.random() * 5200; // irregular, unhurried
+        var live = 0, i;
+        for (i = 0; i < SIG.length; i++) if (SIG[i].on && SIG[i].kind === 0) live++;
+        if (live >= 1) return;
+        // weighted by real activity: busy days are visited more often
+        var tot = 0; for (i = 0; i < N; i++) tot += counts[i];
+        if (!tot) return;
+        var r = Math.random() * tot, pick = N - 1;
+        for (i = 0; i < N; i++) { r -= counts[i]; if (r <= 0) { pick = i; break; } }
+        var g = spawn(routeTo(pick), 0.26 * Math.min(G.w, G.h), 0, 0.7);
+        if (g) g.day = pick;
     }
 
-    /* Selected-day trace: day → its streak (forward) → spine → its branch */
+    /* selected day: signal from the soma to the day, then its streak answers */
     function trace(i) {
         if (!D) return;
-        var end = i, st = streakOf[i];
-        if (st >= 0) end = Math.min(streaks[st].end, i + 14);
-        var p = new Path(256), marks = [], days = [];
-        p.push(dayX[i], dayY[i]); marks.push(0); days.push(i);
-        for (var d = i + 1; d <= end; d++) {
-            var sp = streakPath(d - 1, d);
-            p.push(dayX[d - 1], dayY[d - 1]);
-            p.append(sp, 0, sp.n - 1); p.push(dayX[d], dayY[d]);
-            marks.push(p.len); days.push(d);
-        }
-        var wk = weeks[weekOf[end]];
-        p.push(wk.rootX, wk.rootY);
-        var route = dayRoute[end];
-        p.append(route, 0, route.n - 1);
-
-        // illuminate the weeks the streak spans
-        if (!illum || illum.length !== W) illum = new Float32Array(W);
-        for (d = i; d <= end; d++) illum[weekOf[d]] = Math.max(illum[weekOf[d]], reduce ? 1 : 0.01);
-
         if (reduce) {
-            staticTrace = p; staticUntil = performance.now() + 2600;
-            for (d = 0; d < days.length; d++) flareDay(days[d], 1);
-            setTimeout(function () { staticTrace = null; if (illum) illum.fill(0); requestDraw(); }, 2700);
-            requestDraw();
-            return;
+            staticTrace = routeTo(i); flareDay(i, 1.1);
+            clearTimeout(staticTimer);
+            staticTimer = setTimeout(function () { staticTrace = null; requestDraw(); }, 2600);
+            requestDraw(); return;
         }
-        var g = spawn(p, 0, p.len, 0.3 * G.R, 2);
-        if (g) {
-            g.marks = { s: marks, d: days }; g.mi = 0; g.trail = 0.12 * G.R;
-            g.tipX = dayChild[end] ? dayChild[end].tipX : route.x[route.n - 1];
-            g.tipY = dayChild[end] ? dayChild[end].tipY : route.y[route.n - 1];
-            g.strong = 1; g.w = weekOf[end];
-        }
-        // a secondary pulse up the selected day's own branch
-        if (end !== i && dayChild[i]) { var g2 = spawn(dayChild[i].route, 0, dayChild[i].route.len, 0.24 * G.R, 1); if (g2) { g2.tipX = dayChild[i].tipX; g2.tipY = dayChild[i].tipY; g2.strong = 1; g2.w = weekOf[i]; } }
-        flareDay(i, 1.2);
+        var g = spawn(routeTo(i), 0.42 * Math.min(G.w, G.h), 2, 1);
+        if (g) { g.day = i; g.strong = 1; }
         wake();
     }
-    var staticTrace = null, staticUntil = 0;
+    var staticTrace = null, staticTimer = 0;
+    function streakRipple(i) {
+        var st = streakOf[i];
+        if (st < 0) return;
+        var S2 = streaks[st], n = 0;
+        for (var d = i + 1; d <= S2.end && n < 12; d++, n++) delayFlare(d, 110 * (n + 1), 0.75);
+        for (d = i - 1, n = 0; d >= S2.start && n < 12; d--, n++) delayFlare(d, 110 * (n + 1), 0.6);
+    }
 
-    /* New activity after a refresh — fires once per changed record */
+    /* month selected: one controlled signal through all of its daily nodes */
+    function tourMonth(m) {
+        if (!D || reduce) return;
+        for (var i = 0; i < SIG.length; i++) if (SIG[i].on && SIG[i].kind === 1) SIG[i].on = false;
+        var t = monthTour(m), g = spawn(t.p, 0.5 * Math.min(G.w, G.h), 1, 1);
+        if (g) { g.marks = t.mk; g.strong = 1; }
+        wake();
+    }
+
+    /* new activity after a refresh — fires once per changed record */
     var pendingNew = [];
     function fireNew() {
         if (!pendingNew.length || !inView || document.hidden || !D) return;
@@ -632,58 +805,149 @@
         list.forEach(function (i, n) {
             setTimeout(function () {
                 if (reduce) { flareDay(i, 1.3); requestDraw(); return; }
-                var w = weekOf[i], s1 = spineLenAtWeek(w), s0 = Math.max(0, s1 - (6 / W) * spine.len);
-                var g = spawn(spine, s0, s1, (4 / W) * spine.len, 0);
-                if (g) { g.strong = 1; g.w = w; g.kind = 3; g.tipX = i; }
+                var g = spawn(routeTo(i), 0.34 * Math.min(G.w, G.h), 3, 1);
+                if (g) { g.day = i; g.strong = 1; }
                 wake();
-            }, n * 900);
+            }, 400 + n * 1100);
         });
+    }
+
+    /* =========================================================
+       YEAR IN MOTION — playback state
+       ========================================================= */
+
+    var pb = { t: 0, playing: false, lastD: -1, lastM: -1, timer: 0 };
+
+    function headPos(t, out) { // luminous head moving through the chronological paths
+        var d = Math.floor(t), f = t - d;
+        if (d >= N - 1) { d = N - 1; f = 0; }
+        var ci = dayCh[d], s = dayS[d];
+        if (d + 1 < N && f > 0) {
+            if (dayCh[d + 1] === ci) s += (dayS[d + 1] - s) * f;
+            else if (f < 0.5) s += (CH[ci].path.len - s) * (f * 2);
+            else { ci = dayCh[d + 1]; s = dayS[d + 1] * ((f - 0.5) * 2); }
+        }
+        out.ci = ci; out.s = s;
+        CH[ci].path.at(s, PT); out.x = PT.x; out.y = PT.y;
+        return out;
+    }
+    var HEAD = { ci: 0, s: 0, x: 0, y: 0 };
+
+    function revealUpTo(d, flares) {
+        for (var x = pb.lastD + 1; x <= d; x++) {
+            if (flares && counts[x] > 0) flareDay(x, 0.85);
+            var m = monthOf[x];
+            if (m !== pb.lastM) {
+                pb.lastM = m;
+                if (flares && !reduce) { // conduction: soma → the new month's branch
+                    var st = ST[m], T = TR[st.q], p = new Path(96);
+                    p.push(G.somaX, G.somaY); appendSeg(p, T.path, 0, st.sS); appendSeg(p, st.path, 0, Math.min(st.path.len, 1.2 * G.S));
+                    spawn(p, 0.9 * Math.min(G.w, G.h), 4, 0.7);
+                }
+            }
+        }
+        pb.lastD = d;
+    }
+
+    function play() {
+        if (!D) return;
+        if (pb.t >= N - 1) { pb.t = 0; pb.lastD = -1; pb.lastM = -1; }
+        pb.playing = true;
+        sel.day = -1; sel.month = -1; hover.day = hover.month = -1;
+        applyFocus(); refreshTip();
+        playUI();
+        announce("Playing the year from " + fmtLong.format(new Date(dateMs[Math.floor(pb.t)])) + ".");
+        if (reduce) stepReduced(); else { last = performance.now(); wake(); }
+    }
+    function pause(silent) {
+        if (!pb.playing) return;
+        pb.playing = false; clearTimeout(pb.timer);
+        playUI(); readout();
+        if (!silent) announce("Playback paused on " + fmtLong.format(new Date(dateMs[Math.floor(pb.t)])) + ".");
+    }
+    function finish() {
+        pb.playing = false; pb.t = N - 1; revealUpTo(N - 1, !reduce);
+        playUI(); readout(); requestDraw();
+        announce("Playback complete: " + plural(D.totals.contributions, "contribution") + " across " + plural(D.totals.activeDays, "active day") + ".");
+    }
+    function stepReduced() { // reduced motion: discrete month-by-month reveal, no travelling light
+        clearTimeout(pb.timer);
+        if (!pb.playing) return;
+        var d = Math.floor(pb.t), m = monthOf[d];
+        var target = pb.lastD < 0 ? months[m].last : (m + 1 < months.length ? months[m + 1].last : N - 1);
+        pb.t = target; revealUpTo(target, false); readout(); requestDraw();
+        if (target >= N - 1) { finish(); return; }
+        pb.timer = setTimeout(stepReduced, 1100);
+    }
+    function scrubTo(d) {
+        pause(true);
+        pb.t = d; pb.lastD = d; pb.lastM = monthOf[d];
+        sel.month = -1; applyFocus();
+        readout(); requestDraw();
+    }
+
+    function playUI() {
+        el.play.setAttribute("data-playing", pb.playing ? "true" : "false");
+        el.play.setAttribute("aria-label", pb.playing ? "Pause playback" : pb.t >= N - 1 ? "Play the year from the start" : "Resume playback");
+        root.toggleAttribute("data-playing", pb.playing);
     }
 
     /* =========================================================
        FRAME
        ========================================================= */
 
-    var inView = false, raf = 0, last = 0, drawQueued = false;
-    var hover = { day: -1, week: -1, month: -1 }, sel = { day: -1, week: -1, month: -1 };
+    var inView = false, raf = 0, last = 0, drawQueued = false, lastPaint = 0;
+    var hover = { day: -1, month: -1 }, sel = { day: -1, month: -1 };
+    var focusAmt = 1, routeCache = { day: -1, p: null };
 
-    function anyActive() {
-        if (fade < 1) return true;
-        if (reduce) return false;
-        return !!D;
-    }
     function wake() {
         if (raf || !inView || document.hidden) return;
         last = performance.now();
         raf = requestAnimationFrame(frame);
     }
     function requestDraw() {
-        if (raf) return;
-        if (drawQueued) return;
+        if (raf || drawQueued) return;
         drawQueued = true;
         requestAnimationFrame(function () { drawQueued = false; if (!raf) render(0, performance.now()); });
     }
-
     function frame(now) {
         raf = 0;
-        var dt = Math.min(0.05, (now - last) / 1000); last = now;
-        render(dt, now);
-        if (inView && !document.hidden && (anyActive() || busy())) raf = requestAnimationFrame(frame);
+        var dt = Math.min(0.05, (now - last) / 1000);
+        var active = busy();
+        // only fine drift left → ~30 fps is plenty
+        if (active || now - lastPaint > 31) { last = now; lastPaint = now; render(dt, now); }
+        // render() may already have queued the next frame (wake via refreshBase): never run two loops
+        if (!raf && inView && !document.hidden && (active || (!reduce && D))) raf = requestAnimationFrame(frame);
     }
     function busy() {
+        if (fade < 1 || pb.playing || focusAmt < 1) return true;
         for (var i = 0; i < SIG.length; i++) if (SIG[i].on) return true;
         for (i = 0; i < FLR.length; i++) if (FLR[i].on) return true;
-        if (illum) for (i = 0; i < illum.length; i++) if (illum[i] > 0.002) return true;
+        for (i = 0; i < DLY.length; i++) if (DLY[i].on) return true;
         return false;
     }
 
+    function drawTips(c, time) {
+        var kk = G.kk, hl = (G.mobile ? 1.3 : 1.7) * kk * 4;
+        c.strokeStyle = "#888888"; c.lineWidth = 0.5 * kk; c.globalAlpha = 0.45;
+        c.beginPath();
+        for (var i = 0; i < nTip; i++) {
+            var o = i * 5, m = tipP[o + 3];
+            if (!lit(m)) continue;
+            var a = tipP[o + 2] + Math.sin(time * 0.55 + tipP[o + 4]) * 0.09, x = tipP[o], y = tipP[o + 1];
+            var mx = x + Math.cos(a) * hl * 0.55, my = y + Math.sin(a) * hl * 0.55, a2 = a + Math.sin(time * 0.8 + tipP[o + 4] * 1.3) * 0.12;
+            c.moveTo(x, y); c.quadraticCurveTo(mx, my, mx + Math.cos(a2) * hl * 0.45, my + Math.sin(a2) * hl * 0.45);
+        }
+        c.stroke();
+    }
+
     function render(dt, now) {
-        var c = ctx;
+        var c = ctx, kk = G.kk, i, g, time = now / 1000;
         c.setTransform(1, 0, 0, 1, 0, 0);
         c.globalAlpha = 1;
         c.clearRect(0, 0, canvas.width, canvas.height);
         if (fade < 1) {
-            fade = Math.min(1, fade + dt / 0.24);
+            fade = Math.min(1, fade + dt / 0.3);
             var e = fade * fade * (3 - 2 * fade);
             c.globalAlpha = 1 - e; c.drawImage(basePrev, 0, 0);
             c.globalAlpha = e; c.drawImage(baseCur, 0, 0);
@@ -691,94 +955,161 @@
         c.globalAlpha = 1;
         c.setTransform(G.dpr, 0, 0, G.dpr, 0, 0);
         c.lineCap = "round"; c.lineJoin = "round";
+
+        // drifting fibre dust (low amplitude, per-particle phase)
+        if (!reduce) {
+            var LA = [0.2, 0.38, 0.6], LS = [0.7, 0.95, 1.2], LC = ["#555555", "#888888", "#a3a3a3"], amp = 0.9 * kk;
+            for (var lay = 0; lay < 3; lay++) {
+                c.fillStyle = LC[lay]; c.beginPath();
+                for (i = 0; i < nDust; i++) {
+                    var d6 = i * 6;
+                    if (!dustP[d6 + 4] || dustP[d6 + 2] !== lay) continue;
+                    if (dustP[d6 + 3] >= 0 && !lit(dustP[d6 + 3])) continue;
+                    var ph = dustP[d6 + 5];
+                    c.rect(dustP[d6] + Math.sin(time * 0.35 + ph) * amp * (1 + lay * 0.4), dustP[d6 + 1] + Math.cos(time * 0.28 + ph * 1.7) * amp * (1 + lay * 0.4), LS[lay] * kk, LS[lay] * kk);
+                }
+                c.globalAlpha = LA[lay]; c.fill();
+            }
+            drawTips(c, time);
+            // soma breathes very slightly
+            glow(c, G.somaX, G.somaY, G.somaR * (2.2 + 0.12 * Math.sin(time * 0.7)), D ? 0.07 + 0.03 * Math.sin(time * 0.7) : 0.03);
+        }
         if (!D) return;
 
-        ambient(now);
-        var k = G.k, i, j, g;
+        if (!reduce && dt) ambient(now);
 
-        // trace illumination of weeks
-        if (illum) {
+        // playback progress
+        if (pb.playing && !reduce && dt) {
+            pb.t = Math.min(N - 1, pb.t + dt * PLAY_RATE);
+            var dNow = Math.floor(pb.t);
+            if (dNow !== pb.lastD) { revealUpTo(dNow, true); readout(); }
+            if (pb.t >= N - 1) finish();
+        }
+        var rv = Math.floor(pb.t), revealing = rv < N - 1;
+        var rmNow = revealing ? monthOf[rv] : -1;
+        if (rmNow !== revealM) { revealM = rmNow; refreshBase(false); }
+
+        // selected month brightens progressively from the soma outwards
+        var fm = focus.month;
+        if (fm >= 0 && ST[fm]) {
+            if (focusAmt < 1) focusAmt = reduce ? 1 : Math.min(1, focusAmt + (dt || 0.016) / 1.1);
+            var st = ST[fm], T = TR[st.q], grow = (1 - Math.pow(1 - focusAmt, 2.2));
+            var Ltot = st.sS + st.path.len, reach = grow * Ltot * 1.05;
             c.strokeStyle = "#ffffff";
-            for (var w = 0; w < W; w++) {
-                var v = illum[w];
-                if (v <= 0.002) continue;
-                var wk = weeks[w];
-                c.globalAlpha = 0.75 * v; c.lineWidth = (0.9 + wk.t) * k;
-                c.beginPath(); strokePath(c, wk.trunk);
-                for (j = 0; j < wk.children.length; j++) strokePath(c, wk.children[j].path);
+            c.globalAlpha = 0.7; c.lineWidth = 1.5 * kk;
+            c.beginPath(); strokeTo(c, T.path, Math.min(st.sS, reach)); c.stroke();
+            if (reach > st.sS) {
+                var sr = reach - st.sS;
+                c.globalAlpha = 0.8; c.lineWidth = 1.2 * kk;
+                c.beginPath(); strokeTo(c, st.path, sr); c.stroke();
+                c.lineWidth = 0.8 * kk; c.globalAlpha = 0.65; c.beginPath();
+                st.chunks.forEach(function (ci) { var C = CH[ci]; if (!C.terminal && sr > C.sS) strokeTo(c, C.path, (sr - C.sS) * 1.4); });
                 c.stroke();
-                if (!reduce) illum[w] = holdIllum() ? Math.min(1, v + dt * 3) : Math.max(0, v - dt * 0.55);
+            }
+        } else if (pb.playing || revealing) { // playback: current month branch softly lit
+            var m2 = monthOf[rv], st2 = ST[m2];
+            if (st2) {
+                c.strokeStyle = "#ffffff"; c.globalAlpha = 0.35; c.lineWidth = 1 * kk; c.beginPath();
+                strokeTo(c, TR[st2.q].path, st2.sS); strokeTo(c, st2.path, st2.path.len);
+                st2.chunks.forEach(function (ci) { if (!CH[ci].terminal) strokeTo(c, CH[ci].path, CH[ci].path.len); });
+                c.stroke();
             }
         }
-        if (staticTrace) { c.strokeStyle = "#ffffff"; c.globalAlpha = 0.85; c.lineWidth = 1.2 * k; c.beginPath(); strokePath(c, staticTrace); c.stroke(); }
 
-        // highlight: hovered / selected day or week
-        var hd = hover.day >= 0 ? hover.day : sel.day, hw = hover.week >= 0 ? hover.week : sel.week;
-        if (hw >= 0 && hd < 0) {
-            wk = weeks[hw];
-            c.strokeStyle = "#ffffff"; c.globalAlpha = 0.9; c.lineWidth = (1 + wk.t) * k;
-            c.beginPath(); strokePath(c, wk.trunk);
-            for (j = 0; j < wk.children.length; j++) { strokePath(c, wk.children[j].path); for (var q = 0; q < wk.children[j].twigs.length; q++) strokePath(c, wk.children[j].twigs[q]); }
-            c.stroke();
-            c.lineWidth = 0.8; c.globalAlpha = 0.55;
-            c.beginPath();
-            for (i = Math.max(0, hw * 7 - WD0); i < Math.min(N, hw * 7 + 7 - WD0); i++) { c.moveTo(dayX[i] + dayRad[i] + 2.5 * k, dayY[i]); c.arc(dayX[i], dayY[i], dayRad[i] + 2.5 * k, 0, TAU); }
+        // temporal connections between consecutive active days
+        c.strokeStyle = "#d9d9d9"; c.lineWidth = 0.6 * kk;
+        for (var pass = 0; pass < 2; pass++) {
+            c.globalAlpha = pass ? 0.14 : 0.42; c.beginPath();
+            for (i = 0; i < nLink; i++) {
+                var o = i * 4, b = linkP[o], sm = linkP[o + 1];
+                if ((sm === 1) === !!pass || b > rv) continue;
+                if (fm >= 0 && monthOf[b] !== fm && monthOf[b - 1] !== fm) continue;
+                c.moveTo(dayX[b - 1], dayY[b - 1]);
+                if (sm) c.lineTo(dayX[b], dayY[b]); else c.quadraticCurveTo(linkP[o + 2], linkP[o + 3], dayX[b], dayY[b]);
+            }
             c.stroke();
         }
+
+        // day particles, batched per tier (focus + playback reveal)
+        var FILL = ["#555555", "#888888", "#a3a3a3", "#d9d9d9", "#ffffff"], ALPHA = [0.95, 0.9, 0.95, 1, 1];
+        for (var tier = 0; tier < 5; tier++) {
+            for (var on = 1; on >= 0; on--) {
+                if (!on && fm < 0) continue;
+                c.fillStyle = FILL[tier]; c.globalAlpha = ALPHA[tier] * (on ? 1 : tier ? 0.22 : 0.4);
+                c.beginPath();
+                for (i = 0; i <= rv; i++) {
+                    if (tiers[i] !== tier || (fm >= 0 && (monthOf[i] === fm) !== !!on)) continue;
+                    c.moveTo(dayX[i] + dayRad[i], dayY[i]); c.arc(dayX[i], dayY[i], dayRad[i], 0, TAU);
+                }
+                c.fill();
+            }
+        }
+        if (revealing) { // not reached yet: faint graphite seeds
+            c.fillStyle = "#252525"; c.globalAlpha = 1; c.beginPath();
+            for (i = rv + 1; i < N; i++) { var rr = 0.85 * kk; c.moveTo(dayX[i] + rr, dayY[i]); c.arc(dayX[i], dayY[i], rr, 0, TAU); }
+            c.fill();
+        }
+        // satellites (small surrounding details scaled by the day's count)
+        c.fillStyle = "#d9d9d9"; c.beginPath();
+        var ssz = 0.75 * kk;
+        for (i = 0; i < nSat; i++) {
+            var s4 = i * 4, sd = satP[s4 + 2];
+            if (sd > rv || (fm >= 0 && monthOf[sd] !== fm)) continue;
+            c.rect(satP[s4] - ssz / 2, satP[s4 + 1] - ssz / 2, ssz * satP[s4 + 3] * 1.6, ssz * satP[s4 + 3] * 1.6);
+        }
+        c.globalAlpha = 0.45; c.fill();
+        // local glow: subtle for high, a soft halo for exceptional
+        for (i = 0; i <= rv; i++) {
+            if (tiers[i] < 3) continue;
+            var gf = fm < 0 || monthOf[i] === fm ? 1 : 0.2;
+            if (tiers[i] === 4) glow(c, dayX[i], dayY[i], 15 * kk, 0.34 * gf);
+            else glow(c, dayX[i], dayY[i], 8.5 * kk, 0.16 * gf);
+        }
+
+        // hover / selected day: its route from the soma, ring, glow
+        var hd = hover.day >= 0 ? hover.day : sel.day;
         if (hd >= 0) {
-            wk = weeks[weekOf[hd]];
-            var route = dayRoute[hd];
-            c.strokeStyle = "#ffffff"; c.globalAlpha = 0.55; c.lineWidth = 0.8 * k;
-            c.setLineDash([2, 3]);
-            c.beginPath(); c.moveTo(dayX[hd], dayY[hd]); c.lineTo(wk.rootX, wk.rootY); c.stroke();
-            c.setLineDash([]);
-            c.globalAlpha = 0.95; c.lineWidth = 1.25 * k;
-            c.beginPath(); strokePath(c, route); c.stroke();
-            if (dayChild[hd]) { c.fillStyle = "#ffffff"; c.beginPath(); c.arc(dayChild[hd].tipX, dayChild[hd].tipY, 1.8 * k, 0, TAU); c.fill(); }
+            if (routeCache.day !== hd) { routeCache.day = hd; routeCache.p = routeTo(hd); }
+            c.strokeStyle = "#ffffff"; c.globalAlpha = 0.75; c.lineWidth = 1.05 * kk;
+            c.beginPath(); strokeTo(c, routeCache.p, routeCache.p.len); c.stroke();
             c.globalAlpha = 1; c.lineWidth = 1;
-            c.beginPath(); c.arc(dayX[hd], dayY[hd], dayRad[hd] + 4 * k, 0, TAU); c.stroke();
-            glow(c, dayX[hd], dayY[hd], 16 * k, 0.5);
+            c.beginPath(); c.arc(dayX[hd], dayY[hd], dayRad[hd] + 3.6 * kk, 0, TAU); c.stroke();
+            glow(c, dayX[hd], dayY[hd], 14 * kk, 0.45);
         }
+        if (staticTrace) { c.strokeStyle = "#ffffff"; c.globalAlpha = 0.9; c.lineWidth = 1.3 * kk; c.beginPath(); strokeTo(c, staticTrace, staticTrace.len); c.stroke(); }
 
         // signals
         for (i = 0; i < SIG.length; i++) {
             g = SIG[i];
             if (!g.on) continue;
-            var path = g.path;
             g.s += g.v * dt;
-            if (g.kind === 0 || g.kind === 3) {
-                var wNow = weekAtLen(g.s);
-                if (wNow !== g.lastW) {
-                    if (g.lastW >= 0 && g.kind === 0) passWeek(wNow);
-                    g.lastW = wNow;
-                }
-            }
-            if (g.marks) while (g.mi < g.marks.s.length && g.s >= g.marks.s[g.mi]) { flareDay(g.marks.d[g.mi], 1); g.mi++; }
+            if (g.marks) while (g.mi < g.marks.s.length && g.s >= g.marks.s[g.mi]) { var md = g.marks.d[g.mi]; if (counts[md]) flareDay(md, 0.95); g.mi++; }
             var done = g.s >= g.end;
             if (done) g.s = g.end;
-            // envelope: spine signals fade in and out over ~2 weeks of arc
-            var envA = 1;
-            if (g.kind === 0) { var fl = (2 / W) * spine.len; envA = Math.max(0.08, Math.min(1, (g.s - g.s0) / fl, (g.end - g.s) / fl + 0.1)); }
-            drawTrail(c, path, g.s, g.trail, 0.85 * envA, (g.kind === 2 ? 1.3 : 1) * k);
-            path.at(g.s, PT);
-            glow(c, PT.x, PT.y, (g.kind === 2 ? 15 : 12) * k, 0.95 * envA);
-            c.globalAlpha = envA; c.fillStyle = "#ffffff"; c.beginPath(); c.arc(PT.x, PT.y, 1.25 * k, 0, TAU); c.fill();
+            var env = Math.min(1, g.s / (0.06 * g.path.len + 1) + 0.25);
+            drawTrail(c, g.path, g.s, g.trail, 0.8 * g.a * env, (g.kind === 2 ? 1.25 : 1) * kk);
+            g.path.at(g.s, PT);
+            glow(c, PT.x, PT.y, (g.kind === 2 ? 14 : 11) * kk, 0.9 * g.a * env);
+            c.globalAlpha = g.a * env; c.fillStyle = "#ffffff"; c.beginPath(); c.arc(PT.x, PT.y, 1.15 * kk, 0, TAU); c.fill();
             if (done) {
                 g.on = false;
-                if (g.kind === 1 || g.kind === 2) {
-                    flare(g.tipX, g.tipY, (g.strong ? 26 : 16) * k, g.strong ? 0.75 : 0.45, 1.1, !!g.strong);
-                    if (g.kind === 2 && illum) holdUntil = 0;
-                } else if (g.kind === 3) { // new activity: branch into the day's path
-                    var di = g.tipX;
-                    flareDay(di, 1.5);
-                    var ch = dayChild[di];
-                    var p2 = ch ? ch.route : weeks[weekOf[di]].trunk;
-                    var g3 = spawn(p2, 0, p2.len, 0.22 * G.R, 1);
-                    if (g3) { g3.tipX = ch ? ch.tipX : p2.x[p2.n - 1]; g3.tipY = ch ? ch.tipY : p2.y[p2.n - 1]; g3.strong = 1; }
+                if (g.day >= 0) {
+                    flareDay(g.day, g.strong ? 1.2 : 0.7);
+                    if (g.kind === 2 || g.kind === 3) streakRipple(g.day);
                 }
             }
         }
-        if (anyTraceRunning()) holdUntil = now + 400;
+        // delayed flares (streak ripples)
+        for (i = 0; i < DLY.length; i++) if (DLY[i].on && now >= DLY[i].at) { DLY[i].on = false; if (DLY[i].day <= rv) flareDay(DLY[i].day, DLY[i].s); }
+
+        // playback head
+        if (pb.playing && !reduce) {
+            headPos(pb.t, HEAD);
+            var hp = CH[HEAD.ci].path;
+            drawTrail(c, hp, HEAD.s, 0.05 * Math.min(G.w, G.h), 0.8, 1.2 * kk);
+            glow(c, HEAD.x, HEAD.y, 16 * kk, 0.85);
+            c.globalAlpha = 1; c.fillStyle = "#ffffff"; c.beginPath(); c.arc(HEAD.x, HEAD.y, 1.5 * kk, 0, TAU); c.fill();
+        }
 
         // flares
         for (i = 0; i < FLR.length; i++) {
@@ -789,36 +1120,27 @@
             if (p >= 1) { f.on = false; continue; }
             var fa = f.a * Math.pow(1 - p, 1.6);
             glow(c, f.x, f.y, f.size * (0.7 + 0.6 * p), fa);
-            if (f.ring) { c.globalAlpha = fa * 0.6; c.strokeStyle = "#ffffff"; c.lineWidth = 0.7; c.beginPath(); c.arc(f.x, f.y, f.size * (0.15 + 0.5 * p), 0, TAU); c.stroke(); }
+            if (f.ring) { c.globalAlpha = fa * 0.6; c.strokeStyle = "#ffffff"; c.lineWidth = 0.7; c.beginPath(); c.arc(f.x, f.y, f.size * (0.15 + 0.45 * p), 0, TAU); c.stroke(); }
         }
         c.globalAlpha = 1;
-    }
-    var holdUntil = 0;
-    function holdIllum() { return performance.now() < holdUntil; }
-    function anyTraceRunning() { for (var i = 0; i < SIG.length; i++) if (SIG[i].on && SIG[i].kind === 2) return true; return false; }
-
-    function passWeek(w) {
-        if (weeks[w].quiet) return;
-        var t = weeks[w].t;
-        for (var i = Math.max(0, w * 7 - WD0); i < Math.min(N, w * 7 + 7 - WD0); i++) {
-            if (counts[i] > 0 && Math.random() < 0.45 + 0.4 * t) flareDay(i, 0.55 + 0.35 * Math.random());
-        }
-        if (Math.random() < 0.12 + 0.45 * t) branchInto(w, false);
     }
 
     /* Silver trail: segments bucketed by alpha to avoid style churn */
     function drawTrail(c, p, s, len, a, lw) {
         var hi = p.index(s), BK = 6;
-        c.strokeStyle = "#a3a3a3"; c.lineWidth = lw;
+        c.strokeStyle = "#d9d9d9"; c.lineWidth = lw;
         for (var b = 0; b < BK; b++) {
             var lo = s - len * ((b + 1) / BK), up = s - len * (b / BK);
-            c.globalAlpha = a * (1 - b / BK) * 0.8;
+            c.globalAlpha = a * (1 - b / BK) * 0.75;
             c.beginPath();
             var started = false;
             for (var i = hi; i >= 0 && p.l[i] > lo - 0.0001; i--) {
                 if (p.l[i] > up) continue;
-                if (!started) { if (b === 0) { p.at(s, PT); c.moveTo(PT.x, PT.y); c.lineTo(p.x[i], p.y[i]); } else c.moveTo(p.x[Math.min(i + 1, p.n - 1)], p.y[Math.min(i + 1, p.n - 1)]), c.lineTo(p.x[i], p.y[i]); started = true; }
-                else c.lineTo(p.x[i], p.y[i]);
+                if (!started) {
+                    if (b === 0) { p.at(s, PT); c.moveTo(PT.x, PT.y); }
+                    else { var j = Math.min(i + 1, p.n - 1); c.moveTo(p.x[j], p.y[j]); }
+                    c.lineTo(p.x[i], p.y[i]); started = true;
+                } else c.lineTo(p.x[i], p.y[i]);
             }
             if (started) c.stroke();
         }
@@ -828,80 +1150,62 @@
        INTERACTION
        ========================================================= */
 
-    function local(e) { var r = canvas.getBoundingClientRect(); return { x: (e.clientX - r.left) * (G.size / r.width), y: (e.clientY - r.top) * (G.size / r.height) }; }
+    function local(e) { var r = canvas.getBoundingClientRect(); return { x: (e.clientX - r.left) * (G.w / r.width), y: (e.clientY - r.top) * (G.h / r.height) }; }
 
-    function hitDay(x, y, tol) {
-        var dx = x - G.cx, dy = y - G.cy, r = Math.hypot(dx, dy);
-        if (r < G.rIn - G.step * 1.2 || r > G.rOut + G.step * 1.2) return -1;
-        var a = Math.atan2(dy, dx) - G.a0;
-        a = ((a % TAU) + TAU) % TAU;
-        if (a > G.sweep + 0.05 && a < TAU - 0.05) return -1;
-        if (a >= TAU - 0.05) a -= TAU;
-        var wf = (a / G.sweep) * W - 0.5, kf = (r - G.rIn) / G.step;
-        var best = -1, bd = tol * tol;
-        for (var w = Math.floor(wf); w <= Math.floor(wf) + 1; w++) for (var t = Math.floor(kf); t <= Math.floor(kf) + 1; t++) {
-            if (w < 0 || w >= W || t < 0 || t > 6) continue;
-            var i = w * 7 + t - WD0;
-            if (i < 0 || i >= N) continue;
-            var ex = dayX[i] - x, ey = dayY[i] - y, d = ex * ex + ey * ey;
+    function hitDay(x, y, tol, touch) { // distance to the particle's edge: larger (busier) days are easier targets
+        var best = -1, bd = tol, rv = Math.floor(pb.t);
+        for (var i = 0; i <= rv; i++) {
+            var d = Math.hypot(dayX[i] - x, dayY[i] - y) - dayRad[i] * (touch ? 2.2 : 1);
             if (d < bd) { bd = d; best = i; }
         }
         return best;
     }
-    function hitWeek(x, y, tol) {
-        var dx = x - G.cx, dy = y - G.cy, r = Math.hypot(dx, dy);
-        if (r < G.rOut + G.step * 0.6 || r > G.rField + 10) return -1;
-        var a = ((Math.atan2(dy, dx) - G.a0) % TAU + TAU) % TAU, wc = Math.round((a / G.sweep) * W - 0.5);
-        var best = -1, bd = tol * tol;
-        for (var w = wc - 4; w <= wc + 2; w++) {
-            if (w < 0 || w >= W) continue;
-            var wk = weeks[w];
-            bd = nearest(wk.trunk, x, y, bd, w);
-            for (var j = 0; j < wk.children.length; j++) bd = nearest(wk.children[j].path, x, y, bd, w);
+    function hitMonth(x, y, tol) {
+        var best = -1, bd = tol * tol, i;
+        for (var m = 0; m < ST.length; m++) {
+            var st = ST[m];
+            if (!st) continue;
+            var list = [st.path];
+            for (var k = 0; k < st.chunks.length; k++) if (!CH[st.chunks[k]].terminal) list.push(CH[st.chunks[k]].path);
+            for (var j = 0; j < list.length; j++) {
+                var p = list[j];
+                for (i = 0; i < p.n; i += 2) { var dx = p.x[i] - x, dy = p.y[i] - y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = m; } }
+            }
         }
-        return hitW;
-        function nearest(p, x2, y2, cur, w2) {
-            for (var i = 0; i < p.n; i += 2) { var ex = p.x[i] - x2, ey = p.y[i] - y2, d = ex * ex + ey * ey; if (d < cur) { cur = d; hitW = w2; } }
-            return cur;
+        for (i = 0; i < labels.length; i++) {
+            var lb = labels[i];
+            if (lb.m >= 0 && Math.abs(lb.x - x) < 15 && Math.abs(lb.y - y) < 8) return lb.m;
         }
-    }
-    var hitW = -1;
-    function hitWeekSafe(x, y, tol) { hitW = -1; return hitWeek(x, y, tol); }
-    function hitMonth(x, y) {
-        if (G.mobile) return -1;
-        var dx = x - G.cx, dy = y - G.cy, r = Math.hypot(dx, dy);
-        if (r < G.rLabel - 10 || r > G.rLabel + 9) return -1;
-        var a = ((Math.atan2(dy, dx) - G.a0) % TAU + TAU) % TAU;
-        if (a > G.sweep) return -1;
-        var w = Math.floor((a / G.sweep) * W);
-        for (var m = 0; m < months.length; m++) {
-            var mo = months[m];
-            if (mo.last - mo.first < 6) continue;
-            var am = (ang(weekOf[mo.first]) + ang(weekOf[mo.last])) / 2, lx = px(G.rLabel, am), ly = py(G.rLabel, am);
-            if (Math.abs(lx - x) < 16 && Math.abs(ly - y) < 9) return m;
-        }
-        return -1;
+        return best;
     }
 
     function applyFocus() {
         var m = hover.month >= 0 ? hover.month : sel.month;
-        var w = m >= 0 ? -1 : (hover.day < 0 && hover.week >= 0 ? hover.week : (sel.day < 0 ? sel.week : -1));
-        if (m !== focus.month || w !== focus.week) { focus.month = m; focus.week = w; refreshBase(false); }
-        syncMonthButtons();
+        if (m !== focus.month) {
+            focus.month = m; focusAmt = m >= 0 && !reduce ? 0 : 1;
+            refreshBase(false);
+        }
+        syncMonthButtons(); readout();
         requestDraw(); wake();
     }
 
-    function dayText(i) {
-        var c = counts[i];
-        return { k: fmtDay.format(new Date(dateMs[i])), v: (c ? plural(c, "contribution") : "No contributions") + (c ? "<small>" + TIER_NAMES[tiers[i]] + (streakOf[i] >= 0 && streaks[streakOf[i]].end > streaks[streakOf[i]].start ? " · " + (streaks[streakOf[i]].end - streaks[streakOf[i]].start + 1) + "-day streak" : "") + "</small>" : "") };
+    function branchName(i) {
+        var C = CH[dayCh[i]], st = ST[C.m], n = st.chunks.length, pos = st.chunks.indexOf(dayCh[i]) + 1;
+        return "Branch " + ROMAN[st.q] + " › " + MONTHS[months[C.m].m] + (n > 1 ? " › segment " + pos + " of " + n : "");
     }
-    function weekText(w) {
-        var first = Math.max(0, w * 7 - WD0), lastD = Math.min(N - 1, w * 7 + 6 - WD0);
-        return { k: "Week of " + fmtShort.format(new Date(dateMs[first])), v: plural(weekTotal[w], "contribution") + "<small>" + plural(weekActive[w], "active day") + " of " + (lastD - first + 1) + "</small>" };
+    function dayText(i) {
+        var c = counts[i], mo = months[monthOf[i]], stI = streakOf[i], extra = "";
+        if (stI >= 0 && streaks[stI].end > streaks[stI].start) extra = " · " + (streaks[stI].end - streaks[stI].start + 1) + "-day streak";
+        return {
+            k: fmtDay.format(new Date(dateMs[i])),
+            v: (c ? plural(c, "contribution") : "No contributions") +
+                "<small>" + TIER_NAMES[tiers[i]] + extra + "</small>" +
+                "<small>" + MONTHS_LONG[mo.m] + " " + mo.y + " · " + branchName(i) + "</small>",
+        };
     }
     function monthText(m) {
         var mo = months[m];
-        return { k: MONTHS_LONG[mo.m] + " " + mo.y, v: plural(mo.total, "contribution") + "<small>" + plural(mo.active, "active day") + "</small>" };
+        return { k: MONTHS_LONG[mo.m] + " " + mo.y, v: plural(mo.total, "contribution") + "<small>" + plural(mo.active, "active day") + " of " + (mo.last - mo.first + 1) + " · Branch " + ROMAN[mo.q] + "</small>" };
     }
 
     function showTip(t, x, y, pinned) {
@@ -909,103 +1213,112 @@
         el.tip.hidden = false;
         if (pinned) el.tip.setAttribute("data-pinned", ""); else el.tip.removeAttribute("data-pinned");
         el.tipNav.hidden = !pinned || sel.day < 0;
-        var sw = stage.clientWidth / G.size, tw = el.tip.offsetWidth, th = el.tip.offsetHeight, W2 = stage.clientWidth;
-        var X = x * sw, Y = y * sw, gap = 14;
+        var sx = stage.clientWidth / G.w, tw = el.tip.offsetWidth, th = el.tip.offsetHeight, W2 = stage.clientWidth, H2 = stage.clientHeight;
+        var X = x * sx, Y = y * sx, gap = 14;
         var left = X + gap, top = Y - th - gap;
         if (left + tw > W2 - 4) left = X - tw - gap;
         if (left < 4) left = Math.max(4, Math.min(W2 - tw - 4, X - tw / 2));
         if (top < 4) top = Y + gap;
-        if (top + th > W2 - 4) top = W2 - th - 4;
+        if (top + th > H2 - 4) top = Math.max(4, H2 - th - 4);
         el.tip.style.transform = "translate(" + Math.round(left) + "px," + Math.round(top) + "px)";
     }
     function hideTip() { el.tip.hidden = true; el.tip.removeAttribute("data-pinned"); }
     function announce(s) { el.live.textContent = s; }
 
+    function monthAnchor(m) { for (var i = 0; i < labels.length; i++) if (labels[i].m === m) return labels[i]; return { x: G.somaX, y: G.somaY }; }
     function refreshTip() {
+        if (!D) return hideTip();
         if (hover.day >= 0) return showTip(dayText(hover.day), dayX[hover.day], dayY[hover.day], false);
-        if (hover.week >= 0) { var wk = weeks[hover.week], tp = wk.trunk; return showTip(weekText(hover.week), tp.x[tp.n - 1], tp.y[tp.n - 1], false); }
-        if (hover.month >= 0) { var mo = months[hover.month], am = (ang(weekOf[mo.first]) + ang(weekOf[mo.last])) / 2; return showTip(monthText(hover.month), px(G.rLabel, am), py(G.rLabel, am), false); }
         if (sel.day >= 0) return showTip(dayText(sel.day), dayX[sel.day], dayY[sel.day], true);
-        if (sel.week >= 0) { tp = weeks[sel.week].trunk; return showTip(weekText(sel.week), tp.x[tp.n - 1], tp.y[tp.n - 1], true); }
+        if (hover.month >= 0 && lastPointer === "mouse" && hoverOnCanvas) { var a = monthAnchor(hover.month); return showTip(monthText(hover.month), a.x, a.y, false); }
         hideTip();
     }
 
-    function selectDay(i, doTrace, viaKey) {
-        sel.day = i; sel.week = -1;
+    function selectDay(i, doTrace) {
+        if (pb.t < N - 1 && i > Math.floor(pb.t)) scrubTo(N - 1); // never inspect an unrevealed date
+        sel.day = i; sel.month = -1;
         applyFocus(); refreshTip();
-        announce(fmtLong.format(new Date(dateMs[i])) + ": " + (counts[i] ? plural(counts[i], "contribution") + ". " + TIER_NAMES[tiers[i]] + "." : "no contributions."));
-        if (doTrace) { if (counts[i] > 0) trace(i); else { flareDay(i, 0.8); wake(); } }
+        announce(fmtLong.format(new Date(dateMs[i])) + ": " + (counts[i] ? plural(counts[i], "contribution") + ". " + TIER_NAMES[tiers[i]] + "." : "no contributions.") + " " + MONTHS_LONG[months[monthOf[i]].m] + ", " + branchName(i).replace(/›/g, ",") + ".");
+        if (doTrace) trace(i);
     }
-    function selectWeek(w) {
-        sel.week = w; sel.day = -1;
+    function selectMonth(m, toggle) {
+        if (pb.playing) { // jump the playback to that month and keep going
+            pb.t = months[m].first; pb.lastD = pb.t - 1; pb.lastM = -1;
+            readout(); announce("Playback jumped to " + MONTHS_LONG[months[m].m] + " " + months[m].y + ".");
+            return;
+        }
+        if (pb.t < N - 1) { pb.t = N - 1; pb.lastD = N - 1; pb.lastM = monthOf[N - 1]; }
+        sel.month = toggle && sel.month === m ? -1 : m;
+        sel.day = -1; hover.day = -1;
         applyFocus(); refreshTip();
-        announce(weekText(w).k + ": " + plural(weekTotal[w], "contribution") + ", " + plural(weekActive[w], "active day") + ".");
-        if (!weeks[w].quiet) { if (!illum || illum.length !== W) illum = new Float32Array(W); if (!reduce) branchInto(w, true); else flare(weeks[w].rootX, weeks[w].rootY, 20 * G.k, 0.6, 1); wake(); }
+        if (sel.month >= 0) {
+            tourMonth(m);
+            var mo = months[m];
+            announce(MONTHS_LONG[mo.m] + " " + mo.y + " selected: " + plural(mo.total, "contribution") + ", " + plural(mo.active, "active day") + ", branch " + ROMAN[mo.q] + ".");
+        } else announce("Showing the whole year.");
     }
     function clearSel(all) {
-        sel.day = -1; sel.week = -1; if (all) sel.month = -1;
+        sel.day = -1; if (all) sel.month = -1;
         applyFocus(); refreshTip();
     }
 
-    var lastPointer = "mouse", downAt = null;
+    var lastPointer = "mouse", downAt = null, hoverOnCanvas = false;
+    function tolFor(touch) { return touch ? Math.max(16, 7 * G.kk) : Math.max(7, 4 * G.kk + 3); }
     canvas.addEventListener("pointermove", function (e) {
         if (!D) return;
         lastPointer = e.pointerType;
         if (e.pointerType !== "mouse") return;
-        var p = local(e), d = hitDay(p.x, p.y, Math.max(8, G.step * 0.75)), w = -1, m = -1;
-        if (d < 0) w = hitWeekSafe(p.x, p.y, 12);
-        if (d < 0 && w < 0) m = hitMonth(p.x, p.y);
-        canvas.style.cursor = d >= 0 || w >= 0 || m >= 0 ? "pointer" : "crosshair";
-        if (d === hover.day && w === hover.week && m === hover.month) return;
-        hover.day = d; hover.week = w; hover.month = m;
+        hoverOnCanvas = true;
+        var p = local(e), d = hitDay(p.x, p.y, tolFor(false));
+        if (d > Math.floor(pb.t)) d = -1;
+        var m = d < 0 ? hitMonth(p.x, p.y, 7) : -1;
+        canvas.style.cursor = d >= 0 || m >= 0 ? "pointer" : "default";
+        if (d === hover.day && m === hover.month) return;
+        hover.day = d; hover.month = m;
         applyFocus(); refreshTip();
     });
     canvas.addEventListener("pointerleave", function () {
-        if (hover.day < 0 && hover.week < 0 && hover.month < 0) return;
-        hover.day = hover.week = hover.month = -1;
+        hoverOnCanvas = false;
+        if (hover.day < 0 && hover.month < 0) return;
+        hover.day = hover.month = -1;
         applyFocus(); refreshTip();
     });
-    canvas.addEventListener("pointerdown", function (e) { downAt = { x: e.clientX, y: e.clientY, t: e.pointerType }; lastPointer = e.pointerType; });
+    canvas.addEventListener("pointerdown", function (e) { downAt = { x: e.clientX, y: e.clientY }; lastPointer = e.pointerType; });
     canvas.addEventListener("click", function (e) {
         if (!D) return;
         var touch = lastPointer !== "mouse";
         if (downAt && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 12) return;
-        var p = local(e), tol = touch ? Math.max(18, G.step * 1.3) : Math.max(8, G.step * 0.75);
-        var d = hitDay(p.x, p.y, tol);
-        if (d >= 0) { hover.day = hover.week = hover.month = -1; if (sel.day === d && !touch) return clearSel(false); return selectDay(d, true); }
-        var w = hitWeekSafe(p.x, p.y, touch ? 22 : 12);
-        if (w >= 0) { hover.day = hover.week = -1; if (sel.week === w && !touch) return clearSel(false); return selectWeek(w); }
-        var m = hitMonth(p.x, p.y);
-        if (m >= 0) { hover.month = -1; sel.month = sel.month === m ? -1 : m; sel.day = sel.week = -1; applyFocus(); refreshTip(); return announceMonth(); }
-        clearSel(false);
+        var p = local(e), d = hitDay(p.x, p.y, tolFor(touch), touch);
+        if (d >= 0) { hover.day = hover.month = -1; if (sel.day === d && !touch) return clearSel(false); return selectDay(d, true); }
+        var m = hitMonth(p.x, p.y, touch ? 12 : 7);
+        if (m >= 0) { hover.month = -1; return selectMonth(m, true); }
+        clearSel(true);
     });
 
     canvas.addEventListener("keydown", function (e) {
         if (!D) return;
-        var i = sel.day >= 0 ? sel.day : -1, k = e.key;
+        var i = sel.day, k = e.key;
         var mv = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[k];
-        if (mv !== undefined) { e.preventDefault(); selectDay(i < 0 ? N - 1 : Math.max(0, Math.min(N - 1, i + mv)), false, true); return; }
-        if (k === "Home" || k === "End") { e.preventDefault(); selectDay(k === "Home" ? 0 : N - 1, false, true); return; }
+        if (mv !== undefined) { e.preventDefault(); selectDay(i < 0 ? (sel.month >= 0 ? months[sel.month].first : N - 1) : clamp(i + mv, 0, N - 1), false); return; }
+        if (k === "Home" || k === "End") { e.preventDefault(); selectDay(k === "Home" ? 0 : N - 1, false); return; }
         if (k === "PageUp" || k === "PageDown") {
             e.preventDefault();
-            var m = i < 0 ? months.length - 1 : monthOf[i] + (k === "PageUp" ? -1 : 1);
-            m = Math.max(0, Math.min(months.length - 1, m));
-            selectDay(months[m].first, false, true); return;
+            var m = i < 0 ? (sel.month >= 0 ? sel.month : months.length - 1) : monthOf[i];
+            m = clamp(m + (k === "PageUp" ? -1 : 1), 0, months.length - 1);
+            selectDay(months[m].first, false); return;
         }
-        if ((k === "Enter" || k === " ") && i >= 0) { e.preventDefault(); selectDay(i, true, true); return; }
+        if ((k === "Enter" || k === " ") && i >= 0) { e.preventDefault(); selectDay(i, true); return; }
         if (k === "Escape") { e.preventDefault(); clearSel(true); announce("Selection cleared."); }
     });
-    canvas.addEventListener("blur", function () { /* keep pinned selection; tooltip stays accessible */ });
 
     el.tip.addEventListener("click", function (e) {
         var b = e.target.closest("button");
         if (!b) return;
         if (b.hasAttribute("data-no-close")) { clearSel(false); canvas.focus({ preventScroll: true }); return; }
         var step = +b.getAttribute("data-no-step");
-        if (step && sel.day >= 0) { selectDay(Math.max(0, Math.min(N - 1, sel.day + step)), false); flareDay(sel.day, 0.9); wake(); }
+        if (step && sel.day >= 0) { selectDay(clamp(sel.day + step, 0, N - 1), false); flareDay(sel.day, 0.9); wake(); }
     });
-
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && (sel.day >= 0 || sel.week >= 0) && root.contains(document.activeElement)) clearSel(false); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && sel.day >= 0 && root.contains(document.activeElement)) clearSel(false); });
 
     /* Month buttons */
     function buildMonthButtons() {
@@ -1014,38 +1327,66 @@
             var b = document.createElement("button");
             b.type = "button"; b.className = "no-month";
             b.setAttribute("aria-pressed", "false");
-            var label = MONTHS[mo.m] + (m === 0 || mo.m === 0 || m === months.length - 1 && months[0].m === mo.m ? " ’" + String(mo.y).slice(2) : "");
-            b.innerHTML = MONTHS[mo.m] + "<span>" + mo.total + "</span>";
-            b.setAttribute("aria-label", MONTHS_LONG[mo.m] + " " + mo.y + ", " + plural(mo.total, "contribution") + ", " + plural(mo.active, "active day"));
-            b.title = label + " · " + plural(mo.total, "contribution");
-            b.addEventListener("click", function () {
-                sel.month = sel.month === m ? -1 : m; sel.day = sel.week = -1;
-                applyFocus(); refreshTip(); announceMonth();
-            });
-            b.addEventListener("mouseenter", function () { if (lastPointer === "mouse") { hover.month = m; applyFocus(); } });
+            var yr = m === 0 || mo.m === 0 || (m === months.length - 1 && months[0].m === mo.m);
+            b.innerHTML = MONTHS[mo.m] + (yr ? "<em>’" + String(mo.y).slice(2) + "</em>" : "") + "<span>" + mo.total + "</span>";
+            b.setAttribute("aria-label", MONTHS_LONG[mo.m] + " " + mo.y + ", " + plural(mo.total, "contribution") + ", " + plural(mo.active, "active day") + ", branch " + ROMAN[mo.q]);
+            b.addEventListener("click", function () { selectMonth(m, true); });
+            b.addEventListener("mouseenter", function () { if (lastPointer === "mouse" && !pb.playing) { hover.month = m; applyFocus(); } });
             b.addEventListener("mouseleave", function () { if (hover.month === m) { hover.month = -1; applyFocus(); } });
             el.months.appendChild(b);
         });
+        // timeline ticks at real month boundaries
+        el.ticks.innerHTML = "";
+        months.forEach(function (mo) {
+            var s = document.createElement("span"), f = mo.first / Math.max(1, N - 1);
+            s.style.left = "calc(7px + (100% - 14px) * " + f.toFixed(4) + ")";
+            if (mo.last - mo.first >= 9) s.setAttribute("data-label", G.mobile ? MONTHS[mo.m].charAt(0) : MONTHS[mo.m]);
+            el.ticks.appendChild(s);
+        });
     }
     function syncMonthButtons() {
-        var bs = el.months.children;
-        for (var m = 0; m < bs.length; m++) bs[m].setAttribute("aria-pressed", sel.month === m ? "true" : "false");
-        if (D) {
-            var mo = sel.month >= 0 ? months[sel.month] : hover.month >= 0 ? months[hover.month] : null;
-            el.period.textContent = mo ? (G.mobile ? MONTHS[mo.m] + " " + mo.y + " · " + mo.total : MONTHS_LONG[mo.m] + " " + mo.y + " · " + plural(mo.total, "contribution")) : periodText();
+        var bs = el.months.children, cur = pb.playing || pb.t < N - 1 ? monthOf[Math.floor(pb.t)] : -1;
+        for (var m = 0; m < bs.length; m++) {
+            bs[m].setAttribute("aria-pressed", sel.month === m ? "true" : "false");
+            bs[m].toggleAttribute("data-current", cur === m);
         }
     }
-    function announceMonth() {
-        if (sel.month < 0) return announce("Showing all months.");
-        var t = monthText(sel.month);
-        announce(t.k + " highlighted: " + plural(months[sel.month].total, "contribution") + ", " + plural(months[sel.month].active, "active day") + ".");
+
+    /* Readout under the timeline */
+    var fmtDM = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+    function readout() {
+        if (!D) return;
+        var d, mo, sum = 0, act = 0, x;
+        el.range.value = String(Math.floor(pb.t));
+        el.range.style.setProperty("--p", (Math.floor(pb.t) / Math.max(1, N - 1) * 100).toFixed(2) + "%");
+        el.range.setAttribute("aria-valuetext", fmtLong.format(new Date(dateMs[Math.floor(pb.t)])));
+        var fm = hover.month >= 0 ? hover.month : sel.month;
+        if (fm >= 0 && !pb.playing) {
+            mo = months[fm];
+            el.rMonth.textContent = MONTHS_LONG[mo.m] + " " + mo.y;
+            el.rDate.textContent = fmtDM.format(new Date(dateMs[mo.first])) + " – " + fmtDM.format(new Date(dateMs[mo.last]));
+            el.rStat.textContent = plural(mo.total, "contribution") + " · " + plural(mo.active, "active day");
+            el.rProg.textContent = "Days " + (mo.first + 1) + "–" + (mo.last + 1) + " of " + N;
+        } else {
+            d = !pb.playing && sel.day >= 0 ? sel.day : Math.floor(pb.t); mo = months[monthOf[d]];
+            for (x = mo.first; x <= d; x++) { sum += counts[x]; if (counts[x]) act++; }
+            el.rMonth.textContent = MONTHS_LONG[mo.m] + " " + mo.y;
+            el.rDate.textContent = fmtDay.format(new Date(dateMs[d]));
+            el.rStat.textContent = plural(sum, "contribution") + " · " + plural(act, "active day") + (d < mo.last ? " so far" : "");
+            var run = 0; for (x = 0; x <= d; x++) run += counts[x];
+            el.rProg.textContent = "Day " + (d + 1) + " of " + N + (d < N - 1 ? " · " + run.toLocaleString("en-GB") + " revealed" : "");
+        }
+        syncMonthButtons();
     }
+
+    el.play.addEventListener("click", function () { if (pb.playing) pause(false); else play(); });
+    el.range.addEventListener("input", function () { if (D) scrubTo(clamp(+el.range.value | 0, 0, N - 1)); });
 
     /* =========================================================
        DATA LIFECYCLE
        ========================================================= */
 
-    function periodText() { if (G.mobile) return "Last 365 days"; return fmtShort.format(new Date(dateMs[0])) + " – " + fmtShort.format(new Date(dateMs[N - 1])); }
+    function periodText() { return fmtShort.format(new Date(dateMs[0])) + " – " + fmtShort.format(new Date(dateMs[N - 1])); }
     function rel(ms) {
         var s = Math.max(0, (Date.now() - ms) / 1000);
         if (s < 60) return "just now";
@@ -1056,8 +1397,9 @@
     function setSync(state, text) {
         status = state;
         el.sync.setAttribute("data-sync", state); el.syncText.textContent = text;
-        stage.setAttribute("data-state", state === "error" ? (D ? "ready" : "error") : (D ? "ready" : "loading"));
+        stage.setAttribute("data-state", D ? "ready" : state === "error" ? "error" : "loading");
         el.retry.hidden = !(state === "error" && !D);
+        el.play.disabled = !D; el.range.disabled = !D;
     }
     function paintStats() {
         if (!D) return;
@@ -1069,8 +1411,7 @@
         el.streak.innerHTML = best + "<small>" + (best === 1 ? "day" : "days") + "</small>";
         var at = Date.parse(D.fetchedAt);
         el.updated.innerHTML = fmtStamp.format(new Date(at)) + "<small>" + rel(at) + (status === "cached" ? " · cached copy" : "") + "</small>";
-        el.from.textContent = fmtShort.format(new Date(dateMs[0]));
-        syncMonthButtons();
+        el.period.textContent = periodText();
     }
 
     function valid(p) {
@@ -1080,23 +1421,25 @@
     }
 
     function apply(p, state) {
-        var prev = D;
+        var keep = -1;
+        if (D && sel.month >= 0 && months[sel.month]) keep = months[sel.month].y * 12 + months[sel.month].m;
         D = p;
-        var keepMonth = -1;
-        if (prev && sel.month >= 0) { var pm = months[sel.month]; keepMonth = pm ? pm.y * 12 + pm.m : -1; }
         prepare(p);
-        sel.day = sel.week = hover.day = hover.week = hover.month = -1; sel.month = -1;
-        if (keepMonth >= 0) months.forEach(function (mo, m) { if (mo.y * 12 + mo.m === keepMonth) sel.month = m; });
-        focus.month = sel.month; focus.week = -1;
+        pause(true);
+        pb.t = N - 1; pb.lastD = N - 1; pb.lastM = monthOf[N - 1];
+        sel.day = hover.day = hover.month = -1; sel.month = -1; routeCache.day = -1; staticTrace = null;
+        SIG.forEach(function (g) { g.on = false; });
+        if (keep >= 0) months.forEach(function (mo, m) { if (mo.y * 12 + mo.m === keep) sel.month = m; });
+        focus.month = sel.month; focusAmt = 1; revealM = -1;
+        el.range.max = String(N - 1);
+        if (G.w) { build(); G.built = canvas.width + "x" + canvas.height + "|" + D.fetchedAt; }
         buildMonthButtons();
-        if (!illum || illum.length !== W) illum = new Float32Array(W);
-        if (G.size) build();
         setSync(state, state === "live" ? "Live" : state === "cached" ? "Cached" : "Offline");
-        paintStats(); hideTip();
+        paintStats(); hideTip(); playUI(); readout();
         refreshBase(true);
         requestDraw();
 
-        // new activity → signal once per changed record
+        // new activity → one signal per changed record
         var seen = lsGet(LS_SEEN), next = {};
         for (var i = 0; i < N; i++) if (counts[i] > 0) next[p.days[i].date] = counts[i];
         if (seen && state === "live") {
@@ -1110,8 +1453,8 @@
     function load() {
         if (loading) return;
         loading = true; lastAttempt = Date.now();
-        if (!D) setSync("loading", "Synchronising");
-        else el.sync.setAttribute("data-sync", "loading"), el.syncText.textContent = "Syncing";
+        if (!D) { setSync("loading", "Synchronising"); el.stateText.textContent = "Synchronising with GitHub"; }
+        else { el.sync.setAttribute("data-sync", "loading"); el.syncText.textContent = "Syncing"; }
         fetch(API, { headers: { Accept: "application/json" }, cache: "no-cache" })
             .then(function (r) { return r.json().catch(function () { return null; }).then(function (j) { if (!r.ok || !valid(j)) throw new Error((j && j.error) || "HTTP " + r.status); return j; }); })
             .then(function (j) {
@@ -1126,12 +1469,12 @@
                 if (D) { setSync("cached", "Cached"); paintStats(); }
                 else {
                     setSync("error", "Unavailable");
-                    el.period.textContent = "GitHub data is unavailable right now";
+                    el.stateText.textContent = "GitHub activity is unavailable right now.";
+                    el.period.textContent = "No data loaded";
                     announce("GitHub contribution data is unavailable right now.");
                 }
             });
     }
-
     el.retry.addEventListener("click", load);
 
     /* =========================================================
@@ -1149,12 +1492,13 @@
             es.forEach(function (e) {
                 inView = e.isIntersecting;
                 if (inView) { if (!started) { started = true; load(); } fireNew(); requestDraw(); wake(); }
+                else pause(true); // playback never runs unseen
             });
-        }, { rootMargin: "300px 0px" }).observe(root);
+        }, { rootMargin: "200px 0px" }).observe(stage);
     } else { inView = true; started = true; load(); wake(); }
 
     document.addEventListener("visibilitychange", function () {
-        if (document.hidden) return;
+        if (document.hidden) { pause(true); return; }
         if (started && Date.now() - lastAttempt > REFRESH_MS) load();
         fireNew(); wake();
     });
@@ -1168,15 +1512,24 @@
     function onResize() {
         cancelAnimationFrame(rz);
         rz = requestAnimationFrame(function () {
-            var before = G.size + "|" + G.dpr;
+            var before = G.w + "x" + G.h + "|" + G.dpr + "|" + G.mobile;
             layout();
-            if (before !== G.size + "|" + G.dpr) { syncMonthButtons(); refreshBase(true); hideTip(); if (sel.day >= 0 || sel.week >= 0) refreshTip(); requestDraw(); }
+            if (before !== G.w + "x" + G.h + "|" + G.dpr + "|" + G.mobile) {
+                routeCache.day = -1; staticTrace = null;
+                SIG.forEach(function (g) { g.on = false; });
+                if (D) buildMonthButtons();
+                refreshBase(true); hideTip(); if (sel.day >= 0) refreshTip(); readout(); requestDraw();
+            }
         });
     }
     if ("ResizeObserver" in window) new ResizeObserver(onResize).observe(stage);
     else window.addEventListener("resize", onResize);
 
-    function onReduce(e) { reduce = e.matches; if (reduce) { SIG.forEach(function (g) { g.on = false; }); } requestDraw(); wake(); }
+    function onReduce(e) {
+        reduce = e.matches;
+        if (reduce) { SIG.forEach(function (g) { g.on = false; }); if (pb.playing) { pause(true); } }
+        refreshBase(true); requestDraw(); wake();
+    }
     if (reduceMQ.addEventListener) reduceMQ.addEventListener("change", onReduce);
     else if (reduceMQ.addListener) reduceMQ.addListener(onReduce);
 })();
