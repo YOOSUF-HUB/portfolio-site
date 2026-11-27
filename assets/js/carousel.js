@@ -210,7 +210,7 @@ if ($(".slider-service-wrap").length > 0) {
     });
 }
 
-/*-- Slick Slide --*/
+/*-- Passive touch listeners for jQuery --*/
 window.onload = function () {
     if (window.jQuery) {
         jQuery.event.special.touchstart = {
@@ -225,52 +225,4 @@ window.onload = function () {
         };
     }
 
-    if (document.querySelector(".section-selected-work")) {
-        const $for = $(".slick-for").slick({
-            slidesToShow: 1,
-            slidesToScroll: 1,
-            arrows: false,
-            fade: true,
-            asNavFor: ".slick-nav",
-            infinite: true,
-            autoplay: true,
-            autoplaySpeed: 2000,
-        });
-
-        const $nav = $(".slick-nav").slick({
-            slidesToShow: 3,
-            slidesToScroll: 1,
-            asNavFor: ".slick-for",
-            vertical: true,
-            verticalSwiping: true,
-            centerMode: true,
-            arrows: false,
-            dots: false,
-            infinite: true,
-            focusOnSelect: true,
-        });
-
-        $(".section-selected-work .nav-prev-swiper").on("click", function () {
-            $for.slick("slickPrev");
-        });
-        $(".section-selected-work .nav-next-swiper").on("click", function () {
-            $for.slick("slickNext");
-        });
-
-        const $tags = $(".work-tag li");
-        $for.on("beforeChange", function (event, slick, currentSlide, nextSlide) {
-            $tags.removeClass("active");
-            $tags.eq(nextSlide).addClass("active");
-
-            const $award = $(".image-award");
-            if ((nextSlide + 1) % 3 === 0) {
-                $award.addClass("active");
-            } else {
-                $award.removeClass("active");
-            }
-        });
-
-        $tags.eq(0).addClass("active");
-        $nav.trigger("afterChange", [$nav.slick("getSlick"), 0]);
-    }
 };
