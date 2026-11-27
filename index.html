@@ -38,6 +38,7 @@
     <link rel="stylesheet" href="assets/css/night-sky.css">
     <link rel="stylesheet" href="assets/css/hero-actions.css">
     <!-- Monochrome design system: loaded last so it governs every colour -->
+    <link rel="stylesheet" href="assets/css/field-notes.css">
     <link rel="stylesheet" href="assets/css/theme-mono.css">
 
     <!-- Favicon and Touch Icons  -->
@@ -1087,6 +1088,27 @@
         </section>
         <!-- /Activity Archive — Neural Arbor -->
 
+        <!-- Latest Field Notes: newest three published journal entries.
+             Data: /journal/latest.json (built by scripts/build-journal.mjs from Pages CMS content)
+             UI: assets/js/field-notes.js · Styles: assets/css/field-notes.css
+             Stays hidden until something is published. -->
+        <section class="fn" id="fieldNotesScroll" aria-labelledby="fn-title" data-fn hidden>
+            <div class="container">
+                <header class="fn-head">
+                    <div>
+                        <p class="fn-eyebrow"><span>Latest field notes</span><span class="fn-eyebrow__sep" aria-hidden="true">/</span><span>004</span></p>
+                        <h2 class="fn-title" id="fn-title">Beyond the code.</h2>
+                    </div>
+                    <a class="fn-all" href="/journal/">
+                        <span>Explore all</span>
+                        <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 9.5 9.5 2.5M4 2.5h5.5V8"/></svg>
+                    </a>
+                </header>
+                <ol class="fn-list" data-fn-list></ol>
+            </div>
+        </section>
+        <!-- /Latest Field Notes -->
+
 
         <!-- Award -->
         <!-- <section class="section-award flat-spacing">
@@ -1985,6 +2007,7 @@
     <script src="assets/js/tech-stack-data.js"></script>
     <script src="assets/js/tech-explorer.js"></script>
     <script src="assets/js/neural-orbit.js"></script>
+    <script src="assets/js/field-notes.js"></script>
     <script src="assets/js/contact-form.js"></script>
 </body>
 
