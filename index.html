@@ -33,6 +33,7 @@
     <link rel="stylesheet" href="assets/css/contact-form.css">
     <link rel="stylesheet" href="assets/css/tech-logos.css">
     <link rel="stylesheet" href="assets/css/tech-explorer.css">
+    <link rel="stylesheet" href="assets/css/neural-orbit.css">
     <link rel="stylesheet" href="assets/css/process.css">
     <link rel="stylesheet" href="assets/css/night-sky.css">
     <link rel="stylesheet" href="assets/css/hero-actions.css">
@@ -966,6 +967,97 @@
         <!-- /Tech Stack — Explore my toolkit -->
 
 
+        <!-- Activity Archive — "Neural Orbit": the last 365 days of GitHub contributions.
+             Data: /api/github-contributions (api/github-contributions.js, token server-side)
+             UI: assets/js/neural-orbit.js · Styles: assets/css/neural-orbit.css -->
+        <section class="no" id="activityScroll" aria-labelledby="no-title" data-no>
+            <div class="container">
+                <header class="no-head">
+                    <div class="no-head__main">
+                        <p class="no-eyebrow"><span>Activity archive</span><span class="no-eyebrow__sep" aria-hidden="true">/</span><span>003</span></p>
+                        <h2 class="no-title" id="no-title">Code in motion.</h2>
+                    </div>
+                    <div class="no-head__aside">
+                        <p class="no-lede">Every contribution leaves a trace. A living record of building, experimenting, and engineering.</p>
+                        <a class="no-gh" href="https://github.com/YOOSUF-HUB" target="_blank" rel="noopener noreferrer" aria-label="GitHub profile YOOSUF-HUB (opens in a new tab)">
+                            <span>GitHub</span><span class="no-gh__sep" aria-hidden="true">/</span><span>YOOSUF-HUB</span>
+                            <svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M2.5 9.5 9.5 2.5M4 2.5h5.5V8"/></svg>
+                        </a>
+                    </div>
+                </header>
+
+                <div class="no-body">
+                    <div class="no-viz">
+                        <div class="no-stage" data-no-stage data-state="loading">
+                            <canvas class="no-canvas" data-no-canvas tabindex="0" role="application"
+                                aria-roledescription="contribution orbit"
+                                aria-label="GitHub contribution calendar for the last 365 days, drawn as a circular orbit. Use the arrow keys to move between days, Enter to trace a day's signal, Escape to clear."></canvas>
+
+                            <div class="no-core" data-no-core>
+                                <span class="no-core__value" data-no-total>—</span>
+                                <span class="no-core__label">Contributions</span>
+                                <span class="no-core__period" data-no-period>Last 365 days</span>
+                                <span class="no-sync" data-no-sync data-sync="loading"><i aria-hidden="true"></i><span data-no-sync-text>Synchronising</span></span>
+                                <button class="no-retry" type="button" hidden data-no-retry>Retry</button>
+                            </div>
+
+                            <div class="no-tip" hidden data-no-tip>
+                                <p class="no-tip__k" data-no-tip-k></p>
+                                <p class="no-tip__v" data-no-tip-v></p>
+                                <div class="no-tip__nav" hidden data-no-tip-nav>
+                                    <button type="button" aria-label="Previous day" data-no-step="-1"><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M7.5 2.5 4 6l3.5 3.5"/></svg></button>
+                                    <button type="button" aria-label="Next day" data-no-step="1"><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M4.5 2.5 8 6 4.5 9.5"/></svg></button>
+                                    <button type="button" aria-label="Close details" data-no-close><svg viewBox="0 0 12 12" aria-hidden="true" focusable="false"><path d="M3 3l6 6M9 3l-6 6"/></svg></button>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="no-read" aria-hidden="true"><span>Clockwise from <b data-no-from>—</b></span><span>Inner track Sun → outer Sat</span></p>
+                    </div>
+
+                    <aside class="no-side" aria-label="Contribution summary">
+                        <dl class="no-stats">
+                            <div class="no-stat">
+                                <dt>Commit contributions</dt>
+                                <dd data-no-commits>—</dd>
+                            </div>
+                            <div class="no-stat">
+                                <dt>Active days</dt>
+                                <dd data-no-active>—</dd>
+                            </div>
+                            <div class="no-stat">
+                                <dt>Longest streak</dt>
+                                <dd data-no-streak>—</dd>
+                            </div>
+                            <div class="no-stat no-stat--sync">
+                                <dt>Last successful update</dt>
+                                <dd data-no-updated>—</dd>
+                            </div>
+                        </dl>
+
+                        <div class="no-months">
+                            <p class="no-label" id="no-months-label">Months <span>— select to inspect</span></p>
+                            <div class="no-months__grid" role="group" aria-labelledby="no-months-label" data-no-months></div>
+                        </div>
+
+                        <div class="no-legend" aria-label="Daily intensity">
+                            <p class="no-label">Daily intensity</p>
+                            <ul class="no-legend__list">
+                                <li><i class="no-dot no-dot--0" aria-hidden="true"></i>None</li>
+                                <li><i class="no-dot no-dot--1" aria-hidden="true"></i>Low</li>
+                                <li><i class="no-dot no-dot--2" aria-hidden="true"></i>Moderate</li>
+                                <li><i class="no-dot no-dot--3" aria-hidden="true"></i>High</li>
+                                <li><i class="no-dot no-dot--4" aria-hidden="true"></i>Exceptional</li>
+                            </ul>
+                            <p class="no-note">Contributions include commits, pull requests, issues and reviews, as counted by GitHub. Commit contributions are shown separately.</p>
+                        </div>
+                    </aside>
+                </div>
+                <p class="no-sr" aria-live="polite" data-no-live></p>
+            </div>
+        </section>
+        <!-- /Activity Archive — Neural Orbit -->
+
+
         <!-- Award -->
         <!-- <section class="section-award flat-spacing">
             <div class="container">
@@ -1862,6 +1954,7 @@
     <script src="assets/js/about-motion.js"></script>
     <script src="assets/js/tech-stack-data.js"></script>
     <script src="assets/js/tech-explorer.js"></script>
+    <script src="assets/js/neural-orbit.js"></script>
     <script src="assets/js/contact-form.js"></script>
 </body>
 
