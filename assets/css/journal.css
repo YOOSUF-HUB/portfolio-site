@@ -1527,3 +1527,21 @@ html.jn-lb-open body {
         transition: none !important;
     }
 }
+
+/* ---------- 404 page (uses the journal shell) ---------- */
+.jn-404 {
+    min-height: 70vh;
+}
+
+.jn-404__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 32px;
+    justify-content: flex-end;
+}
+
+@media (max-width: 767px) {
+    .jn-404__links {
+        justify-content: flex-start;
+    }
+}
