@@ -1,0 +1,409 @@
+# Pages CMS configuration — FIELD NOTES (the personal engineering journal)
+# Docs: https://pagescms.org/docs/configuration/
+#
+# Every entry is a Markdown file with YAML frontmatter; the `body` field is the
+# Markdown below the frontmatter. `status` controls publication only: anything
+# that is not "Published" is skipped by scripts/build-journal.mjs and never
+# reaches the public site. Participation details (role, result, attendance)
+# are separate fields and never affect publication.
+
+media:
+  - name: journal
+    label: Journal images
+    input: assets/images/journal
+    output: /assets/images/journal
+    categories: [image]
+    rename: safe
+
+components:
+  status:
+    label: Publication status
+    type: select
+    required: true
+    default: Draft
+    description: Only "Published" entries appear on the website. Drafts stay in the repository.
+    options:
+      values: [Draft, Published]
+  slug:
+    label: Slug
+    type: string
+    required: true
+    description: "Lowercase words separated by hyphens. Becomes the URL: /journal/your-slug/ (unique across the whole journal)."
+    pattern:
+      regex: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+      message: Use lowercase letters, numbers and single hyphens, e.g. my-first-article
+    options:
+      maxlength: 80
+  cover_image:
+    label: Cover image
+    type: image
+    options:
+      media: journal
+      extensions: [jpg, jpeg, png, webp, avif, gif]
+  cover_alt:
+    label: Cover image description (alt text)
+    type: string
+    description: Describe what the image shows for screen-reader users. Required when a cover image is set.
+    options:
+      maxlength: 180
+  gallery:
+    label: Gallery
+    type: object
+    list:
+      max: 24
+      collapsible:
+        collapsed: true
+        summary: "{alt}"
+    fields:
+      - name: image
+        label: Image
+        type: image
+        required: true
+        options:
+          media: journal
+          extensions: [jpg, jpeg, png, webp, avif, gif]
+      - name: alt
+        label: Description (alt text)
+        type: string
+        required: true
+        options:
+          maxlength: 180
+      - name: caption
+        label: Caption
+        type: string
+        options:
+          maxlength: 220
+  tags:
+    label: Tags
+    type: string
+    list: true
+  technologies:
+    label: Technologies
+    type: string
+    list: true
+  body:
+    label: Body
+    type: rich-text
+    options:
+      format: markdown
+      media: journal
+      extensions: [jpg, jpeg, png, webp, avif, gif]
+  seo_title:
+    label: SEO title
+    type: string
+    description: Optional. Defaults to the title.
+    options:
+      maxlength: 70
+  seo_description:
+    label: SEO description
+    type: text
+    description: Optional. Defaults to the excerpt. Aim for 120–160 characters.
+    options:
+      maxlength: 180
+
+content:
+  - name: articles
+    label: Blog articles
+    type: collection
+    path: content/journal/articles
+    filename: "{fields.slug}.md"
+    format: yaml-frontmatter
+    view:
+      fields: [title, status, publish_date, category]
+      primary: title
+      sort: [publish_date, title]
+      default:
+        sort: publish_date
+        order: desc
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+        options:
+          maxlength: 140
+      - name: slug
+        component: slug
+      - name: excerpt
+        label: Excerpt
+        type: text
+        required: true
+        options:
+          maxlength: 300
+      - name: cover_image
+        component: cover_image
+      - name: cover_alt
+        component: cover_alt
+      - name: publish_date
+        label: Publish date
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: category
+        label: Category
+        type: select
+        required: true
+        options:
+          values:
+            - AI & Machine Learning
+            - Software Engineering
+            - Data Science
+            - Cloud & DevOps
+            - Career & Learning
+            - Notes
+      - name: tags
+        component: tags
+      - name: reading_time
+        label: Reading time (minutes)
+        type: number
+        description: Optional. Calculated from the body when left empty.
+        options:
+          min: 1
+          max: 120
+      - name: featured
+        label: Featured
+        type: boolean
+        default: false
+        description: The newest featured entry is shown in the journal's featured area.
+      - name: status
+        component: status
+      - name: body
+        component: body
+      - name: seo_title
+        component: seo_title
+      - name: seo_description
+        component: seo_description
+
+  - name: events
+    label: Events & conferences
+    type: collection
+    path: content/journal/events
+    filename: "{fields.slug}.md"
+    format: yaml-frontmatter
+    view:
+      fields: [title, status, event_date, location]
+      primary: title
+      sort: [event_date, title]
+      default:
+        sort: event_date
+        order: desc
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+        options:
+          maxlength: 140
+      - name: slug
+        component: slug
+      - name: excerpt
+        label: Excerpt
+        type: text
+        required: true
+        options:
+          maxlength: 300
+      - name: event_date
+        label: Event date
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: end_date
+        label: End date
+        type: date
+        default: ""
+        description: Optional, for events longer than one day.
+        options:
+          format: yyyy-MM-dd
+      - name: location
+        label: Location (city, country or Online)
+        type: string
+      - name: venue
+        label: Venue
+        type: string
+      - name: organiser
+        label: Organiser
+        type: string
+      - name: participation
+        label: My participation
+        type: select
+        description: How you took part. This is separate from publication status.
+        options:
+          values: [Attendee, Speaker, Panellist, Workshop facilitator, Volunteer, Organiser, Exhibitor]
+      - name: cover_image
+        component: cover_image
+      - name: cover_alt
+        component: cover_alt
+      - name: gallery
+        component: gallery
+      - name: event_url
+        label: Event website
+        type: string
+        pattern:
+          regex: "^https?://"
+          message: Use a full URL starting with https://
+      - name: registration_url
+        label: Registration link
+        type: string
+        pattern:
+          regex: "^https?://"
+          message: Use a full URL starting with https://
+      - name: tags
+        component: tags
+      - name: status
+        component: status
+      - name: body
+        component: body
+      - name: seo_title
+        component: seo_title
+      - name: seo_description
+        component: seo_description
+
+  - name: hackathons
+    label: Hackathons
+    type: collection
+    path: content/journal/hackathons
+    filename: "{fields.slug}.md"
+    format: yaml-frontmatter
+    view:
+      fields: [title, status, start_date, hackathon_name]
+      primary: title
+      sort: [start_date, title]
+      default:
+        sort: start_date
+        order: desc
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+        options:
+          maxlength: 140
+      - name: slug
+        component: slug
+      - name: project_name
+        label: Project name
+        type: string
+      - name: hackathon_name
+        label: Hackathon name
+        type: string
+        required: true
+      - name: start_date
+        label: Start date
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: end_date
+        label: End date
+        type: date
+        default: ""
+        options:
+          format: yyyy-MM-dd
+      - name: team_name
+        label: Team name
+        type: string
+      - name: my_role
+        label: My role
+        type: string
+      - name: result
+        label: Result
+        type: string
+        description: "Your outcome, written as it happened, e.g. Participant, Finalist, 2nd place. Separate from publication status."
+      - name: description
+        label: Short description
+        type: text
+        required: true
+        description: Used as the excerpt in listings.
+        options:
+          maxlength: 300
+      - name: cover_image
+        component: cover_image
+      - name: cover_alt
+        component: cover_alt
+      - name: gallery
+        component: gallery
+      - name: technologies
+        component: technologies
+      - name: github_url
+        label: GitHub repository
+        type: string
+        pattern:
+          regex: "^https?://"
+          message: Use a full URL starting with https://
+      - name: demo_url
+        label: Demo link
+        type: string
+        pattern:
+          regex: "^https?://"
+          message: Use a full URL starting with https://
+      - name: status
+        component: status
+      - name: body
+        component: body
+      - name: seo_title
+        component: seo_title
+      - name: seo_description
+        component: seo_description
+
+  - name: experiments
+    label: Experiments & dev logs
+    type: collection
+    path: content/journal/experiments
+    filename: "{fields.slug}.md"
+    format: yaml-frontmatter
+    view:
+      fields: [title, status, publish_date]
+      primary: title
+      sort: [publish_date, title]
+      default:
+        sort: publish_date
+        order: desc
+    fields:
+      - name: title
+        label: Title
+        type: string
+        required: true
+        options:
+          maxlength: 140
+      - name: slug
+        component: slug
+      - name: excerpt
+        label: Excerpt
+        type: text
+        required: true
+        options:
+          maxlength: 300
+      - name: publish_date
+        label: Publish date
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: cover_image
+        component: cover_image
+      - name: cover_alt
+        component: cover_alt
+      - name: technologies
+        component: technologies
+      - name: github_url
+        label: GitHub repository
+        type: string
+        pattern:
+          regex: "^https?://"
+          message: Use a full URL starting with https://
+      - name: demo_url
+        label: Demo link
+        type: string
+        pattern:
+          regex: "^https?://"
+          message: Use a full URL starting with https://
+      - name: status
+        component: status
+      - name: body
+        component: body
+      - name: seo_title
+        component: seo_title
+      - name: seo_description
+        component: seo_description
