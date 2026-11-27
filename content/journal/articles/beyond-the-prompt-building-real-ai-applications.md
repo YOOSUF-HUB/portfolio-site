@@ -4,6 +4,10 @@ slug: beyond-the-prompt-building-real-ai-applications
 excerpt: Building AI applications involves much more than connecting an LLM API.
   A look into the engineering, architecture, and problem-solving behind
   practical AI systems.
+cover_image: /assets/images/journal/david-rangel-4m7gmlnr3m0-unsplash.jpg
+cover_alt: Building AI applications involves much more than connecting an LLM
+  API. A look into the engineering, architecture, and problem-solving behind
+  practical AI systems.
 publish_date: 2026-11-27
 category: AI & Machine Learning
 tags:
@@ -14,7 +18,7 @@ tags:
   - Python
   - Software Engineering
 reading_time: 5
-featured: false
+featured: true
 status: Published
 seo_title: "Beyond the Prompt: Building Real AI Applications | Yoosuf Ahamed"
 seo_description: Going beyond simple LLM API calls to understand what it takes
