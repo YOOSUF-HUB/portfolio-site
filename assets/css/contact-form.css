@@ -37,3 +37,9 @@
 .form-cta .nice-select[data-cf-for="interest"] .list {
   max-height: none;
 }
+
+/* LinkedIn alternative under the "say hello" line */
+.form-cta .cf-alt {
+    display: block;
+    margin-top: 4px;
+}
