@@ -15,7 +15,7 @@ tags:
   - Software Engineering
 reading_time: 5
 featured: false
-status: Draft
+status: Published
 seo_title: "Beyond the Prompt: Building Real AI Applications | Yoosuf Ahamed"
 seo_description: Going beyond simple LLM API calls to understand what it takes
   to engineer useful AI applications.
